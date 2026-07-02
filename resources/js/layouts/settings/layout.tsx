@@ -8,9 +8,15 @@ import { cn, toUrl } from '@/lib/utils';
 import { edit as editAppearance } from '@/routes/appearance';
 import { edit } from '@/routes/profile';
 import { edit as editSecurity } from '@/routes/security';
+import { settings } from "@/routes/site/index"
 import type { NavItem } from '@/types';
 
 const sidebarNavItems: NavItem[] = [
+    {
+        title: 'Site Settings',
+        href: settings(),
+        icon: null,
+    },
     {
         title: 'Profile',
         href: edit(),

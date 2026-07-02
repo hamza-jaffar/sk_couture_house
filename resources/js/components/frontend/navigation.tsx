@@ -1,17 +1,27 @@
-import React, { useState } from 'react';
+import React, { useEffect, useState } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { BRASS, BRASS_L, OXBLOOD, PARCH, WALNUT } from '@/constant/colors';
+import { Frontend } from '@/types';
+import { usePage } from '@inertiajs/react';
+import { getLocationName } from '@/lib/utils';
 
 interface NavigationProps { activeSection: string; }
 
+type PageProps = {
+  frontend: Frontend;
+};
+
 export const Navigation: React.FC<NavigationProps> = ({ activeSection }) => {
   const [isOpen, setIsOpen] = useState(false);
+  const [locationName, setLocationName] = useState<string>('Loading...');
+
+  const { frontend } = usePage<PageProps>().props;
 
   const items = [
-    { name: 'Philosophy',       href: '#hero',     id: 'hero' },
-    { name: 'Runway Lookbook',  href: '#lookbook', id: 'lookbook' },
-    { name: 'Fabric Canvas',    href: '#canvas',   id: 'canvas' },
-    { name: 'Book Appointment', href: '#contact',  id: 'contact' },
+    { name: 'Philosophy', href: '#hero', id: 'hero' },
+    { name: 'Runway Lookbook', href: '#lookbook', id: 'lookbook' },
+    { name: 'Fabric Canvas', href: '#canvas', id: 'canvas' },
+    { name: 'Book Appointment', href: '#contact', id: 'contact' },
   ];
 
   const go = (e: React.MouseEvent<HTMLAnchorElement>, href: string) => {
@@ -19,19 +29,29 @@ export const Navigation: React.FC<NavigationProps> = ({ activeSection }) => {
     document.querySelector(href)?.scrollIntoView({ behavior: 'smooth' });
   };
 
+  useEffect(() => {
+    getLocationName(frontend.information.north_cordinate, frontend.information.east_cordinate)
+    .then((data) => {
+        setLocationName(data); // This works because 'data' is the actual string
+      })
+      .catch((err) => {
+        setLocationName("Location unavailable");
+      });
+  }, []);
+
   const menuVar = {
     initial: { x: '100%' },
-    animate: { x: 0,      transition: { duration: 0.8, ease: [0.16, 1, 0.3, 1] as [number,number,number,number] } },
-    exit:    { x: '100%', transition: { duration: 0.6, ease: [0.16, 1, 0.3, 1] as [number,number,number,number], delay: 0.1 } },
+    animate: { x: 0, transition: { duration: 0.8, ease: [0.16, 1, 0.3, 1] as [number, number, number, number] } },
+    exit: { x: '100%', transition: { duration: 0.6, ease: [0.16, 1, 0.3, 1] as [number, number, number, number], delay: 0.1 } },
   };
   const listVar = {
     animate: { transition: { staggerChildren: 0.08, delayChildren: 0.2 } },
-    exit:    { transition: { staggerChildren: 0.05, staggerDirection: -1 } },
+    exit: { transition: { staggerChildren: 0.05, staggerDirection: -1 } },
   };
   const itemVar = {
     initial: { y: 50, opacity: 0 },
-    animate: { y: 0, opacity: 1, transition: { duration: 0.6, ease: [0.16, 1, 0.3, 1] as [number,number,number,number] } },
-    exit:    { y: 30, opacity: 0, transition: { duration: 0.4, ease: [0.16, 1, 0.3, 1] as [number,number,number,number] } },
+    animate: { y: 0, opacity: 1, transition: { duration: 0.6, ease: [0.16, 1, 0.3, 1] as [number, number, number, number] } },
+    exit: { y: 30, opacity: 0, transition: { duration: 0.4, ease: [0.16, 1, 0.3, 1] as [number, number, number, number] } },
   };
 
   return (
@@ -44,12 +64,10 @@ export const Navigation: React.FC<NavigationProps> = ({ activeSection }) => {
         <div className="max-w-7xl mx-auto px-6 md:px-12 h-20 flex items-center justify-between">
 
           {/* Logo — antique brass */}
-          <a href="#hero" onClick={(e) => go(e, '#hero')}
-            className="font-serif text-xl tracking-[0.28em] font-light uppercase transition-opacity hover:opacity-75"
-            style={{ background: `linear-gradient(90deg, ${BRASS}, ${BRASS_L})`, WebkitBackgroundClip: 'text', WebkitTextFillColor: 'transparent' }}
-          >
-            ATELIER JAFFAR
-          </a>
+          <a href="#hero" className='flex gap-2' onClick={(e) => go(e, '#hero')}>
+            <img src="/favicon.svg" alt="App Logo" className="w-10 h-10" />
+          </a> 
+
 
           {/* Desktop Nav */}
           <nav className="hidden md:flex items-center space-x-12 relative">
@@ -75,8 +93,8 @@ export const Navigation: React.FC<NavigationProps> = ({ activeSection }) => {
             className="flex flex-col space-y-1.5 items-end justify-center w-8 h-8 group relative z-50 focus:outline-none"
             aria-label="Toggle Menu"
           >
-            <span className={`h-[1px] transition-all duration-500 ${isOpen ? 'w-6 rotate-45 translate-y-2' : 'w-6'}`}   style={{ background: BRASS }} />
-            <span className={`h-[1px] transition-all duration-500 ${isOpen ? 'w-0 opacity-0' : 'w-4 group-hover:w-6'}`}  style={{ background: BRASS_L }} />
+            <span className={`h-[1px] transition-all duration-500 ${isOpen ? 'w-6 rotate-45 translate-y-2' : 'w-6'}`} style={{ background: BRASS }} />
+            <span className={`h-[1px] transition-all duration-500 ${isOpen ? 'w-0 opacity-0' : 'w-4 group-hover:w-6'}`} style={{ background: BRASS_L }} />
             <span className={`h-[1px] transition-all duration-500 ${isOpen ? 'w-6 -rotate-45 -translate-y-1.5' : 'w-5'}`} style={{ background: BRASS }} />
           </button>
         </div>
@@ -119,7 +137,7 @@ export const Navigation: React.FC<NavigationProps> = ({ activeSection }) => {
                   Atelier Coordinates
                 </span>
                 <span className="font-serif italic text-sm" style={{ color: `${PARCH}CC` }}>
-                  48.8566° N, 2.3522° E — Paris, FR
+                  {frontend.information.north_cordinate}° N, {frontend.information.east_cordinate}° {locationName}
                 </span>
               </div>
 
@@ -131,7 +149,7 @@ export const Navigation: React.FC<NavigationProps> = ({ activeSection }) => {
                       className="group flex items-baseline space-x-6 transition-opacity hover:opacity-80"
                     >
                       <span className="font-sans text-xs tracking-widest" style={{ color: `${BRASS}55` }}>0{idx + 1}.</span>
-                      <span className="font-serif text-4xl md:text-5xl font-light tracking-wide uppercase relative" style={{ color: PARCH }}>
+                      <span className="font-serif text-xl md:text-2xl font-light tracking-wide uppercase relative" style={{ color: PARCH }}>
                         {item.name}
                         <span className="absolute left-0 bottom-0 w-0 h-[1px] group-hover:w-full transition-all duration-500"
                           style={{ background: `linear-gradient(90deg, ${BRASS}, ${BRASS_L})` }} />
@@ -145,11 +163,11 @@ export const Navigation: React.FC<NavigationProps> = ({ activeSection }) => {
               <div className="pt-8 flex justify-between items-end" style={{ borderTop: `1px solid rgba(184,149,42,0.12)` }}>
                 <div>
                   <span className="font-sans text-[10px] tracking-widest uppercase block mb-2" style={{ color: `${BRASS}88` }}>Inquiries</span>
-                  <a href="mailto:atelier@jaffar.com" className="text-xs tracking-wider transition-opacity hover:opacity-80" style={{ color: `${PARCH}99` }}>
-                    atelier@jaffar.com
+                  <a href={`mailto:${frontend.information.email}`} className="text-xs tracking-wider transition-opacity hover:opacity-80" style={{ color: `${PARCH}99` }}>
+                    {frontend.information.email}
                   </a>
                 </div>
-                <span className="font-sans text-[9px] tracking-widest" style={{ color: `${PARCH}25` }}>© 2026 ATELIER JAFFAR</span>
+                <span className="font-sans text-[9px] tracking-widest" style={{ color: `${PARCH}25` }}>© {new Date().getFullYear()} {frontend.information.name}</span>
               </div>
             </motion.div>
           </>

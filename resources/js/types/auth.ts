@@ -15,6 +15,14 @@ export type Auth = {
     user: User;
 };
 
+export type Frontend = {
+    information: Settings
+}
+
+export type Settings = {
+    [key: string] : string;
+}
+
 /* @chisel-passkeys */
 export type Passkey = {
     id: number;

@@ -1,20 +1,38 @@
 import React, { useState } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { BG, BRASS, BRASS_L, FOREST, OXBLOOD, PARCH, WALNUT } from '@/constant/colors';
+import { usePage } from '@inertiajs/react';
+import { Frontend } from '@/types';
+import { socialPlatformMapping } from '@/constant/mapping';
 
 const pressReleases = [
-  { pub: 'VOGUE EDITORIAL',   title: 'ATELIER JAFFAR REDEFINES SARTORIAL GEOMETRY',      date: 'MAY 2026',     col: BRASS_L  },
-  { pub: "HARPER'S BAZAAR",   title: 'THE ARCHITECTURE OF BIAS DRAPING',                  date: 'MARCH 2026',   col: OXBLOOD  },
-  { pub: 'HIGHSNOBIETY',      title: 'TECHNICAL COUTURE IN THE PARIS UNDERGROUND',        date: 'JANUARY 2026', col: FOREST   },
+  { pub: 'VOGUE EDITORIAL', title: 'ATELIER JAFFAR REDEFINES SARTORIAL GEOMETRY', date: 'MAY 2026', col: BRASS_L },
+  { pub: "HARPER'S BAZAAR", title: 'THE ARCHITECTURE OF BIAS DRAPING', date: 'MARCH 2026', col: OXBLOOD },
+  { pub: 'HIGHSNOBIETY', title: 'TECHNICAL COUTURE IN THE PARIS UNDERGROUND', date: 'JANUARY 2026', col: FOREST },
 ];
 
-const socials = [
-  { name: 'Instagram', col: BRASS_L  },
-  { name: 'Vimeo',     col: OXBLOOD  },
-  { name: 'LinkedIn',  col: FOREST  },
-];
+const AVAILABLE_COLORS = [BRASS_L, OXBLOOD, FOREST];
+
+
+type PageProps = {
+  frontend: Frontend;
+};
 
 export const Footer: React.FC = () => {
+  const { frontend } = usePage<PageProps>().props;
+
+  const socials = Object.entries(frontend.information)
+    .filter(([key, value]) => socialPlatformMapping[key] && value)
+    .map(([key, value]) => {
+      const randomColor = AVAILABLE_COLORS[Math.floor(Math.random() * AVAILABLE_COLORS.length)];
+
+      return {
+        name: socialPlatformMapping[key],
+        link: value,
+        col: randomColor
+      };
+    });
+
   const [form, setForm] = useState({ name: '', email: '', fabric: 'wool', date: '', notes: '' });
   const [sent, setSent] = useState(false);
   const [loading, setLoading] = useState(false);
@@ -29,11 +47,11 @@ export const Footer: React.FC = () => {
       style={{ borderTop: `1px solid rgba(184,149,42,0.2)`, background: `linear-gradient(180deg, ${BG} 0%, #0e2010 55%, ${BG} 100%)` }}
     >
       {/* Ambient blobs */}
-      <div className="absolute bottom-[10%] right-[5%] w-[500px] h-[500px] rounded-full pointer-events-none"
+      <div className="absolute bottom-[10%] right-[5%] w-125 h-125 rounded-full pointer-events-none"
         style={{ background: 'radial-gradient(circle, rgba(30,77,48,0.20) 0%, transparent 70%)' }} />
-      <div className="absolute top-[10%] left-[5%] w-[400px] h-[400px] rounded-full pointer-events-none"
+      <div className="absolute top-[10%] left-[5%] w-100 h-100 rounded-full pointer-events-none"
         style={{ background: 'radial-gradient(circle, rgba(184,149,42,0.12) 0%, transparent 70%)' }} />
-      <div className="absolute bottom-[30%] left-[15%] w-[300px] h-[300px] rounded-full pointer-events-none"
+      <div className="absolute bottom-[30%] left-[15%] w-75 h-75 rounded-full pointer-events-none"
         style={{ background: 'radial-gradient(circle, rgba(122,28,28,0.12) 0%, transparent 70%)' }} />
 
       <div className="max-w-7xl mx-auto px-6 md:px-12 w-full z-10 relative">
@@ -46,7 +64,7 @@ export const Footer: React.FC = () => {
             style={{ background: 'rgba(13,24,14,0.72)', border: `1px solid rgba(184,149,42,0.22)` }}
           >
             {/* Forest→Oxblood→Walnut→Brass top bar */}
-            <div className="absolute top-0 left-0 right-0 h-[3px]"
+            <div className="absolute top-0 left-0 right-0 h-0.75"
               style={{ background: `linear-gradient(90deg, ${FOREST}, ${OXBLOOD}, ${WALNUT}, ${BRASS})` }} />
             <div className="absolute inset-0 bg-grain pointer-events-none opacity-5" />
 
@@ -158,7 +176,7 @@ export const Footer: React.FC = () => {
                 </span>{' '}
                 <br />together.
               </h2>
-              <div className="w-16 h-[2px]" style={{ background: `linear-gradient(90deg, ${FOREST}, ${OXBLOOD}, ${WALNUT}, ${BRASS})` }} />
+              <div className="w-16 h-0.5" style={{ background: `linear-gradient(90deg, ${FOREST}, ${OXBLOOD}, ${WALNUT}, ${BRASS})` }} />
             </div>
 
             {/* Press Hub */}
@@ -193,14 +211,9 @@ export const Footer: React.FC = () => {
             {/* Contact info */}
             <div className="grid grid-cols-2 gap-8 text-xs uppercase tracking-widest">
               <div>
-                <span className="block text-[8px] mb-2 tracking-[0.25em]" style={{ color: BRASS, opacity: 0.65 }}>ATELIER CONTACT</span>
-                <p className="font-serif lowercase tracking-normal text-sm mb-1" style={{ color: PARCH }}>atelier@jaffar.com</p>
-                <p style={{ color: `${PARCH}60` }}>+33 (0)1 44 55 66 77</p>
-              </div>
-              <div>
-                <span className="block text-[8px] mb-2 tracking-[0.25em]" style={{ color: FOREST, opacity: 0.75 }}>HOURS</span>
-                <p style={{ color: `${PARCH}70` }}>Mon — Fri</p>
-                <p style={{ color: `${PARCH}70` }}>10:00 — 18:30 CEST</p>
+                <span className="block text-[8px] mb-2 tracking-[0.25em]" style={{ color: BRASS, opacity: 0.65 }}>{frontend.information.name} CONTACT</span>
+                <p className="font-serif lowercase tracking-normal text-sm mb-1" style={{ color: PARCH }}>{frontend.information.email}m</p>
+                <p style={{ color: `${PARCH}60` }}>{frontend.information.phone_number}</p>
               </div>
             </div>
           </div>
@@ -210,10 +223,10 @@ export const Footer: React.FC = () => {
         <div className="pt-8 flex flex-col md:flex-row justify-between items-center space-y-4 md:space-y-0 text-[10px] tracking-widest uppercase"
           style={{ borderTop: `1px solid rgba(184,149,42,0.15)`, color: `${PARCH}30` }}
         >
-          <span>© 2026 ATELIER JAFFAR. ALL RIGHTS RESERVED.</span>
+          <span>© {new Date().getFullYear()} {frontend.information.name}. ALL RIGHTS RESERVED.</span>
           <div className="flex space-x-8">
-            {socials.map(({ name, col }) => (
-              <a key={name} href="#" className="transition-colors duration-300"
+            {socials.map(({ name, link, col }) => (
+              <a key={name} href={link} className="transition-colors duration-300"
                 style={{ color: `${PARCH}30` }}
                 onMouseEnter={e => { (e.currentTarget as HTMLElement).style.color = col; }}
                 onMouseLeave={e => { (e.currentTarget as HTMLElement).style.color = `${PARCH}30`; }}

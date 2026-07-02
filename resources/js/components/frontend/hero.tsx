@@ -1,30 +1,86 @@
 import React, { useState, useEffect } from 'react';
 import { motion } from 'framer-motion';
 import { BG, BRASS, BRASS_L, FOREST, PARCH } from '@/constant/colors';
+import { getLocalTimezone, getLocationName, getWeatherString } from '@/lib/utils';
+import { usePage } from '@inertiajs/react';
+import { Frontend } from '@/types';
 
 const MARQUEE_WORDS = [
-  { text: 'SARTORIAL INTEGRITY',   color: BRASS_L  },
-  { text: 'ARCHITECTURAL DRAPE',   color: '#6ba8a4' },
-  { text: 'SUSTAINABLE ORIGIN',    color: '#4a7c59' },
-  { text: 'HANDCRAFTED IN PARIS',  color: BRASS     },
-  { text: 'RAW TEXTURAL DUALITY',  color: '#9b8fb5' },
+  { text: 'SARTORIAL INTEGRITY', color: BRASS_L },
+  { text: 'ARCHITECTURAL DRAPE', color: '#6ba8a4' },
+  { text: 'SUSTAINABLE ORIGIN', color: '#4a7c59' },
+  { text: 'HANDCRAFTED IN PARIS', color: BRASS },
+  { text: 'RAW TEXTURAL DUALITY', color: '#9b8fb5' },
   { text: 'MONOLITHIC SILHOUETTE', color: '#c17b7b' },
 ];
 
+type PageProps = {
+  frontend: Frontend;
+};
+
 export const Hero: React.FC = () => {
-  const [parisTime, setParisTime] = useState('');
+  const [weatherString, setWeatherString] = useState<string>("Loading...");
+  const [localTime, setLocalTime] = useState<string>('Loading...');
+  const [locationName, setLocationName] = useState<string>('Loading...');
+
+  const { frontend } = usePage<PageProps>().props;
 
   useEffect(() => {
-    const tick = () =>
-      setParisTime(new Date().toLocaleTimeString('en-GB', {
-        timeZone: 'Europe/Paris', hour: '2-digit', minute: '2-digit', second: '2-digit', hour12: false,
-      }));
-    tick();
-    const id = setInterval(tick, 1000);
-    return () => clearInterval(id);
+    getLocalTimezone(frontend.information.north_cordinate, frontend.information.east_cordinate)
+      .then((timezoneId) => {
+        if (!timezoneId) {
+          setLocalTime("Time unavailable");
+          return;
+        }
+
+        // Helper function to calculate and format the current live moment
+        const tickClock = () => {
+          const now = new Date();
+          const formattedTime = now.toLocaleTimeString([], {
+            timeZone: timezoneId, // Crucial: Calculates the precise time live in that exact timezone
+            hour: '2-digit',
+            minute: '2-digit',
+            hour12: true
+          });
+          setLocalTime(formattedTime);
+        };
+
+        // Run it immediately on layout mount
+        tickClock();
+
+        // Keep it updating every second so minutes change perfectly as they happen
+        const timerId = setInterval(tickClock, 1000);
+
+        // Cleanup interval if the component unmounts to prevent memory leaks
+        return () => clearInterval(timerId);
+      })
+      .catch(() => {
+        setLocalTime("Time unavailable");
+      });
+  }, [frontend.information.north_cordinate, frontend.information.east_cordinate]);
+
+  useEffect(() => {
+    // Call the async function and pass the resolved string directly to state
+    getWeatherString(frontend.information.north_cordinate, frontend.information.east_cordinate)
+      .then((data) => {
+        setWeatherString(data); // This works because 'data' is the actual string
+      })
+      .catch((err) => {
+        setWeatherString("Weather unavailable");
+      });
   }, []);
 
-  const ease = [0.16, 1, 0.3, 1] as [number,number,number,number];
+    useEffect(() => {
+      getLocationName(frontend.information.north_cordinate, frontend.information.east_cordinate)
+      .then((data) => {
+          setLocationName(data); // This works because 'data' is the actual string
+        })
+        .catch((err) => {
+          setLocationName("Location unavailable");
+        });
+    }, []);
+  
+  const ease = [0.16, 1, 0.3, 1] as [number, number, number, number];
 
   return (
     <section id="hero"
@@ -32,11 +88,11 @@ export const Hero: React.FC = () => {
       style={{ background: `linear-gradient(140deg, ${BG} 0%, #0f2415 45%, #0d1c0e 80%, ${BG} 100%)` }}
     >
       {/* Ambient glows */}
-      <div className="absolute top-[10%] left-[5%] w-[600px] h-[600px] rounded-full pointer-events-none"
+      <div className="absolute top-[10%] left-[5%] w-150 h-150 rounded-full pointer-events-none"
         style={{ background: `radial-gradient(circle, rgba(30,77,48,0.22) 0%, transparent 70%)` }} />
-      <div className="absolute bottom-[20%] right-[4%] w-[500px] h-[500px] rounded-full pointer-events-none"
+      <div className="absolute bottom-[20%] right-[4%] w-125 h-125 rounded-full pointer-events-none"
         style={{ background: `radial-gradient(circle, rgba(184,149,42,0.14) 0%, transparent 70%)` }} />
-      <div className="absolute top-[55%] left-[45%] w-[350px] h-[350px] rounded-full pointer-events-none"
+      <div className="absolute top-[55%] left-[45%] w-87.5 h-87.5 rounded-full pointer-events-none"
         style={{ background: `radial-gradient(circle, rgba(122,28,28,0.10) 0%, transparent 70%)` }} />
 
       {/* ── Main Split ── */}
@@ -83,7 +139,7 @@ export const Hero: React.FC = () => {
 
           {/* Tall narrow image */}
           <div className="absolute right-0 top-1/2 -translate-y-1/2 lg:-right-4 w-40 sm:w-56 md:w-64 lg:w-72
-                          h-[320px] sm:h-[450px] lg:h-[520px] overflow-hidden -z-10 opacity-70 lg:opacity-100 transition-luxury"
+                          h-8 sm:h-112.5 lg:h-130 overflow-hidden -z-10 opacity-70 lg:opacity-100 transition-luxury"
             style={{ border: `1px solid rgba(184,149,42,0.28)`, boxShadow: `0 0 48px rgba(30,77,48,0.18), 0 0 80px rgba(184,149,42,0.10)` }}
           >
             <motion.div initial={{ scale: 1.15, opacity: 0 }} animate={{ scale: 1, opacity: 1 }}
@@ -103,7 +159,7 @@ export const Hero: React.FC = () => {
           <motion.div initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }}
             transition={{ duration: 0.8, delay: 0.4, ease }} className="space-y-6"
           >
-            <div className="w-12 h-[1px]" style={{ background: `linear-gradient(90deg, ${BRASS}, ${FOREST})` }} />
+            <div className="w-12 h-px" style={{ background: `linear-gradient(90deg, ${BRASS}, ${FOREST})` }} />
             <p className="font-serif text-lg md:text-xl leading-relaxed font-light" style={{ color: `${PARCH}E6` }}>
               A study in sartorial architecture. We mold heavy canvas and delicate silk around the human canvas,
               creating garments that are sculptures in slow motion.
@@ -119,10 +175,9 @@ export const Hero: React.FC = () => {
             style={{ borderTop: `1px solid rgba(184,149,42,0.20)` }}
           >
             {[
-              { label: 'Atelier Location', value: 'Rue de la Paix, Paris', col: '#6ba8a4' },
-              { label: 'Local Time (Paris)', value: parisTime || '19:27:35', mono: true, col: BRASS_L },
-              { label: 'Current Climate', value: '22°C — Partly Cloudy', col: '#4a7c59' },
-              { label: 'Next Release', value: 'September 2026', col: '#9b8fb5' },
+              { label: `${frontend.information.name} Location`, value: locationName, col: '#6ba8a4' },
+              { label: 'Local Time', value: localTime || '19:27:35', mono: true, col: BRASS_L },
+              { label: 'Current Climate', value: weatherString, col: '#4a7c59' },
             ].map(({ label, value, mono, col }) => (
               <div key={label}>
                 <span className="block text-[9px] tracking-widest uppercase mb-1" style={{ color: col, opacity: 0.75 }}>{label}</span>

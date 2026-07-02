@@ -68,9 +68,9 @@ export const FabricCanvas: React.FC = () => {
             style={{ borderTop: `1px solid rgba(184,149,42,0.15)`, background: `linear-gradient(180deg, ${BG} 0%, #0d2010 50%, ${BG} 100%)` }}
         >
             {/* Dynamic ambient blob — changes with fabric */}
-            <div className="absolute top-0 right-0 w-[500px] h-[500px] rounded-full pointer-events-none transition-all duration-1000"
+            <div className="absolute top-0 right-0 w-125 h-125 rounded-full pointer-events-none transition-all duration-1000"
                 style={{ background: `radial-gradient(circle, ${af.accentHex}20 0%, transparent 65%)` }} />
-            <div className="absolute bottom-0 left-0 w-[400px] h-[400px] rounded-full pointer-events-none transition-all duration-1000"
+            <div className="absolute bottom-0 left-0 w-100 h-100 rounded-full pointer-events-none transition-all duration-1000"
                 style={{ background: `radial-gradient(circle, ${af.accentHex2}18 0%, transparent 65%)` }} />
 
             <div className="max-w-7xl mx-auto px-6 md:px-12 w-full relative z-10">
