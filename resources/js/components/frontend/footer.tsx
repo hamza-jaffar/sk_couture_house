@@ -1,25 +1,20 @@
 import React, { useState } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { BG, BRASS, BRASS_L, FOREST, OXBLOOD, PARCH, WALNUT } from '@/constant/colors';
-import { usePage } from '@inertiajs/react';
+import { usePage, useForm } from '@inertiajs/react';
 import { Frontend } from '@/types';
+import { FabricCanvasItem } from '@/types/auth';
 import { socialPlatformMapping } from '@/constant/mapping';
-
-const pressReleases = [
-  { pub: 'VOGUE EDITORIAL', title: 'ATELIER JAFFAR REDEFINES SARTORIAL GEOMETRY', date: 'MAY 2026', col: BRASS_L },
-  { pub: "HARPER'S BAZAAR", title: 'THE ARCHITECTURE OF BIAS DRAPING', date: 'MARCH 2026', col: OXBLOOD },
-  { pub: 'HIGHSNOBIETY', title: 'TECHNICAL COUTURE IN THE PARIS UNDERGROUND', date: 'JANUARY 2026', col: FOREST },
-];
 
 const AVAILABLE_COLORS = [BRASS_L, OXBLOOD, FOREST];
 
-
 type PageProps = {
   frontend: Frontend;
+  fabricCanvases: FabricCanvasItem[];
 };
 
 export const Footer: React.FC = () => {
-  const { frontend } = usePage<PageProps>().props;
+  const { frontend, fabricCanvases } = usePage<PageProps>().props;
 
   const socials = Object.entries(frontend.information)
     .filter(([key, value]) => socialPlatformMapping[key] && value)
@@ -33,13 +28,24 @@ export const Footer: React.FC = () => {
       };
     });
 
-  const [form, setForm] = useState({ name: '', email: '', fabric: 'wool', date: '', notes: '' });
   const [sent, setSent] = useState(false);
-  const [loading, setLoading] = useState(false);
+  const { data, setData, post, processing, reset } = useForm({
+    name: '',
+    email: '',
+    fabric: '',
+    date: '',
+    notes: ''
+  });
 
   const submit = (e: React.FormEvent) => {
-    e.preventDefault(); setLoading(true);
-    setTimeout(() => { setLoading(false); setSent(true); }, 1200);
+    e.preventDefault();
+    post('/invitations', {
+      preserveScroll: true,
+      onSuccess: () => {
+        reset();
+        setSent(true);
+      },
+    });
   };
 
   return (
@@ -73,7 +79,7 @@ export const Footer: React.FC = () => {
             >
               APPOINTMENT BOOKING
             </span>
-            <h3 className="font-serif text-3xl font-light uppercase tracking-wide mb-8" style={{ color: PARCH }}>Atelier Request</h3>
+            <h3 className="font-serif text-3xl font-light uppercase tracking-wide mb-8" style={{ color: PARCH }}>{frontend.information.name} Request</h3>
 
             <AnimatePresence mode="wait">
               {!sent ? (
@@ -85,8 +91,8 @@ export const Footer: React.FC = () => {
                     ].map(({ label, type, key, placeholder, col }) => (
                       <div key={key} className="space-y-1">
                         <label className="text-[9px] tracking-widest uppercase block" style={{ color: col, opacity: 0.75 }}>{label}</label>
-                        <input type={type} required value={form[key as keyof typeof form]}
-                          onChange={e => setForm({ ...form, [key]: e.target.value })}
+                        <input type={type} required value={data[key as keyof typeof data]}
+                          onChange={e => setData(key as keyof typeof data, e.target.value)}
                           className="w-full bg-transparent text-sm py-2 outline-none transition-all duration-300"
                           style={{ color: PARCH, borderBottom: `1px solid rgba(184,149,42,0.22)` }}
                           placeholder={placeholder}
@@ -100,20 +106,19 @@ export const Footer: React.FC = () => {
                   <div className="grid grid-cols-1 sm:grid-cols-2 gap-6">
                     <div className="space-y-1">
                       <label className="text-[9px] tracking-widest uppercase block" style={{ color: OXBLOOD, opacity: 0.8 }}>Fabric Matrix Focus</label>
-                      <select value={form.fabric} onChange={e => setForm({ ...form, fabric: e.target.value })}
+                      <select value={data.fabric} onChange={e => setData('fabric', e.target.value)}
                         className="w-full text-xs py-2 uppercase tracking-widest cursor-pointer outline-none"
                         style={{ background: 'rgba(13,24,14,0.9)', color: `${PARCH}CC`, borderBottom: `1px solid rgba(122,28,28,0.35)` }}
                       >
-                        <option value="wool">Virgin Merino Wool</option>
-                        <option value="organza">Mulberry Silk Organza</option>
-                        <option value="nylon">Technical Matte Nylon</option>
-                        <option value="cashmere">Brushed Cashmere</option>
-                        <option value="linen">Belgian Raw Flax</option>
+                        <option value="">Select a Fabric</option>
+                        {fabricCanvases && fabricCanvases.map(fabric => (
+                          <option key={fabric.id} value={fabric.name.toLowerCase()}>{fabric.name}</option>
+                        ))}
                       </select>
                     </div>
                     <div className="space-y-1">
                       <label className="text-[9px] tracking-widest uppercase block" style={{ color: WALNUT, opacity: 0.85 }}>Preferred Consultation Date</label>
-                      <input type="date" required value={form.date} onChange={e => setForm({ ...form, date: e.target.value })}
+                      <input type="date" value={data.date} onChange={e => setData('date', e.target.value)}
                         className="w-full bg-transparent text-xs py-2 outline-none"
                         style={{ color: `${PARCH}CC`, borderBottom: `1px solid rgba(92,51,23,0.40)`, colorScheme: 'dark' }}
                       />
@@ -122,18 +127,18 @@ export const Footer: React.FC = () => {
 
                   <div className="space-y-1">
                     <label className="text-[9px] tracking-widest uppercase block" style={{ color: BRASS_L, opacity: 0.75 }}>Measurements / Aesthetic Notes</label>
-                    <textarea rows={3} value={form.notes} onChange={e => setForm({ ...form, notes: e.target.value })}
+                    <textarea rows={3} value={data.notes} onChange={e => setData('notes', e.target.value)}
                       className="w-full bg-transparent text-sm py-2 outline-none resize-none"
                       style={{ color: PARCH, borderBottom: `1px solid rgba(184,149,42,0.22)` }}
                       placeholder="e.g. Sculpted shoulder suit request, chest measurement..."
                     />
                   </div>
 
-                  <button type="submit" disabled={loading}
-                    className="w-full font-sans text-xs uppercase tracking-[0.25em] py-4 cursor-pointer focus:outline-none font-medium transition-all duration-500"
+                  <button type="submit" disabled={processing}
+                    className="w-full font-sans text-xs uppercase tracking-[0.25em] py-4 cursor-pointer focus:outline-none font-medium transition-all duration-500 disabled:opacity-50"
                     style={{ background: `linear-gradient(90deg, ${FOREST}, ${OXBLOOD}, ${WALNUT})`, color: PARCH, boxShadow: `0 0 28px rgba(30,77,48,0.30)` }}
                   >
-                    {loading ? 'REGISTERING DETAILED CONFIGS...' : 'REQUEST ATELIER INVITATION'}
+                    {processing ? 'REGISTERING DETAILED CONFIGS...' : `REQUEST ${frontend.information.name} INVITATION`}
                   </button>
                 </motion.form>
               ) : (
@@ -151,7 +156,7 @@ export const Footer: React.FC = () => {
                   <p className="font-sans text-xs leading-relaxed uppercase tracking-wider max-w-sm mx-auto" style={{ color: `${PARCH}70` }}>
                     Your request for an aesthetic consultation is registered. We will send an official stamped invitation card within 24 hours.
                   </p>
-                  <button onClick={() => { setForm({ name: '', email: '', fabric: 'wool', date: '', notes: '' }); setSent(false); }}
+                  <button onClick={() => { reset(); setSent(false); }}
                     className="text-xs uppercase tracking-widest focus:outline-none mt-6 transition-opacity hover:opacity-80"
                     style={{ color: BRASS_L }}
                   >
@@ -177,35 +182,6 @@ export const Footer: React.FC = () => {
                 <br />together.
               </h2>
               <div className="w-16 h-0.5" style={{ background: `linear-gradient(90deg, ${FOREST}, ${OXBLOOD}, ${WALNUT}, ${BRASS})` }} />
-            </div>
-
-            {/* Press Hub */}
-            <div className="space-y-6">
-              <span className="font-sans text-[10px] tracking-widest uppercase block"
-                style={{ background: `linear-gradient(90deg, ${BRASS}, ${BRASS_L})`, WebkitBackgroundClip: 'text', WebkitTextFillColor: 'transparent' }}
-              >
-                PRESS ARCHIVES
-              </span>
-              <div className="space-y-6">
-                {pressReleases.map((p, i) => (
-                  <a key={i} href="#" className="group block pb-4 transition-all duration-500"
-                    style={{ borderBottom: `1px solid rgba(184,149,42,0.15)` }}
-                    onMouseEnter={e => { (e.currentTarget as HTMLElement).style.borderBottomColor = p.col; }}
-                    onMouseLeave={e => { (e.currentTarget as HTMLElement).style.borderBottomColor = 'rgba(184,149,42,0.15)'; }}
-                  >
-                    <div className="flex justify-between items-baseline mb-1">
-                      <span className="font-sans text-[8px] tracking-[0.2em] uppercase font-semibold" style={{ color: p.col }}>{p.pub}</span>
-                      <span className="font-mono text-[9px] group-hover:opacity-100 transition-opacity" style={{ color: `${PARCH}40` }}>{p.date}</span>
-                    </div>
-                    <h4 className="font-serif text-lg font-light uppercase tracking-wide transition-colors" style={{ color: `${PARCH}70` }}
-                      onMouseEnter={e => { (e.currentTarget as HTMLElement).style.color = PARCH; }}
-                      onMouseLeave={e => { (e.currentTarget as HTMLElement).style.color = `${PARCH}70`; }}
-                    >
-                      {p.title}
-                    </h4>
-                  </a>
-                ))}
-              </div>
             </div>
 
             {/* Contact info */}

@@ -3,9 +3,18 @@ import { Footer } from '@/components/frontend/footer';
 import { Hero } from '@/components/frontend/hero';
 import { Lookbook } from '@/components/frontend/look-book';
 import { Navigation } from '@/components/frontend/navigation';
+import { FabricCanvasItem, FeaturedCollection, FrontendData } from '@/types/auth';
+import { usePage } from '@inertiajs/react';
 import { useState, useEffect } from 'react';
 
+type PageProps = {
+  frontendData: FrontendData | null;
+  featuredCollection: FeaturedCollection | null;
+  fabricCanvases: FabricCanvasItem[];
+};
+
 function Welcome() {
+  const { frontendData, featuredCollection, fabricCanvases } = usePage<PageProps>().props;
   const [activeSection, setActiveSection] = useState('hero');
 
   useEffect(() => {
@@ -45,9 +54,9 @@ function Welcome() {
       <Navigation activeSection={activeSection} />
 
       <main>
-        <Hero />
-        <Lookbook />
-        <FabricCanvas />
+        <Hero frontendData={frontendData} featuredCollection={featuredCollection} />
+        <Lookbook featuredCollection={featuredCollection} frontendData={frontendData} />
+        <FabricCanvas fabricCanvases={fabricCanvases} frontendData={frontendData} />
       </main>
       <Footer />
     </div>

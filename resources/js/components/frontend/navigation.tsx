@@ -18,15 +18,20 @@ export const Navigation: React.FC<NavigationProps> = ({ activeSection }) => {
   const { frontend } = usePage<PageProps>().props;
 
   const items = [
-    { name: 'Philosophy', href: '#hero', id: 'hero' },
-    { name: 'Runway Lookbook', href: '#lookbook', id: 'lookbook' },
-    { name: 'Fabric Canvas', href: '#canvas', id: 'canvas' },
-    { name: 'Book Appointment', href: '#contact', id: 'contact' },
+    { name: 'Philosophy', href: '/#hero', id: 'hero' },
+    { name: 'Runway Lookbook', href: '/#lookbook', id: 'lookbook' },
+    { name: 'Fabric Canvas', href: '/#canvas', id: 'canvas' },
+    { name: 'Book Appointment', href: '/#contact', id: 'contact' },
   ];
 
   const go = (e: React.MouseEvent<HTMLAnchorElement>, href: string) => {
     e.preventDefault(); setIsOpen(false);
-    document.querySelector(href)?.scrollIntoView({ behavior: 'smooth' });
+    if (window.location.pathname === '/') {
+      const hash = href.replace('/', '');
+      document.querySelector(hash)?.scrollIntoView({ behavior: 'smooth' });
+    } else {
+      window.location.href = href;
+    }
   };
 
   useEffect(() => {
@@ -64,7 +69,7 @@ export const Navigation: React.FC<NavigationProps> = ({ activeSection }) => {
         <div className="max-w-7xl mx-auto px-6 md:px-12 h-20 flex items-center justify-between">
 
           {/* Logo — antique brass */}
-          <a href="#hero" className='flex gap-2' onClick={(e) => go(e, '#hero')}>
+          <a href="/#hero" className='flex gap-2' onClick={(e) => go(e, '#hero')}>
             <img src="/favicon.svg" alt="App Logo" className="w-10 h-10" />
           </a> 
 
@@ -90,7 +95,7 @@ export const Navigation: React.FC<NavigationProps> = ({ activeSection }) => {
 
           {/* Hamburger — brass lines */}
           <button onClick={() => setIsOpen(!isOpen)}
-            className="flex flex-col space-y-1.5 items-end justify-center w-8 h-8 group relative z-50 focus:outline-none"
+            className="flex md:hidden flex-col space-y-1.5 items-end justify-center w-8 h-8 group relative z-50 focus:outline-none"
             aria-label="Toggle Menu"
           >
             <span className={`h-[1px] transition-all duration-500 ${isOpen ? 'w-6 rotate-45 translate-y-2' : 'w-6'}`} style={{ background: BRASS }} />

@@ -23,6 +23,56 @@ export type Settings = {
     [key: string] : string;
 }
 
+export type MarqueeWord = {
+    text: string;
+    color: string;
+};
+
+export type FrontendData = {
+    id?: number;
+    hero_title?: string;
+    hero_watermark?: string;
+    hero_desc?: string;
+    hero_image?: string;
+    marquee?: MarqueeWord[];
+    scroll_indicator_text?: string;
+    lookbook_tag?: string;
+    fabric_canvas_title?: string;
+    footer_title?: string;
+};
+
+export type CollectionItemType = {
+    id: number;
+    piece_title: string;
+    peice_title?: string;
+    desc: string | null;
+    note: string | null;
+    gsm: string | null;
+    image?: string | null;
+};
+
+export type FeaturedCollection = {
+    id: number;
+    title: string;
+    desc: string | null;
+    is_featured: boolean;
+    items: CollectionItemType[];
+};
+
+export type FabricCanvasItem = {
+    id: number;
+    name: string;
+    origin_mill: string | null;
+    density_weight: string | null;
+    structure: string | null;
+    formulation: string | null;
+    rigidity: number | null;
+    breathability: number | null;
+    warmth: number | null;
+    luster: number | null;
+    desc: string | null;
+};
+
 /* @chisel-passkeys */
 export type Passkey = {
     id: number;
