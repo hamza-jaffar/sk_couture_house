@@ -82,7 +82,7 @@ const PageIndex = () => {
                                             theme="snow"
                                             value={value.html}
                                             onChange={(content) => handleChange(key, 'html', content)}
-                                            className="min-h-64"
+                                            className="min-h-64 border-none"
                                             modules={{
                                                 toolbar: [
                                                     [{ header: [1, 2, 3, false] }],

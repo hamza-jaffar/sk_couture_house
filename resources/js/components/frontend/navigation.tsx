@@ -71,7 +71,7 @@ export const Navigation: React.FC<NavigationProps> = ({ activeSection }) => {
 
           {/* Logo — antique brass */}
           <a href="/#hero" className='flex gap-2' onClick={(e) => go(e, '#hero')}>
-            <AppLogoIcon className="size-10 fill-current text-white dark:text-black" />
+            <AppLogoIcon className="size-10 fill-current text-white" />
           </a> 
 
 

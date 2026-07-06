@@ -180,3 +180,59 @@
     background-repeat: repeat;
     background-size: 256px 256px;
 }
+
+/* Quill editor: remove default borders introduced by global rules */
+.ql-toolbar,
+.ql-container,
+.ql-editor,
+.react-quill {
+    border: 0 !important;
+    box-shadow: none !important;
+}
+
+/* Remove focus outlines inside the editor */
+.ql-editor:focus {
+    outline: none !important;
+}
+
+/* Make editor background inherit the app background for dark mode */
+.ql-container {
+    background: transparent !important;
+}
+
+/* Custom page content fixes: remove pasted background highlights and borders */
+.custom-page .prose,
+.custom-page .prose * {
+    background: transparent !important;
+    border: 0 !important;
+    box-shadow: none !important;
+    color: inherit !important;
+}
+
+/* Remove inline background styles (copied from Word/Google Docs) */
+.custom-page .prose [style*="background"],
+.custom-page .prose [style*="background-color"] {
+    background: transparent !important;
+}
+
+/* Remove mark/tag highlights */
+.custom-page .prose mark {
+    background: transparent !important;
+    color: inherit !important;
+}
+
+/* Ensure paragraphs use site type color and comfortable spacing */
+.custom-page .prose p {
+    color: var(--foreground) !important;
+    margin-bottom: 1rem;
+}
+
+/* Headings styling consistent with frontend */
+.custom-page .prose h1,
+.custom-page .prose h2,
+.custom-page .prose h3 {
+    color: var(--foreground) !important;
+}
+
+/* DEBUG helpers — temporary outlines to diagnose layout/gutter issues */
+/* debug helpers removed */

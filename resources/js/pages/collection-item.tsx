@@ -5,6 +5,7 @@ import { Navigation } from '@/components/frontend/navigation';
 import { Footer } from '@/components/frontend/footer';
 import { BG, BRASS, BRASS_L, FOREST, OXBLOOD, PARCH, WALNUT } from '@/constant/colors';
 import { Frontend, FabricCanvasItem } from '@/types/auth';
+import FrontendBackground from '@/components/fronted-background';
 
 type CollectionItemType = {
     id: number;
@@ -44,12 +45,7 @@ export default function CollectionItemDetail({ frontend, item, fabricCanvases }:
         <div className="relative min-h-screen overflow-x-hidden selection:bg-amber-900/30" style={{ background: '#0b1a0d', color: '#f0ddb8' }}>
             <Head title={`${item.peice_title} | ${frontend.information.name}`} />
 
-            {/* Ambient Backgrounds */}
-            <div className="fixed top-[-10%] left-[-10%] w-[60vw] h-[60vw] rounded-full pointer-events-none z-0"
-                style={{ background: `radial-gradient(circle, ${FOREST}40 0%, transparent 70%)` }} />
-            <div className="fixed bottom-[-10%] right-[-10%] w-[50vw] h-[50vw] rounded-full pointer-events-none z-0"
-                style={{ background: `radial-gradient(circle, ${OXBLOOD}30 0%, transparent 70%)` }} />
-            <div className="bg-grain fixed inset-0 z-0 opacity-40 pointer-events-none" />
+            <FrontendBackground />
 
             <Navigation activeSection="" />
 
