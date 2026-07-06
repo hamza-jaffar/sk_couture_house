@@ -6,6 +6,12 @@ import { Frontend } from '@/types';
 import { FabricCanvasItem } from '@/types/auth';
 import { socialPlatformMapping } from '@/constant/mapping';
 
+const footerLinks = [
+  { label: 'Privacy Policy', href: '/privacy-policy' },
+  { label: 'Rules & Regulation', href: '/rules-and-regulation' },
+  { label: 'Policies', href: '/policies' },
+];
+
 const AVAILABLE_COLORS = [BRASS_L, OXBLOOD, FOREST];
 
 type PageProps = {
@@ -200,7 +206,16 @@ export const Footer: React.FC = () => {
           style={{ borderTop: `1px solid rgba(184,149,42,0.15)`, color: `${PARCH}30` }}
         >
           <span>© {new Date().getFullYear()} {frontend.information.name}. ALL RIGHTS RESERVED.</span>
-          <div className="flex space-x-8">
+          <div className="flex flex-wrap items-center justify-center gap-x-6 gap-y-2 text-center">
+            {footerLinks.map((link) => (
+              <a key={link.href} href={link.href} className="transition-colors duration-300"
+                style={{ color: `${PARCH}30` }}
+                onMouseEnter={e => { (e.currentTarget as HTMLElement).style.color = BRASS_L; }}
+                onMouseLeave={e => { (e.currentTarget as HTMLElement).style.color = `${PARCH}30`; }}
+              >
+                {link.label}
+              </a>
+            ))}
             {socials.map(({ name, link, col }) => (
               <a key={name} href={link} className="transition-colors duration-300"
                 style={{ color: `${PARCH}30` }}

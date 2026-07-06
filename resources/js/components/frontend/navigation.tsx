@@ -4,6 +4,7 @@ import { BRASS, BRASS_L, OXBLOOD, PARCH, WALNUT } from '@/constant/colors';
 import { Frontend } from '@/types';
 import { usePage } from '@inertiajs/react';
 import { getLocationName } from '@/lib/utils';
+import AppLogoIcon from '../app-logo-icon';
 
 interface NavigationProps { activeSection: string; }
 
@@ -70,7 +71,7 @@ export const Navigation: React.FC<NavigationProps> = ({ activeSection }) => {
 
           {/* Logo — antique brass */}
           <a href="/#hero" className='flex gap-2' onClick={(e) => go(e, '#hero')}>
-            <img src="/favicon.svg" alt="App Logo" className="w-10 h-10" />
+            <AppLogoIcon className="size-10 fill-current text-white dark:text-black" />
           </a> 
 
 
