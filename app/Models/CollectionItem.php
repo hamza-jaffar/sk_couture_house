@@ -16,4 +16,5 @@ class CollectionItem extends Model
     {
         return $this->belongsTo(Collections::class, 'collection_id');
     }
+
 }

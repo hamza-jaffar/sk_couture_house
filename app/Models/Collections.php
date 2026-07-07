@@ -6,7 +6,7 @@ use Illuminate\Database\Eloquent\Model;
 
 class Collections extends Model
 {
-    protected $fillable = ['title', 'is_featured', 'desc'];
+    protected $fillable = ['title', 'is_featured', 'desc', 'category_id'];
 
     protected $casts = [
         'is_featured' => 'boolean',
@@ -24,5 +24,15 @@ class Collections extends Model
     public function items()
     {
         return $this->hasMany(CollectionItem::class, 'collection_id');
+    }
+
+    public function category()
+    {
+        return $this->belongsTo(Category::class, 'category_id');
+    }
+
+    public function featuredCategory()
+    {
+        return $this->belongsTo(Category::class, 'featured_collection_id');
     }
 }

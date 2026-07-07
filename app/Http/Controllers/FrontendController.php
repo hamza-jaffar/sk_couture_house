@@ -2,6 +2,7 @@
 
 namespace App\Http\Controllers;
 
+use App\Models\Category;
 use App\Models\Collections;
 use App\Models\FabricCanvas;
 use App\Models\FrontendData;
@@ -16,11 +17,16 @@ class FrontendController extends Controller
             ->with('items')
             ->first();
 
+        $categories = Category::with(['featuredCollection', 'collections' => function ($query) {
+            $query->with('items');
+        }])->get();
+
         $fabricCanvases = FabricCanvas::all();
 
         return inertia('welcome', [
             'frontendData'       => $frontendData,
             'featuredCollection' => $featuredCollection,
+            'categories'         => $categories,
             'fabricCanvases'     => $fabricCanvases,
         ]);
     }

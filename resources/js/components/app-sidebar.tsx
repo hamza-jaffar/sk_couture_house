@@ -1,5 +1,5 @@
 import { Link } from '@inertiajs/react';
-import { BookOpen, FileText, FolderGit2, LayoutGrid, MessageSquare } from 'lucide-react';
+import { BookOpen, FileText, FolderGit2, LayoutGrid, MessageSquare, Tags } from 'lucide-react';
 import AppLogo from '@/components/app-logo';
 import { NavFooter } from '@/components/nav-footer';
 import { NavMain } from '@/components/nav-main';
@@ -36,6 +36,11 @@ const mainNavItems: NavItem[] = [
         title: 'Collections',
         href: '/collections',
         icon: FolderGit2,
+    },
+    {
+        title: 'Categories',
+        href: '/categories',
+        icon: Tags,
     },
     {
         title: 'Fabric Canvases',

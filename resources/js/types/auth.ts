@@ -51,6 +51,19 @@ export type CollectionItemType = {
     image?: string | null;
 };
 
+export type CategoryType = {
+    id: number;
+    name: string;
+    desc: string | null;
+    featured_collection?: { id: number; title: string } | null;
+    collections: Array<{
+        id: number;
+        title: string;
+        desc: string | null;
+        items: CollectionItemType[];
+    }>;
+};
+
 export type FeaturedCollection = {
     id: number;
     title: string;

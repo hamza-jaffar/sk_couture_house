@@ -1,5 +1,6 @@
 <?php
 
+use App\Http\Controllers\CategoryController;
 use App\Http\Controllers\CollectionItemController;
 use App\Http\Controllers\DashboardController;
 use App\Http\Controllers\FrontendController;
@@ -39,6 +40,7 @@ Route::middleware(['auth', 'verified'])->group(function () {
     Route::post('/frontend-data', [FrontendDataController::class, 'store'])->name('frontend-data.store');
     
     Route::resource('collections', CollectionsController::class);
+    Route::resource('categories', CategoryController::class);
     Route::post('/collections/{collection}/items', [CollectionItemController::class, 'store'])->name('collections.items.store');
     Route::delete('/collections/{collection}/items/{item}', [CollectionItemController::class, 'destroy'])->name('collections.items.destroy');
     

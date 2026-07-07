@@ -4,18 +4,19 @@ import { Footer } from '@/components/frontend/footer';
 import { Hero } from '@/components/frontend/hero';
 import { Lookbook } from '@/components/frontend/look-book';
 import { Navigation } from '@/components/frontend/navigation';
-import { FabricCanvasItem, FeaturedCollection, FrontendData } from '@/types/auth';
+import { CategoryType, FabricCanvasItem, FeaturedCollection, FrontendData } from '@/types/auth';
 import { usePage } from '@inertiajs/react';
 import { useState, useEffect } from 'react';
 
 type PageProps = {
   frontendData: FrontendData | null;
   featuredCollection: FeaturedCollection | null;
+  categories: CategoryType[];
   fabricCanvases: FabricCanvasItem[];
 };
 
 function Welcome() {
-  const { frontendData, featuredCollection, fabricCanvases } = usePage<PageProps>().props;
+  const { frontendData, featuredCollection, categories, fabricCanvases } = usePage<PageProps>().props;
   const [activeSection, setActiveSection] = useState('hero');
 
   useEffect(() => {
@@ -42,7 +43,7 @@ function Welcome() {
 
       <main>
         <Hero frontendData={frontendData} featuredCollection={featuredCollection} />
-        <Lookbook featuredCollection={featuredCollection} frontendData={frontendData} />
+        <Lookbook featuredCollection={featuredCollection} categories={categories} frontendData={frontendData} />
         <FabricCanvas fabricCanvases={fabricCanvases} frontendData={frontendData} />
       </main>
       <Footer />

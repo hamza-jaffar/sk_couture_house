@@ -15,13 +15,20 @@ class CollectionsController extends Controller
 
     public function create()
     {
-        return inertia('collections/create');
+        $categories = \App\Models\Category::all();
+
+        return inertia('collections/create', ['categories' => $categories]);
     }
 
     public function edit(Collections $collection)
     {
         $collection->load('items');
-        return inertia('collections/edit', ['collection' => $collection]);
+        $categories = \App\Models\Category::all();
+
+        return inertia('collections/edit', [
+            'collection' => $collection,
+            'categories' => $categories,
+        ]);
     }
 
     public function store(Request $request)
@@ -30,6 +37,7 @@ class CollectionsController extends Controller
             'title' => 'required|string|max:255',
             'desc' => 'nullable|string',
             'is_featured' => 'boolean',
+            'category_id' => 'nullable|exists:categories,id',
         ]);
 
         Collections::create($data);
@@ -43,6 +51,7 @@ class CollectionsController extends Controller
             'title' => 'required|string|max:255',
             'desc' => 'nullable|string',
             'is_featured' => 'boolean',
+            'category_id' => 'nullable|exists:categories,id',
         ]);
 
         $collection->update($data);

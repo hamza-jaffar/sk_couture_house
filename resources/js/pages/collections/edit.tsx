@@ -9,6 +9,11 @@ import { Checkbox } from '@/components/ui/checkbox'
 import { Separator } from '@/components/ui/separator'
 import { useForm, Form, Head, Link, router, usePage } from '@inertiajs/react'
 
+type CategoryOption = {
+    id: number;
+    name: string;
+};
+
 type CollectionItem = {
     id: number;
     piece_title: string;
@@ -23,15 +28,17 @@ type Collection = {
     title: string;
     desc: string | null;
     is_featured: boolean;
+    category_id?: number | null;
     items: CollectionItem[];
 };
 
 type PageProps = {
     collection: Collection;
+    categories: CategoryOption[];
 };
 
 const EditCollection = () => {
-    const { collection } = usePage<PageProps>().props;
+    const { collection, categories } = usePage<PageProps>().props;
     const { data, setData, post, processing, errors, reset } = useForm({
         piece_title: '',
         gsm: '',
@@ -111,6 +118,22 @@ const EditCollection = () => {
                                 <Label htmlFor="is_featured">Featured Collection (Un-features other collections)</Label>
                             </div>
                             <InputError className="mt-2" message={errors.is_featured} />
+
+                            <div className="grid gap-2">
+                                <Label htmlFor="category_id">Category</Label>
+                                <select
+                                    id="category_id"
+                                    name="category_id"
+                                    defaultValue={collection.category_id ?? ''}
+                                    className="flex h-10 w-full rounded-md border border-input bg-background px-3 py-2 text-sm"
+                                >
+                                    <option value="">Uncategorized</option>
+                                    {categories.map((category) => (
+                                        <option key={category.id} value={category.id}>{category.name}</option>
+                                    ))}
+                                </select>
+                                <InputError className="mt-2" message={errors.category_id} />
+                            </div>
 
                             <div className="flex items-center gap-4">
                                 <Button disabled={processing}>Save Changes</Button>
@@ -204,6 +227,9 @@ const EditCollection = () => {
                                     />
                                     <InputError message={errors.gsm} />
                                 </div>
+                            </div>
+
+                            <div className="grid gap-2">
                             </div>
 
                             <div className="grid gap-2">
