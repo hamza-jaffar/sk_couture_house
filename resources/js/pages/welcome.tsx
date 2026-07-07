@@ -4,14 +4,15 @@ import { Footer } from '@/components/frontend/footer';
 import { Hero } from '@/components/frontend/hero';
 import { Lookbook } from '@/components/frontend/look-book';
 import { Navigation } from '@/components/frontend/navigation';
-import { CategoryType, FabricCanvasItem, FeaturedCollection, FrontendData } from '@/types/auth';
+import { FabricCanvasItem, FeaturedCollection, FrontendData } from '@/types/auth';
+import { Category } from '@/types/data';
 import { usePage } from '@inertiajs/react';
 import { useState, useEffect } from 'react';
 
 type PageProps = {
   frontendData: FrontendData | null;
   featuredCollection: FeaturedCollection | null;
-  categories: CategoryType[];
+  categories: Category[];
   fabricCanvases: FabricCanvasItem[];
 };
 
@@ -39,11 +40,11 @@ function Welcome() {
     <div className="relative min-h-screen overflow-x-hidden" style={{ background: '#0b1a0d', color: '#f0ddb8' }}>
 
       <FrontendBackground />
-      <Navigation activeSection={activeSection} />
+      <Navigation activeSection={activeSection} categories={categories} />
 
       <main>
         <Hero frontendData={frontendData} featuredCollection={featuredCollection} />
-        <Lookbook featuredCollection={featuredCollection} categories={categories} frontendData={frontendData} />
+        <Lookbook categories={categories} frontendData={frontendData} />
         <FabricCanvas fabricCanvases={fabricCanvases} frontendData={frontendData} />
       </main>
       <Footer />

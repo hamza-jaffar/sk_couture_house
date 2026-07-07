@@ -17,11 +17,11 @@ import { dashboard } from '@/routes';
 import type { NavItem } from '@/types';
 
 const mainNavItems: NavItem[] = [
-    {
-        title: 'Dashboard',
-        href: dashboard(),
-        icon: LayoutGrid,
-    },
+    // {
+    //     title: 'Dashboard',
+    //     href: dashboard(),
+    //     icon: LayoutGrid,
+    // },
     {
         title: 'Frontend Data',
         href: '/frontend-data',

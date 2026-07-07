@@ -3,27 +3,45 @@ import { motion, AnimatePresence } from 'framer-motion';
 import { BRASS, BRASS_L, OXBLOOD, PARCH, WALNUT } from '@/constant/colors';
 import { Frontend } from '@/types';
 import { usePage } from '@inertiajs/react';
-import { getLocationName } from '@/lib/utils';
+import { getLocationName, toSafeURL } from '@/lib/utils';
 import AppLogoIcon from '../app-logo-icon';
+import { Category } from '@/types/data';
 
-interface NavigationProps { activeSection: string; }
+interface NavigationProps {
+  activeSection: string;
+  categories: Category[];
+}
 
 type PageProps = {
   frontend: Frontend;
 };
 
-export const Navigation: React.FC<NavigationProps> = ({ activeSection }) => {
+export const Navigation: React.FC<NavigationProps> = ({ activeSection, categories }) => {
   const [isOpen, setIsOpen] = useState(false);
   const [locationName, setLocationName] = useState<string>('Loading...');
 
   const { frontend } = usePage<PageProps>().props;
 
+  const category = categories.map(cat => ({
+    name: cat.name,
+    href: `/#categories-${cat.name}`, // Or whatever your URL structure is
+    id: cat.id || cat.name.toLowerCase()
+  }));
+
   const items = [
     { name: 'Philosophy', href: '/#hero', id: 'hero' },
-    { name: 'Runway Lookbook', href: '/#lookbook', id: 'lookbook' },
+    ...category.map(cat => {
+      return {
+        name: cat.name,
+        href: `/#${toSafeURL(cat.name)}`,
+        id: `${toSafeURL(cat.name)}`
+      };
+    }),
     { name: 'Fabric Canvas', href: '/#canvas', id: 'canvas' },
     { name: 'Book Appointment', href: '/#contact', id: 'contact' },
   ];
+
+
 
   const go = (e: React.MouseEvent<HTMLAnchorElement>, href: string) => {
     e.preventDefault(); setIsOpen(false);
@@ -37,7 +55,7 @@ export const Navigation: React.FC<NavigationProps> = ({ activeSection }) => {
 
   useEffect(() => {
     getLocationName(frontend.information.north_cordinate, frontend.information.east_cordinate)
-    .then((data) => {
+      .then((data) => {
         setLocationName(data); // This works because 'data' is the actual string
       })
       .catch((err) => {
@@ -72,7 +90,7 @@ export const Navigation: React.FC<NavigationProps> = ({ activeSection }) => {
           {/* Logo — antique brass */}
           <a href="/#hero" className='flex gap-2' onClick={(e) => go(e, '#hero')}>
             <AppLogoIcon className="size-10 fill-current text-white" />
-          </a> 
+          </a>
 
 
           {/* Desktop Nav */}

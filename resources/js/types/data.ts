@@ -1,3 +1,14 @@
+export interface CollectionItem {
+    id: number;
+    collection_id: number;
+    piece_title: string;
+    peice_title?: string;
+    desc: string | null;
+    note: string | null;
+    gsm: string | null;
+    image?: string | null;
+}
+
 export interface Collection {
     id: number;
     title: string;
@@ -6,6 +17,7 @@ export interface Collection {
     is_featured: boolean;
     created_at: string;
     updated_at: string;
+    items: CollectionItem[]
 }
 
 export interface Category {

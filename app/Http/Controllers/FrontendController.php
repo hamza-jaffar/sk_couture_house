@@ -13,10 +13,6 @@ class FrontendController extends Controller
     {
         $frontendData = FrontendData::first();
 
-        $featuredCollection = Collections::where('is_featured', true)
-            ->with('items')
-            ->first();
-
         $categories = Category::with(['featuredCollection', 'collections' => function ($query) {
             $query->with('items');
         }])->get();
@@ -25,7 +21,6 @@ class FrontendController extends Controller
 
         return inertia('welcome', [
             'frontendData'       => $frontendData,
-            'featuredCollection' => $featuredCollection,
             'categories'         => $categories,
             'fabricCanvases'     => $fabricCanvases,
         ]);

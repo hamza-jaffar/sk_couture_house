@@ -34,7 +34,8 @@ Route::post('/invitations', [InvitationController::class, 'store'])->name('invit
 
 Route::middleware(['auth', 'verified'])->group(function () {
     // dd(Auth::user());
-    Route::get('dashboard', [DashboardController::class, 'dashboard'])->name('dashboard');
+    // Route::get('dashboard', [DashboardController::class, 'dashboard'])->name('dashboard');
+    Route::redirect('dashboard', '/invitations')->name('dashboard');
     
     Route::get('/frontend-data', [FrontendDataController::class, 'edit'])->name('frontend-data.edit');
     Route::post('/frontend-data', [FrontendDataController::class, 'store'])->name('frontend-data.store');
