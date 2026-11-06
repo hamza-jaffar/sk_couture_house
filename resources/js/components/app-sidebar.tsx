@@ -24,19 +24,15 @@ import {
     PieChartIcon,
     MapIcon,
     TerminalIcon,
+    LayoutDashboard,
 } from "lucide-react";
 
 const data = {
-    user: {
-        name: "shadcn",
-        email: "m@example.com",
-        avatar: "/avatars/shadcn.jpg",
-    },
     navMain: [
         {
             title: "Dashboard",
             url: "/dashboard",
-            icon: <TerminalSquareIcon />,
+            icon: <LayoutDashboard />,
         },
         {
             title: "Models",
@@ -134,6 +130,7 @@ const data = {
         },
     ],
 };
+
 export function AppSidebar({ ...props }: React.ComponentProps<typeof Sidebar>) {
     return (
         <Sidebar
@@ -165,7 +162,7 @@ export function AppSidebar({ ...props }: React.ComponentProps<typeof Sidebar>) {
                 <NavSecondary items={data.navSecondary} className="mt-auto" />
             </SidebarContent>
             <SidebarFooter>
-                <NavUser user={data.user} />
+                <NavUser />
             </SidebarFooter>
         </Sidebar>
     );
