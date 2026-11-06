@@ -19,6 +19,7 @@ import { Input } from "@/components/ui/input";
 import { Form } from "@inertiajs/react";
 import { Spinner } from "@/components/ui/spinner";
 import InputError from "@/components/ui/input-error";
+import { Checkbox } from "@/components/ui/checkbox";
 
 export function LoginForm({
     className,
@@ -63,7 +64,12 @@ export function LoginForm({
                                         required
                                     />
                                     <InputError message={errors.password} />
+                                    <div className="flex gap-2 items-center">
+                                        <Checkbox name="remember" />
+                                        <p>Remember me</p>
+                                    </div>
                                 </Field>
+
                                 <Field>
                                     <Button type="submit" disabled={processing}>
                                         {processing ? (

@@ -18,7 +18,10 @@ class LoginController
     {
         $credentials = $request->validated();
 
-        if (Auth::attempt($credentials)) {
+        $remember = isset($credentials['remember']);
+        unset($credentials['remember']);
+
+        if (Auth::attempt($credentials, $remember)) {
             $request->session()->regenerate();
 
             return redirect()->intended('dashboard');
