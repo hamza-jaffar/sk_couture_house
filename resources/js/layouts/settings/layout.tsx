@@ -41,25 +41,27 @@ export default function SettingsLayout({
                         aria-label="Settings"
                     >
                         {sidebarNavItems.map((item, index) => (
-                            <Button
+                            <Link
                                 key={`${toUrl(item.href)}-${index}`}
-                                size="sm"
-                                variant="ghost"
-                                className={cn("w-full justify-start", {
-                                    "bg-primary text-white":
-                                        isCurrentOrParentUrl(item.href),
-                                })}
+                                href={item.href}
                             >
-                                <Link
-                                    href={item.href}
-                                    className="flex gap-2 items-center"
+                                <Button
+                                    size="sm"
+                                    variant="ghost"
+                                    className={cn(
+                                        "w-full justify-start flex gap-2 items-center",
+                                        {
+                                            "bg-primary text-white":
+                                                isCurrentOrParentUrl(item.href),
+                                        },
+                                    )}
                                 >
                                     {item.icon && (
                                         <item.icon className="h-4 w-4" />
                                     )}
                                     {item.title}
-                                </Link>
-                            </Button>
+                                </Button>
+                            </Link>
                         ))}
                     </nav>
                 </aside>

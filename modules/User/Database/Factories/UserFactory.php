@@ -1,6 +1,6 @@
 <?php
 
-namespace Database\Factories;
+namespace Modules\User\Database\Factories;
 
 use Illuminate\Database\Eloquent\Factories\Factory;
 use Illuminate\Support\Facades\Hash;
@@ -12,10 +12,12 @@ use Modules\User\Models\User;
  */
 class UserFactory extends Factory
 {
+    protected $model = User::class;
+
     /**
      * The current password being used by the factory.
      */
-    protected static ?string $password;
+    protected static ?string $password = null;
 
     /**
      * Define the model's default state.
