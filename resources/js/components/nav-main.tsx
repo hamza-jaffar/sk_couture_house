@@ -51,6 +51,14 @@ function isPathActive(url: string, currentUrl: string): boolean {
     );
 }
 
+function isCurrentPath(url: string, currentUrl: string): boolean {
+    if (!url || url === '#') {
+        return false;
+    }
+
+    return normalizePath(url) === normalizePath(currentUrl);
+}
+
 function NavMainItem({
     item,
     currentUrl,
@@ -62,7 +70,7 @@ function NavMainItem({
     const hasActiveChild =
         item.items?.some((subItem) => isPathActive(subItem.url, currentUrl)) ??
         false;
-    const isCurrentPage = isPathActive(item.url, currentUrl);
+    const isCurrentPage = isCurrentPath(item.url, currentUrl);
     const [isOpen, setIsOpen] = useState(hasActiveChild);
 
     useEffect(() => {

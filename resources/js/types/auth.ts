@@ -28,6 +28,14 @@ export type UserFilters = {
     per_page: number;
 };
 
+export type CustomerFilters = {
+    search: string;
+    sort: string;
+    direction: "asc" | "desc";
+    page: number;
+    per_page: number;
+};
+
 export type Auth = {
     user: User;
     permissions: string[];
