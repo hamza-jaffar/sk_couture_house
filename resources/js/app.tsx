@@ -3,6 +3,7 @@ import { Toaster } from "@/components/ui/sonner";
 import AppLayout from "@/layouts/app-layout";
 import { TooltipProvider } from "@/components/ui/tooltip";
 import { initializeTheme } from "./hooks/use-appearance";
+import SettingsLayout from "@/layouts/settings/layout";
 
 const appName = import.meta.env.VITE_APP_NAME || "Laravel";
 
@@ -10,8 +11,12 @@ void createInertiaApp({
     title: (title) => (title ? `${title} - ${appName}` : appName),
     layout: (name) => {
         switch (true) {
-            case name.startsWith('dashboard/'):
-                return AppLayout
+            case name.startsWith("dashboard/"):
+                return AppLayout;
+            case name.startsWith("settings/"):
+                return [AppLayout, SettingsLayout];
+            default:
+                return null;
         }
     },
     withApp(app) {
@@ -23,7 +28,7 @@ void createInertiaApp({
         );
     },
     progress: {
-        color: "#4B5563",
+        color: "#1447e6",
     },
 });
 

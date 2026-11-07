@@ -40,6 +40,7 @@ export function LoginForm({
                                         type="email"
                                         name="email"
                                         placeholder="admin@example.com"
+                                        tabIndex={1}
                                         required
                                     />
                                     <InputError message={errors.email} />
@@ -61,6 +62,7 @@ export function LoginForm({
                                         id="password"
                                         name="password"
                                         type="password"
+                                        tabIndex={2}
                                         required
                                     />
                                     <InputError message={errors.password} />

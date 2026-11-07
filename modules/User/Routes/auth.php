@@ -2,10 +2,13 @@
 
 use Illuminate\Support\Facades\Route;
 use Modules\User\Http\Controllers\Auth\LoginController;
+use Modules\User\Http\Controllers\Settings\ProfileController;
 
 Route::middleware('guest')->group(function () {
     Route::get('/login', [LoginController::class, 'index'])->name('login');
     Route::post('/login', [LoginController::class, 'login'])->middleware('throttle:5,1');
+
+    // Route::redirect('settings', 'settings/profile')->name('settings');
 });
 
 Route::middleware('auth')->group(function () {

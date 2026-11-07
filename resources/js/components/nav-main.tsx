@@ -1,6 +1,6 @@
 "use client"
 
-import { usePage } from "@inertiajs/react"
+import { Link, usePage } from "@inertiajs/react"
 import { useEffect, useState } from "react"
 import {
   Collapsible,
@@ -81,7 +81,7 @@ function NavMainItem({
           hasChildren ? (
             <CollapsibleTrigger />
           ) : (
-            <a href={item.url} />
+            <Link href={item.url} />
           )
         }
       >
@@ -98,7 +98,7 @@ function NavMainItem({
               <SidebarMenuSubItem key={subItem.title}>
                 <SidebarMenuSubButton
                   isActive={isPathActive(subItem.url, currentUrl)}
-                  render={<a href={subItem.url} />}
+                  render={<Link href={subItem.url} />}
                 >
                   <span>{subItem.title}</span>
                 </SidebarMenuSubButton>

@@ -14,7 +14,7 @@ import {
     SidebarMenuItem,
     useSidebar,
 } from "@/components/ui/sidebar";
-import { Form, usePage } from "@inertiajs/react";
+import { Form, Link, usePage } from "@inertiajs/react";
 import { ChevronsUpDownIcon, LogOutIcon, Settings } from "lucide-react";
 import UserInfo from "@/components/user-info";
 
@@ -54,10 +54,15 @@ export function NavUser() {
                         </DropdownMenuGroup>
                         <DropdownMenuSeparator />
                         <DropdownMenuGroup>
-                            <DropdownMenuItem>
-                                <Settings />
-                                Settings
-                            </DropdownMenuItem>
+                            <Link
+                                // className="flex gap-2 items-center"
+                                href="/settings/profile"
+                            >
+                                <DropdownMenuItem>
+                                    <Settings />
+                                    Settings
+                                </DropdownMenuItem>
+                            </Link>
                         </DropdownMenuGroup>
                         <DropdownMenuSeparator />
                         <DropdownMenuGroup>

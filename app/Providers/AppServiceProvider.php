@@ -27,13 +27,13 @@ class AppServiceProvider extends ServiceProvider
     {
         $this->configureDefaults();
 
-        Inertia::handleExceptionsUsing(function (ExceptionResponse $response) {
-            if (in_array($response->statusCode(), [403, 404, 429, 500, 503])) {
-                return $response->render('error', [
-                    'status' => $response->statusCode(),
-                ])->withSharedData();
-            }
-        });
+        // Inertia::handleExceptionsUsing(function (ExceptionResponse $response) {
+        //     if (in_array($response->statusCode(), [403, 404, 429, 500, 503])) {
+        //         return $response->render('error', [
+        //             'status' => $response->statusCode(),
+        //         ])->withSharedData();
+        //     }
+        // });
     }
 
     /**
