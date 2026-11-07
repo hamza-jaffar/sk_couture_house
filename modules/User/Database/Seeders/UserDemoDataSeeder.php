@@ -3,7 +3,6 @@
 namespace Modules\User\Database\Seeders;
 
 use Illuminate\Database\Seeder;
-use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Str;
 use Modules\User\Models\Role;
 use Modules\User\Models\User;
@@ -30,11 +29,7 @@ class UserDemoDataSeeder extends Seeder
         'Promotion Manager',
     ];
 
-    private const int STAFF_COUNT = 100;
-
-    private const int CUSTOMER_COUNT = 10_000;
-
-    private const int CUSTOMER_BATCH_SIZE = 100;
+    private const int STAFF_COUNT = 1000;
 
     public function run(): void
     {
@@ -42,12 +37,14 @@ class UserDemoDataSeeder extends Seeder
             throw new RuntimeException('Demo data can only be seeded in local or testing environments.');
         }
 
+        $this->command->info('Seeding Roles & Permissions...');
         $this->call(RolePermissionSeeder::class);
 
         $permissions = Permission::query()
             ->where('guard_name', 'web')
             ->get();
 
+        $this->command->info('Configuring Demo Roles...');
         $demoRoles = collect(self::DEMO_ROLE_NAMES)
             ->values()
             ->map(function (string $name, int $index) use ($permissions): Role {
@@ -78,6 +75,7 @@ class UserDemoDataSeeder extends Seeder
                 return $role;
             });
 
+        $this->command->info('Seeding Staff Users...');
         foreach (range(1, self::STAFF_COUNT) as $number) {
             $identity = $this->demoIdentity('staff', $number);
             $legacyEmail = sprintf('demo-staff-%03d@example.test', $number);
@@ -94,97 +92,11 @@ class UserDemoDataSeeder extends Seeder
             $user->save();
             $user->syncRoles([$demoRoles->random()]);
         }
+        $this->command->info('Seeding Staff Done');
 
-        $customerRole = Role::query()
-            ->where('name', 'customer')
-            ->where('guard_name', 'web')
-            ->firstOrFail();
-
-        $this->seedCustomers($customerRole);
-    }
-
-    private function seedCustomers(Role $customerRole): void
-    {
-        $userModel = new User;
-        $userTable = $userModel->getTable();
-        $pivotTable = config('permission.table_names.model_has_roles');
-        $roleColumn = config('permission.column_names.role_pivot_key') ?: 'role_id';
-        $modelColumn = config('permission.column_names.model_morph_key') ?: 'model_id';
-
-        foreach (array_chunk(range(1, self::CUSTOMER_COUNT), self::CUSTOMER_BATCH_SIZE) as $numbers) {
-            $identities = array_map(
-                fn (int $number): array => $this->demoIdentity('customer', $number),
-                $numbers,
-            );
-            $emails = array_column($identities, 'email');
-            $legacyEmails = array_map(
-                static fn (int $number): string => sprintf('demo-customer-%05d@example.test', $number),
-                $numbers,
-            );
-            $existingUsers = User::query()
-                ->whereIn('email', [...$legacyEmails, ...$emails])
-                ->get()
-                ->keyBy('email');
-            $timestamp = now();
-            $existingRecords = [];
-            $newRecords = [];
-
-            foreach ($numbers as $index => $number) {
-                $identity = $identities[$index];
-                $existingUser = $existingUsers->get($legacyEmails[$index])
-                    ?? $existingUsers->get($identity['email']);
-
-                if ($existingUser !== null) {
-                    $existingRecords[] = array_merge(
-                        $existingUser->getAttributes(),
-                        $identity,
-                        ['updated_at' => $timestamp],
-                    );
-
-                    continue;
-                }
-
-                $user = User::factory()->make($identity);
-                $newRecords[] = array_merge($user->getAttributes(), [
-                    'created_at' => $timestamp,
-                    'updated_at' => $timestamp,
-                ]);
-            }
-
-            if ($existingRecords !== []) {
-                DB::table($userTable)->upsert(
-                    $existingRecords,
-                    ['id'],
-                    ['name', 'email', 'updated_at'],
-                );
-            }
-
-            if ($newRecords !== []) {
-                DB::table($userTable)->insertOrIgnore($newRecords);
-            }
-
-            $userIds = User::query()->whereIn('email', $emails)->pluck('id')->all();
-
-            if ($userIds === []) {
-                continue;
-            }
-
-            DB::transaction(function () use ($customerRole, $modelColumn, $pivotTable, $roleColumn, $userIds, $userModel): void {
-                DB::table($pivotTable)
-                    ->where('model_type', $userModel->getMorphClass())
-                    ->whereIn($modelColumn, $userIds)
-                    ->delete();
-
-                DB::table($pivotTable)->insert(array_map(
-                    fn (int|string $userId): array => [
-                        $roleColumn => $customerRole->getKey(),
-                        $modelColumn => $userId,
-                        'model_type' => $userModel->getMorphClass(),
-                    ],
-                    $userIds,
-                ));
-            });
-        }
+        $this->command->info('Seeding Customers...');
+        $this->call(CustomerDemoDataSeeder::class);
+        $this->command->info('Seeding Customers Done');
     }
 
     /**

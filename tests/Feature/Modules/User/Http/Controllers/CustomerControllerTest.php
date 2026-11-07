@@ -64,6 +64,30 @@ it('searches, sorts, and paginates customers without including staff users', fun
                 ->where('customers.data.0.roles.0.name', 'customer')));
 });
 
+it('returns the customer total for unfiltered pages without counting staff', function () {
+    $viewer = customerIndexViewer();
+    $customerRole = customerIndexRole();
+
+    foreach (['Alice Customer', 'Zoe Customer'] as $name) {
+        User::factory()
+            ->create(['name' => $name])
+            ->assignRole($customerRole);
+    }
+
+    User::factory()->create(['name' => 'Staff Account']);
+
+    $this->actingAs($viewer)
+        ->get(route('dashboard.customer.index', ['per_page' => 10]))
+        ->assertOk()
+        ->assertInertia(fn (AssertableInertia $page) => $page
+            ->component('dashboard/customer')
+            ->loadDeferredProps(['customer-list'], fn (AssertableInertia $page) => $page
+                ->where('customers.total', 2)
+                ->where('customers.last_page', 1)
+                ->where('customers.data.0.name', 'Alice Customer')
+                ->where('customers.data.1.name', 'Zoe Customer')));
+});
+
 it('forbids authenticated users without the customers view permission', function () {
     $viewer = customerIndexViewer('users.view');
 

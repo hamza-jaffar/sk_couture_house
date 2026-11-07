@@ -48,9 +48,9 @@ class RolePermissionSeeder extends Seeder
 
             // --- CUSTOMERS ---
             'customers.view',
-            'customers.create',
-            'customers.update',
-            'customers.delete',
+            // 'customers.create',
+            // 'customers.update',
+            // 'customers.delete',
 
             // --- DISCOUNTS & PROMOTIONS ---
             'coupons.view',

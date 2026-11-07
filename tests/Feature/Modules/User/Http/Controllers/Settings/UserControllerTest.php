@@ -492,13 +492,6 @@ it('rejects non-administrator bulk deletion containing an administrator account'
 it('seeds demo roles, staff users, and customers idempotently', function () {
     $this->seed(UserDemoDataSeeder::class);
 
-    $staffUsers = User::query()
-        ->where('email', 'like', '%.staff%@example.test')
-        ->pluck('id');
-    $customerUsers = User::query()
-        ->where('email', 'like', '%.customer%@example.test')
-        ->pluck('id');
-    $demoUserIds = $staffUsers->merge($customerUsers);
     $demoRoleNames = [
         'Store Manager',
         'Sales Associate',
@@ -521,21 +514,20 @@ it('seeds demo roles, staff users, and customers idempotently', function () {
         ->firstOrFail();
 
     expect(Role::query()->whereIn('name', $demoRoleNames)->count())->toBe(15)
-        ->and($staffUsers)->toHaveCount(100)
-        ->and($customerUsers)->toHaveCount(10_000)
+        ->and(User::query()->where('email', 'like', '%.staff%@example.test')->count())->toBe(1000)
+        ->and(User::query()->where('email', 'like', '%.customer%@example.test')->count())->toBe(100_000)
         ->and($sampleStaffUser->name)->toContain(' ')
         ->and($sampleStaffUser->email)->toContain('.staff')
         ->and($sampleStaffUser->email)->toEndWith('@example.test')
         ->and(DB::table('model_has_roles')
             ->where('model_type', (new User)->getMorphClass())
-            ->whereIn('model_id', $demoUserIds)
-            ->count())->toBe(10_100);
+            ->count())->toBe(101_000);
 
     $this->seed(UserDemoDataSeeder::class);
 
     expect(Role::query()->whereIn('name', $demoRoleNames)->count())->toBe(15)
-        ->and(User::query()->where('email', 'like', '%.staff%@example.test')->count())->toBe(100)
-        ->and(User::query()->where('email', 'like', '%.customer%@example.test')->count())->toBe(10_000);
+        ->and(User::query()->where('email', 'like', '%.staff%@example.test')->count())->toBe(1000)
+        ->and(User::query()->where('email', 'like', '%.customer%@example.test')->count())->toBe(100_000);
 });
 
 it('refuses to seed demo data outside local and testing environments', function () {

@@ -4,6 +4,7 @@ namespace Modules\User\Services;
 
 use Illuminate\Contracts\Pagination\LengthAwarePaginator;
 use Illuminate\Database\Eloquent\Builder;
+use Illuminate\Pagination\LengthAwarePaginator as Paginator;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Validation\ValidationException;
 use Modules\User\Models\Role;
@@ -25,9 +26,14 @@ class UserService
     public function paginateUser(array $filters, bool $customers = false): LengthAwarePaginator
     {
         $query = User::query();
+        $customerRole = null;
 
         if ($customers) {
-            $query->role('customer');
+            $customerRole = Role::query()
+                ->where('name', 'customer')
+                ->where('guard_name', 'web')
+                ->firstOrFail();
+            $query->role($customerRole);
         } else {
             $query->withoutRole('customer');
         }
@@ -52,20 +58,52 @@ class UserService
             'email' => 'email',
             'created_at' => 'created_at',
         ];
-        $sortColumn = $sortColumns[$filters['sort'] ?? 'name'];
+        $sort = $filters['sort'] ?? 'name';
+        $sortColumn = $sortColumns[$sort];
         $direction = ($filters['direction'] ?? 'asc') === 'desc' ? 'desc' : 'asc';
 
-        $users = $query
+        if ($customers) {
+            $sortIndexes = [
+                'name' => 'users_name_id_index',
+                'email' => 'users_email_unique',
+                'created_at' => 'users_created_at_id_index',
+            ];
+
+            $query->forceIndex($sortIndexes[$sort]);
+        }
+
+        $query
             ->select(['id', 'name', 'email', 'avatar', 'email_verified_at', 'created_at', 'updated_at'])
             ->with('roles:id,name,is_system')
             ->orderBy($sortColumn, $direction)
-            ->orderBy('id')
-            ->paginate(
-                (int) ($filters['per_page'] ?? 10),
-                ['*'],
-                'page',
-                (int) ($filters['page'] ?? 1),
-            )
+            ->orderBy('id');
+
+        $perPage = (int) ($filters['per_page'] ?? 10);
+        $page = (int) ($filters['page'] ?? 1);
+
+        if ($customerRole instanceof Role && ! filled($filters['search'] ?? null) && ! filled($filters['role_id'] ?? null)) {
+            $userModel = new User;
+            $pivotTable = config('permission.table_names.model_has_roles');
+            $roleColumn = config('permission.column_names.role_pivot_key') ?: 'role_id';
+            $total = DB::table($pivotTable)
+                ->where($roleColumn, $customerRole->getKey())
+                ->where('model_type', $userModel->getMorphClass())
+                ->count();
+
+            return new Paginator(
+                $query->forPage($page, $perPage)->get(),
+                $total,
+                $perPage,
+                $page,
+                [
+                    'path' => Paginator::resolveCurrentPath(),
+                    'query' => request()->query(),
+                ],
+            );
+        }
+
+        $users = $query
+            ->paginate($perPage, ['*'], 'page', $page)
             ->withQueryString();
 
         return $users;
