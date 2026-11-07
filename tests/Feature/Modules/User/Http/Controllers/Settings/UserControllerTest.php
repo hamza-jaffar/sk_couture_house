@@ -96,6 +96,34 @@ it('searches, filters, sorts, and paginates internal users on the server', funct
                 ->where('roles.0.is_system', false)));
 });
 
+it('returns internal-user totals without counting customer role assignments', function () {
+    $viewer = userIndexViewer();
+    $staffRole = Role::create(['name' => 'staff', 'guard_name' => 'web']);
+    $customerRole = Role::create([
+        'name' => 'customer',
+        'guard_name' => 'web',
+        'is_system' => true,
+    ]);
+
+    User::factory()
+        ->create(['name' => 'Staff Account'])
+        ->assignRole($staffRole);
+    User::factory()
+        ->create(['name' => 'Customer Account'])
+        ->assignRole($customerRole);
+    User::factory()
+        ->create(['name' => 'Customer With Staff Role'])
+        ->assignRole($customerRole, $staffRole);
+
+    $this->actingAs($viewer)
+        ->get(route('settings.users', ['per_page' => 20]))
+        ->assertOk()
+        ->assertInertia(fn (AssertableInertia $page) => $page
+            ->loadDeferredProps(['user-list'], fn (AssertableInertia $page) => $page
+                ->where('users.total', 2)
+                ->has('users.data', 2)));
+});
+
 it('rejects invalid user filters', function (array $filters, string $field) {
     $viewer = userIndexViewer();
 

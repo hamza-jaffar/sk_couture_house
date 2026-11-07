@@ -2,24 +2,24 @@ import {
     DataTable,
     DataTableColumnHeader,
     type DataTableColumnDef,
-} from '@/components/data-table';
-import Heading from '@/components/heading';
-import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
-import { Button } from '@/components/ui/button';
+} from "@/components/data-table";
+import Heading from "@/components/heading";
+import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
+import { Button } from "@/components/ui/button";
 import {
     Sheet,
     SheetContent,
     SheetDescription,
     SheetHeader,
     SheetTitle,
-} from '@/components/ui/sheet';
-import { Skeleton } from '@/components/ui/skeleton';
-import { index } from '@/actions/Modules/User/Http/Controllers/CustomerController';
-import type { CustomerFilters, PaginatedUser, User } from '@/types';
-import { Deferred, Head, router } from '@inertiajs/react';
-import type { PaginationState, SortingState } from '@tanstack/table-core';
-import { BadgeCheck, CalendarDays, Eye, Mail, UserRound } from 'lucide-react';
-import { useCallback, useEffect, useMemo, useState } from 'react';
+} from "@/components/ui/sheet";
+import { Skeleton } from "@/components/ui/skeleton";
+import { index } from "@/actions/Modules/User/Http/Controllers/CustomerController";
+import type { CustomerFilters, PaginatedUser, User } from "@/types";
+import { Deferred, Head, router } from "@inertiajs/react";
+import type { PaginationState, SortingState } from "@tanstack/table-core";
+import { BadgeCheck, CalendarDays, Eye, Mail, UserRound } from "lucide-react";
+import { useCallback, useEffect, useMemo, useState } from "react";
 
 type Props = {
     customers?: PaginatedUser;
@@ -30,8 +30,8 @@ function initials(name: string): string {
     return name
         .split(/\s+/)
         .slice(0, 2)
-        .map((part) => part[0] ?? '')
-        .join('')
+        .map((part) => part[0] ?? "")
+        .join("")
         .toUpperCase();
 }
 
@@ -52,7 +52,7 @@ export default function Customer({ customers, filters }: Props) {
                 page: resetPage ? 1 : (changes.page ?? filters.page),
             };
             const query = Object.fromEntries(
-                Object.entries(nextFilters).filter(([, value]) => value !== ''),
+                Object.entries(nextFilters).filter(([, value]) => value !== ""),
             );
 
             setIsLoading(true);
@@ -60,7 +60,7 @@ export default function Customer({ customers, filters }: Props) {
                 index.url({ query }),
                 {},
                 {
-                    only: ['customers', 'filters'],
+                    only: ["customers", "filters"],
                     preserveState: true,
                     preserveScroll: true,
                     replace: true,
@@ -86,8 +86,8 @@ export default function Customer({ customers, filters }: Props) {
     const columns = useMemo<DataTableColumnDef<User>[]>(
         () => [
             {
-                id: 'name',
-                accessorKey: 'name',
+                id: "name",
+                accessorKey: "name",
                 header: ({ column }) => (
                     <DataTableColumnHeader column={column} title="Customer" />
                 ),
@@ -107,8 +107,8 @@ export default function Customer({ customers, filters }: Props) {
                 ),
             },
             {
-                id: 'email',
-                accessorKey: 'email',
+                id: "email",
+                accessorKey: "email",
                 header: ({ column }) => (
                     <DataTableColumnHeader column={column} title="Email" />
                 ),
@@ -119,8 +119,8 @@ export default function Customer({ customers, filters }: Props) {
                 ),
             },
             {
-                id: 'created_at',
-                accessorKey: 'created_at',
+                id: "created_at",
+                accessorKey: "created_at",
                 header: ({ column }) => (
                     <DataTableColumnHeader column={column} title="Joined" />
                 ),
@@ -131,7 +131,7 @@ export default function Customer({ customers, filters }: Props) {
                 ),
             },
             {
-                id: 'actions',
+                id: "actions",
                 enableHiding: false,
                 enableSorting: false,
                 cell: ({ row }) => (
@@ -154,7 +154,7 @@ export default function Customer({ customers, filters }: Props) {
     const sorting: SortingState = [
         {
             id: filters.sort,
-            desc: filters.direction === 'desc',
+            desc: filters.direction === "desc",
         },
     ];
     const pagination: PaginationState = {
@@ -172,7 +172,7 @@ export default function Customer({ customers, filters }: Props) {
                     description="Browse and view customer account details."
                 />
 
-                <Deferred
+                {/* <Deferred
                     data="customers"
                     fallback={
                         <div className="space-y-3">
@@ -181,56 +181,56 @@ export default function Customer({ customers, filters }: Props) {
                         </div>
                     }
                 >
-                    <DataTable
-                        columns={columns}
-                        data={customers?.data ?? []}
-                        searchPlaceholder="Search customers..."
-                        enableGlobalSearch
-                        enableColumnVisibility={false}
-                        manualSorting
-                        sorting={sorting}
-                        onSortingChange={(updater) => {
-                            const nextSorting =
-                                typeof updater === 'function'
-                                    ? updater(sorting)
-                                    : updater;
-                            const sort = nextSorting[0];
+                </Deferred> */}
+                <DataTable
+                    columns={columns}
+                    data={customers?.data ?? []}
+                    searchPlaceholder="Search customers..."
+                    enableGlobalSearch
+                    enableColumnVisibility={false}
+                    manualSorting
+                    sorting={sorting}
+                    onSortingChange={(updater) => {
+                        const nextSorting =
+                            typeof updater === "function"
+                                ? updater(sorting)
+                                : updater;
+                        const sort = nextSorting[0];
 
-                            if (sort) {
-                                visitCustomers({
-                                    sort: sort.id,
-                                    direction: sort.desc ? 'desc' : 'asc',
-                                });
-                            }
-                        }}
-                        manualFiltering
-                        searchValue={search}
-                        onSearchChange={setSearch}
-                        manualPagination
-                        pagination={pagination}
-                        onPaginationChange={(updater) => {
-                            const nextPagination =
-                                typeof updater === 'function'
-                                    ? updater(pagination)
-                                    : updater;
+                        if (sort) {
+                            visitCustomers({
+                                sort: sort.id,
+                                direction: sort.desc ? "desc" : "asc",
+                            });
+                        }
+                    }}
+                    manualFiltering
+                    searchValue={search}
+                    onSearchChange={setSearch}
+                    manualPagination
+                    pagination={pagination}
+                    isLoading={isLoading || customers === undefined}
+                    onPaginationChange={(updater) => {
+                        const nextPagination =
+                            typeof updater === "function"
+                                ? updater(pagination)
+                                : updater;
 
-                            visitCustomers(
-                                {
-                                    page: nextPagination.pageIndex + 1,
-                                    per_page: nextPagination.pageSize,
-                                },
-                                false,
-                            );
-                        }}
-                        pageCount={customers?.last_page ?? 0}
-                        totalRows={customers?.total ?? 0}
-                        pageSizeOptions={[10, 20, 50, 100]}
-                        initialPageSize={filters.per_page}
-                        isLoading={isLoading || customers === undefined}
-                        emptyTitle="No customers found"
-                        emptyDescription="Try a different search, or check back when customers have joined."
-                    />
-                </Deferred>
+                        visitCustomers(
+                            {
+                                page: nextPagination.pageIndex + 1,
+                                per_page: nextPagination.pageSize,
+                            },
+                            false,
+                        );
+                    }}
+                    pageCount={customers?.last_page ?? 0}
+                    totalRows={customers?.total ?? 0}
+                    pageSizeOptions={[10, 20, 50, 100]}
+                    initialPageSize={filters.per_page}
+                    emptyTitle="No customers found"
+                    emptyDescription="Try a different search, or check back when customers have joined."
+                />
             </div>
 
             <Sheet
@@ -289,8 +289,8 @@ export default function Customer({ customers, filters }: Props) {
                                         </p>
                                         <p className="font-medium">
                                             {selectedCustomer.email_verified_at
-                                                ? 'Verified'
-                                                : 'Not verified'}
+                                                ? "Verified"
+                                                : "Not verified"}
                                         </p>
                                     </div>
                                 </div>
@@ -333,7 +333,7 @@ export default function Customer({ customers, filters }: Props) {
 
 Customer.layout = {
     breadcrumbs: [
-        { title: 'Dashboard', href: '/dashboard' },
-        { title: 'Customers', href: '/dashboard/customers' },
+        { title: "Dashboard", href: "/dashboard" },
+        { title: "Customers", href: "/dashboard/customers" },
     ],
 };

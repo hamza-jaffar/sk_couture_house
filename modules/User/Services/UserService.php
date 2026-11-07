@@ -4,6 +4,7 @@ namespace Modules\User\Services;
 
 use Illuminate\Contracts\Pagination\LengthAwarePaginator;
 use Illuminate\Database\Eloquent\Builder;
+use Illuminate\Database\Query\Builder as QueryBuilder;
 use Illuminate\Pagination\LengthAwarePaginator as Paginator;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Validation\ValidationException;
@@ -12,6 +13,8 @@ use Modules\User\Models\User;
 
 class UserService
 {
+    public function __construct(private UserListingCache $listingCache) {}
+
     /**
      * @param  array{
      *     search?: string|null,
@@ -25,17 +28,59 @@ class UserService
      */
     public function paginateUser(array $filters, bool $customers = false): LengthAwarePaginator
     {
+        return $this->listingCache->remember(
+            $filters,
+            $customers,
+            fn (): LengthAwarePaginator => $this->paginateUserWithoutCache($filters, $customers),
+        );
+    }
+
+    /**
+     * @param  array{
+     *     search?: string|null,
+     *     role_id?: int|string|null,
+     *     sort?: 'name'|'email'|'created_at',
+     *     direction?: 'asc'|'desc',
+     *     per_page?: int|string,
+     *     page?: int|string
+     * }  $filters
+     * @return LengthAwarePaginator<int, User>
+     */
+    private function paginateUserWithoutCache(array $filters, bool $customers): LengthAwarePaginator
+    {
         $query = User::query();
-        $customerRole = null;
+        $customerRoleQuery = Role::query()
+            ->where('name', 'customer')
+            ->where('guard_name', 'web');
+        $customerRole = $customers
+            ? $customerRoleQuery->firstOrFail()
+            : $customerRoleQuery->first();
 
         if ($customers) {
-            $customerRole = Role::query()
-                ->where('name', 'customer')
-                ->where('guard_name', 'web')
-                ->firstOrFail();
             $query->role($customerRole);
-        } else {
-            $query->withoutRole('customer');
+        } elseif ($customerRole instanceof Role) {
+            $pivotTable = config('permission.table_names.model_has_roles');
+            $roleColumn = config('permission.column_names.role_pivot_key') ?: 'role_id';
+            $modelColumn = config('permission.column_names.model_morph_key') ?: 'model_id';
+            $userModel = new User;
+            $userTable = $userModel->getTable();
+
+            $query->whereNotExists(function (QueryBuilder $assignments) use (
+                $pivotTable,
+                $roleColumn,
+                $modelColumn,
+                $userModel,
+                $userTable,
+                $customerRole,
+            ): void {
+                $assignments
+                    // Avoid materializing all customer IDs before filtering internal users.
+                    ->selectRaw('/*+ NO_SEMIJOIN() */ 1')
+                    ->from($pivotTable)
+                    ->whereColumn("{$pivotTable}.{$modelColumn}", "{$userTable}.id")
+                    ->where("{$pivotTable}.model_type", $userModel->getMorphClass())
+                    ->where("{$pivotTable}.{$roleColumn}", $customerRole->getKey());
+            });
         }
 
         if (filled($filters['search'] ?? null)) {
@@ -85,10 +130,22 @@ class UserService
             $userModel = new User;
             $pivotTable = config('permission.table_names.model_has_roles');
             $roleColumn = config('permission.column_names.role_pivot_key') ?: 'role_id';
-            $total = DB::table($pivotTable)
-                ->where($roleColumn, $customerRole->getKey())
-                ->where('model_type', $userModel->getMorphClass())
-                ->count();
+            $modelColumn = config('permission.column_names.model_morph_key') ?: 'model_id';
+
+            if ($customers) {
+                $total = DB::table($pivotTable)
+                    ->where($roleColumn, $customerRole->getKey())
+                    ->where('model_type', $userModel->getMorphClass())
+                    ->count();
+            } else {
+                $customerCount = DB::table($pivotTable)
+                    ->where($roleColumn, $customerRole->getKey())
+                    ->where('model_type', $userModel->getMorphClass())
+                    ->distinct()
+                    ->count($modelColumn);
+
+                $total = DB::table((new User)->getTable())->count() - $customerCount;
+            }
 
             return new Paginator(
                 $query->forPage($page, $perPage)->get(),

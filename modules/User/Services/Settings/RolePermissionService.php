@@ -7,6 +7,7 @@ use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Validation\ValidationException;
 use Modules\User\Models\Role;
+use Modules\User\Models\User;
 use Spatie\Permission\Models\Permission;
 
 class RolePermissionService
@@ -25,10 +26,19 @@ class RolePermissionService
      */
     public function paginateRoles(array $filters): LengthAwarePaginator
     {
+        $roleAssignments = config('permission.table_names.model_has_roles');
+        $roleColumn = config('permission.column_names.role_pivot_key') ?: 'role_id';
+        $userModel = new User;
+        $usersCount = DB::table($roleAssignments)
+            ->selectRaw('COUNT(*)')
+            ->whereColumn("{$roleAssignments}.{$roleColumn}", 'roles.id')
+            ->where("{$roleAssignments}.model_type", $userModel->getMorphClass());
+
         $query = Role::query()
             ->where('guard_name', 'web')
             ->with(['permissions:id'])
-            ->withCount(['permissions', 'users']);
+            ->withCount('permissions')
+            ->addSelect(['users_count' => $usersCount]);
 
         if (filled($filters['search'] ?? null)) {
             $query->where('name', 'like', '%'.trim($filters['search']).'%');

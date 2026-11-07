@@ -1,8 +1,12 @@
 <?php
 
+use Illuminate\Pagination\LengthAwarePaginator;
+use Illuminate\Support\Facades\Cache;
+use Illuminate\Support\Facades\DB;
 use Inertia\Testing\AssertableInertia;
 use Modules\User\Models\Role;
 use Modules\User\Models\User;
+use Modules\User\Services\UserListingCache;
 use Spatie\Permission\Models\Permission;
 
 function customerIndexViewer(string $permission = 'customers.view'): User
@@ -86,6 +90,85 @@ it('returns the customer total for unfiltered pages without counting staff', fun
                 ->where('customers.last_page', 1)
                 ->where('customers.data.0.name', 'Alice Customer')
                 ->where('customers.data.1.name', 'Zoe Customer')));
+});
+
+it('refreshes cached customer profile data after a customer is updated', function () {
+    $viewer = customerIndexViewer();
+    $customer = User::factory()->create(['name' => 'Original Customer']);
+    $customer->assignRole(customerIndexRole());
+    $url = route('dashboard.customer.index');
+
+    $this->actingAs($viewer)
+        ->get($url)
+        ->assertInertia(fn (AssertableInertia $page) => $page
+            ->loadDeferredProps(['customer-list'], fn (AssertableInertia $page) => $page
+                ->where('customers.data.0.name', 'Original Customer')));
+
+    DB::connection()->commit();
+    $customer->update(['name' => 'Updated Customer']);
+
+    $this->get($url)
+        ->assertInertia(fn (AssertableInertia $page) => $page
+            ->loadDeferredProps(['customer-list'], fn (AssertableInertia $page) => $page
+                ->where('customers.data.0.name', 'Updated Customer')));
+});
+
+it('rebuilds customer listings when a cached value is not a paginator', function () {
+    $filters = ['search' => 'cache-shape-check'];
+    $key = 'user-listings:'.Cache::get('user-listings:version', 1).':'.hash(
+        'sha256',
+        json_encode(
+            ['customers' => true, 'filters' => $filters],
+            JSON_THROW_ON_ERROR,
+        ),
+    );
+    Cache::put($key, new stdClass, now()->addMinutes(5));
+
+    $paginator = app(UserListingCache::class)->remember(
+        $filters,
+        true,
+        fn (): LengthAwarePaginator => new LengthAwarePaginator([], 0, 10),
+    );
+
+    expect($paginator)->toBeInstanceOf(LengthAwarePaginator::class);
+    expect(Cache::get($key))->toBeArray();
+
+    $cachedPaginator = app(UserListingCache::class)->remember(
+        $filters,
+        true,
+        fn (): LengthAwarePaginator => throw new RuntimeException('Cache miss'),
+    );
+
+    expect($cachedPaginator)->toBeInstanceOf(LengthAwarePaginator::class);
+});
+
+it('refreshes the cached customer listing when a role is assigned', function () {
+    $viewer = customerIndexViewer();
+    $customerRole = customerIndexRole();
+    $url = route('dashboard.customer.index');
+
+    $this->actingAs($viewer)
+        ->get($url)
+        ->assertInertia(fn (AssertableInertia $page) => $page
+            ->loadDeferredProps(['customer-list'], fn (AssertableInertia $page) => $page
+                ->where('customers.total', 0)));
+
+    DB::connection()->commit();
+    $customer = User::factory()->create(['name' => 'New Customer']);
+    $customer->assignRole($customerRole);
+
+    $this->get($url)
+        ->assertInertia(fn (AssertableInertia $page) => $page
+            ->loadDeferredProps(['customer-list'], fn (AssertableInertia $page) => $page
+                ->where('customers.total', 1)
+                ->where('customers.data.0.name', 'New Customer')));
+
+    $customer->removeRole($customerRole);
+
+    $this->get($url)
+        ->assertInertia(fn (AssertableInertia $page) => $page
+            ->loadDeferredProps(['customer-list'], fn (AssertableInertia $page) => $page
+                ->where('customers.total', 0)));
 });
 
 it('forbids authenticated users without the customers view permission', function () {

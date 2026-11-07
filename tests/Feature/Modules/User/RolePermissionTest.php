@@ -1,5 +1,6 @@
 <?php
 
+use Illuminate\Support\Facades\DB;
 use Inertia\Testing\AssertableInertia;
 use Modules\User\Database\Seeders\RolePermissionSeeder;
 use Modules\User\Models\Role;
@@ -120,6 +121,35 @@ it('paginates and sorts roles on the server', function () {
                 ->where('roles.last_page', 2)
                 ->where('roles.data.0.name', 'Role 02')
                 ->where('roles.total', 12)));
+});
+
+it('counts assigned users for each role without counting other model types', function () {
+    $manager = rolePermissionsManager();
+    $role = Role::create(['name' => 'buyers', 'guard_name' => 'web']);
+
+    User::factory()
+        ->count(2)
+        ->create()
+        ->each(fn (User $user) => $user->assignRole($role));
+
+    DB::table(config('permission.table_names.model_has_roles'))->insert([
+        [
+            'role_id' => $role->id,
+            'model_type' => 'Modules\\Other\\Models\\Customer',
+            'model_id' => 999999,
+        ],
+    ]);
+
+    $this->actingAs($manager)
+        ->get(route('settings.roles', [
+            'sort' => 'users_count',
+            'direction' => 'desc',
+        ]))
+        ->assertOk()
+        ->assertInertia(fn (AssertableInertia $page) => $page
+            ->loadDeferredProps('role-list', fn (AssertableInertia $page) => $page
+                ->where('roles.data.0.name', 'buyers')
+                ->where('roles.data.0.users_count', 2)));
 });
 
 it('denies access to users without the roles view permission', function () {

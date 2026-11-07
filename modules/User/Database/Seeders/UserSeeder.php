@@ -16,22 +16,22 @@ class UserSeeder extends Seeder
             return;
         }
 
-        // $seededAdmin = User::factory()->make([
-        //     'name' => 'Hamza Jaffar',
-        //     'email' => 'hamzajaffer789@gmail.com',
-        //     'password' => 'password123',
-        // ]);
+        $seededAdmin = User::factory()->make([
+            'name' => 'Hamza Jaffar',
+            'email' => 'hamzajaffer789@gmail.com',
+            'password' => 'password123',
+        ]);
 
-        // $admin = User::query()->firstOrCreate(
-        //     ['email' => $seededAdmin->email],
-        //     [
-        //         'name' => $seededAdmin->name,
-        //         'password' => $seededAdmin->password,
-        //     ],
-        // );
+        $admin = User::query()->firstOrCreate(
+            ['email' => $seededAdmin->email],
+            [
+                'name' => $seededAdmin->name,
+                'password' => $seededAdmin->password,
+            ],
+        );
 
-        // $admin->syncRoles(['admin']);
+        $admin->syncRoles(['admin']);
 
-        $this->call(GenerateCustomersSeeder::class);
+        $this->call(UserDemoDataSeeder::class);
     }
 }

@@ -5,6 +5,7 @@ namespace Modules\User\Database\Seeders;
 use InvalidArgumentException;
 use Modules\User\Models\Role;
 use Modules\User\Models\User;
+use Modules\User\Services\UserListingCache;
 
 class GenerateCustomersSeeder extends CustomerDemoDataSeeder
 {
@@ -31,6 +32,7 @@ class GenerateCustomersSeeder extends CustomerDemoDataSeeder
 
         $this->command?->info("Appending {$count} customers starting at {$firstNumber}...");
         $this->seedCustomers($customerRole, $firstNumber, $count);
+        app(UserListingCache::class)->invalidateAfterCommit();
         $this->command?->info('Customer generation complete.');
     }
 }

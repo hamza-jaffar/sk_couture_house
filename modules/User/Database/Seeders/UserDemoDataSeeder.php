@@ -29,7 +29,7 @@ class UserDemoDataSeeder extends Seeder
         'Promotion Manager',
     ];
 
-    private const int STAFF_COUNT = 1000;
+    private const int STAFF_COUNT = 49;
 
     public function run(): void
     {

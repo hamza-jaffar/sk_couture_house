@@ -8,11 +8,12 @@ use Illuminate\Support\Str;
 use InvalidArgumentException;
 use Modules\User\Models\Role;
 use Modules\User\Models\User;
+use Modules\User\Services\UserListingCache;
 use RuntimeException;
 
 class CustomerDemoDataSeeder extends Seeder
 {
-    protected const int CUSTOMER_COUNT = 100_000;
+    protected const int CUSTOMER_COUNT = 10_000;
 
     protected const int CUSTOMER_BATCH_SIZE = 100;
 
@@ -26,6 +27,7 @@ class CustomerDemoDataSeeder extends Seeder
             ->firstOrFail();
 
         $this->seedCustomers($customerRole, 1, self::CUSTOMER_COUNT);
+        app(UserListingCache::class)->invalidateAfterCommit();
     }
 
     protected function ensureDemoEnvironment(): void
