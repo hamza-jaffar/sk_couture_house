@@ -7,12 +7,12 @@ it('seeds module roles, permissions, and a factory-backed admin idempotently', f
     $this->seed(DatabaseSeeder::class);
     $this->seed(DatabaseSeeder::class);
 
-    $admin = User::query()->where('email', 'admin@example.test')->firstOrFail();
+    $admin = User::query()->firstOrFail();
 
     expect($admin->hasRole('admin'))->toBeTrue();
     expect($admin->hasPermissionTo('users.view'))->toBeTrue();
 
     $this->assertDatabaseCount('roles', 2);
-    $this->assertDatabaseCount('permissions', 4);
+    $this->assertDatabaseCount('permissions', 8);
     $this->assertDatabaseCount('users', 1);
 });

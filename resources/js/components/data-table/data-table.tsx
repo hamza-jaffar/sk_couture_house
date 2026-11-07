@@ -69,6 +69,10 @@ export interface DataTableProps<TData extends Record<string, any>, TValue = unkn
   className?: string
   /** Enable alternating row colors */
   striped?: boolean
+  /** Stable row identity for selection when records are paginated by the server */
+  getRowId?: (originalRow: TData) => string
+  /** Clear selections when the server-side result set changes */
+  selectionResetKey?: string
 
   // ── Controlled / Server-Side Props ──
   /** Enables manual/server-side sorting */
@@ -108,6 +112,8 @@ export function DataTable<TData extends Record<string, any>, TValue = unknown>({
   onRowClick,
   className,
   striped = false,
+  getRowId,
+  selectionResetKey,
   manualSorting = false,
   sorting,
   onSortingChange,
@@ -139,6 +145,7 @@ export function DataTable<TData extends Record<string, any>, TValue = unknown>({
   const table = useLegacyTable<TData>({
     data,
     columns: columns as any,
+    getRowId,
     manualSorting,
     manualFiltering,
     manualPagination,
@@ -163,6 +170,10 @@ export function DataTable<TData extends Record<string, any>, TValue = unknown>({
     ...(!manualFiltering ? { getFilteredRowModel: getFilteredRowModel() } : {}),
     ...(enablePagination && !manualPagination ? { getPaginationRowModel: getPaginationRowModel() } : {}),
   })
+
+  React.useEffect(() => {
+    table.resetRowSelection()
+  }, [selectionResetKey])
 
   // Search value getter/setter depending on whether we use server-side or client-side mode
   const currentSearchValue = manualFiltering
@@ -309,7 +320,7 @@ export function DataTable<TData extends Record<string, any>, TValue = unknown>({
                   <TableRow key={rowIndex} className="border-b">
                     {columns.map((_, colIndex) => (
                       <TableCell key={colIndex} className="px-4 py-3.5">
-                        <Skeleton className="h-4 w-full max-w-[120px]" />
+                        <Skeleton className="h-4 w-full max-w-30" />
                       </TableCell>
                     ))}
                   </TableRow>

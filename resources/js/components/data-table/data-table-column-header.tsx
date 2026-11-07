@@ -48,22 +48,25 @@ export function DataTableColumnHeader<
     return (
         <div className={cn("flex items-center space-x-2", className)}>
             <DropdownMenu>
-                <DropdownMenuTrigger>
-                    <Button
-                        variant="ghost"
-                        size="sm"
-                        className="data-[state=open]:bg-accent -ml-3 h-8 text-xs font-semibold tracking-wider uppercase text-muted-foreground hover:text-foreground"
-                    >
-                        <span>{title}</span>
-                        {isSorted === "desc" ? (
-                            <ArrowDownIcon className="ml-2 size-3.5" />
-                        ) : isSorted === "asc" ? (
-                            <ArrowUpIcon className="ml-2 size-3.5" />
-                        ) : (
-                            <ChevronsUpDownIcon className="ml-2 size-3.5 opacity-50" />
-                        )}
-                    </Button>
-                </DropdownMenuTrigger>
+                <DropdownMenuTrigger
+                    render={
+                        <Button
+                            type="button"
+                            variant="ghost"
+                            size="sm"
+                            className="data-[state=open]:bg-accent -ml-3 h-8 text-xs font-semibold tracking-wider uppercase text-muted-foreground hover:text-foreground"
+                        >
+                            <span>{title}</span>
+                            {isSorted === "desc" ? (
+                                <ArrowDownIcon className="ml-2 size-3.5" />
+                            ) : isSorted === "asc" ? (
+                                <ArrowUpIcon className="ml-2 size-3.5" />
+                            ) : (
+                                <ChevronsUpDownIcon className="ml-2 size-3.5 opacity-50" />
+                            )}
+                        </Button>
+                    }
+                />
                 <DropdownMenuContent align="start" className="w-36">
                     <DropdownMenuItem
                         onClick={() => column.toggleSorting(false)}

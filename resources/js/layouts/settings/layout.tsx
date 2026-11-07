@@ -5,7 +5,7 @@ import { useCurrentUrl } from "@/hooks/use-current-url";
 import { cn, toUrl } from "@/lib/utils";
 import { NavItem } from "@/types/ui";
 import { Link } from "@inertiajs/react";
-import { SunMoon, User } from "lucide-react";
+import { SunMoon, User, UserShield } from "lucide-react";
 import React from "react";
 
 const sidebarNavItems: NavItem[] = [
@@ -13,6 +13,11 @@ const sidebarNavItems: NavItem[] = [
         title: "Profile",
         href: "/settings/profile",
         icon: User,
+    },
+    {
+        title: "Role & Permission",
+        href: "/settings/roles",
+        icon: UserShield,
     },
     {
         title: "Appearance",

@@ -3,8 +3,8 @@
 namespace Modules\User\Database\Seeders;
 
 use Illuminate\Database\Seeder;
+use Modules\User\Models\Role;
 use Spatie\Permission\Models\Permission;
-use Spatie\Permission\Models\Role;
 
 class RolePermissionSeeder extends Seeder
 {
@@ -14,17 +14,23 @@ class RolePermissionSeeder extends Seeder
     public function run(): void
     {
         $permissions = collect([
+            'roles.view',
+            'roles.create',
+            'roles.update',
+            'roles.delete',
             'users.view',
             'users.create',
             'users.update',
             'users.delete',
-        ])->map(
-            fn (string $name): Permission => Permission::findOrCreate($name, 'web'),
-        );
+        ])->map(fn (string $name) => Permission::findOrCreate($name, 'web'));
 
-        $adminRole = Role::findOrCreate('admin', 'web', true);
+        $adminRole = Role::query()->firstOrCreate(
+            ['name' => 'admin', 'guard_name' => 'web'],
+            ['is_system' => true],
+        );
+        $adminRole->update(['is_system' => true]);
         $adminRole->syncPermissions($permissions);
 
-        Role::findOrCreate('customer', 'web');
+        Role::query()->firstOrCreate(['name' => 'customer', 'guard_name' => 'web'], ['is_system' => true]);
     }
 }

@@ -60,7 +60,7 @@ export function DataTablePagination<TData extends Record<string, any>>({
               table.setPageSize(Number(value))
             }}
           >
-            <SelectTrigger className="h-8 w-[70px]">
+            <SelectTrigger className="h-8 w-17.5">
               <SelectValue placeholder={`${pageSize}`} />
             </SelectTrigger>
             <SelectContent side="top">
@@ -74,7 +74,7 @@ export function DataTablePagination<TData extends Record<string, any>>({
         </div>
 
         {/* Page counter */}
-        <div className="flex w-[100px] items-center justify-center text-sm font-medium whitespace-nowrap">
+        <div className="flex w-25 items-center justify-center text-sm font-medium whitespace-nowrap">
           Page {pageCount > 0 ? pageIndex + 1 : 0} of {pageCount}
         </div>
 
