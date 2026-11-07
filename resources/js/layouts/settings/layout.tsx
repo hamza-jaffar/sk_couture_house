@@ -1,11 +1,12 @@
 import Heading from "@/components/heading";
 import { Button } from "@/components/ui/button";
 import { Separator } from "@/components/ui/separator";
+import { useCan } from "@/hooks/use-can";
 import { useCurrentUrl } from "@/hooks/use-current-url";
 import { cn, toUrl } from "@/lib/utils";
 import { NavItem } from "@/types/ui";
 import { Link } from "@inertiajs/react";
-import { SunMoon, User, UserShield } from "lucide-react";
+import { SunMoon, User, UserCog, UserShield } from "lucide-react";
 import React from "react";
 
 const sidebarNavItems: NavItem[] = [
@@ -13,16 +14,26 @@ const sidebarNavItems: NavItem[] = [
         title: "Profile",
         href: "/settings/profile",
         icon: User,
+        permission: "",
     },
     {
         title: "Role & Permission",
         href: "/settings/roles",
         icon: UserShield,
+        permission: "roles.view",
+    },
+
+    {
+        title: "Users",
+        href: "/settings/users",
+        icon: UserCog,
+        permission: "users.view",
     },
     {
         title: "Appearance",
         href: "/settings/appearance",
         icon: SunMoon,
+        permission: "",
     },
 ];
 
@@ -32,6 +43,8 @@ export default function SettingsLayout({
     children: React.ReactNode;
 }) {
     const { isCurrentOrParentUrl } = useCurrentUrl();
+    const can = useCan();
+
     return (
         <div className="px-4 py-6">
             <Heading
@@ -39,35 +52,39 @@ export default function SettingsLayout({
                 description="Manage your profile and account settings"
             />
 
-            <div className="flex flex-col lg:flex-row lg:space-x-12">
-                <aside className="w-full max-w-xl lg:w-48">
+            <div className="flex flex-col md:flex-row md:space-x-12">
+                <aside className="w-full max-w-xl md:w-48">
                     <nav
                         className="flex flex-col space-y-1 space-x-0"
                         aria-label="Settings"
                     >
-                        {sidebarNavItems.map((item, index) => (
-                            <Link
-                                key={`${toUrl(item.href)}-${index}`}
-                                href={item.href}
-                            >
-                                <Button
-                                    size="sm"
-                                    variant="ghost"
-                                    className={cn(
-                                        "w-full justify-start flex gap-2 items-center",
-                                        {
-                                            "bg-primary text-white":
-                                                isCurrentOrParentUrl(item.href),
-                                        },
-                                    )}
-                                >
-                                    {item.icon && (
-                                        <item.icon className="h-4 w-4" />
-                                    )}
-                                    {item.title}
-                                </Button>
-                            </Link>
-                        ))}
+                        {sidebarNavItems
+                            .filter(
+                                (item) =>
+                                    !item.permission || can(item.permission),
+                            )
+                            .map((item) => (
+                                <Link key={toUrl(item.href)} href={item.href}>
+                                    <Button
+                                        size="sm"
+                                        variant="ghost"
+                                        className={cn(
+                                            "flex w-full items-center justify-start gap-2",
+                                            {
+                                                "bg-primary text-white":
+                                                    isCurrentOrParentUrl(
+                                                        item.href,
+                                                    ),
+                                            },
+                                        )}
+                                    >
+                                        {item.icon && (
+                                            <item.icon className="h-4 w-4" />
+                                        )}
+                                        {item.title}
+                                    </Button>
+                                </Link>
+                            ))}
                     </nav>
                 </aside>
 

@@ -1,135 +1,152 @@
-"use client"
+'use client';
 
-import { Link, usePage } from "@inertiajs/react"
-import { useEffect, useState } from "react"
+import { Link, usePage } from '@inertiajs/react';
+import { useEffect, useState } from 'react';
 import {
-  Collapsible,
-  CollapsibleContent,
-  CollapsibleTrigger,
-} from "@/components/ui/collapsible"
+    Collapsible,
+    CollapsibleContent,
+    CollapsibleTrigger,
+} from '@/components/ui/collapsible';
 import {
-  SidebarGroup,
-  SidebarGroupLabel,
-  SidebarMenu,
-  SidebarMenuButton,
-  SidebarMenuItem,
-  SidebarMenuSub,
-  SidebarMenuSubButton,
-  SidebarMenuSubItem,
-} from "@/components/ui/sidebar"
-import { ChevronRightIcon } from "lucide-react"
+    SidebarGroup,
+    SidebarGroupLabel,
+    SidebarMenu,
+    SidebarMenuButton,
+    SidebarMenuItem,
+    SidebarMenuSub,
+    SidebarMenuSubButton,
+    SidebarMenuSubItem,
+} from '@/components/ui/sidebar';
+import { useCan } from '@/hooks/use-can';
+import { ChevronRightIcon } from 'lucide-react';
 
 type NavMainItemData = {
-  title: string
-  url: string
-  icon: React.ReactNode
-  items?: {
-    title: string
-    url: string
-  }[]
-}
+    title: string;
+    url: string;
+    icon: React.ReactNode;
+    permission?: string;
+    items?: {
+        title: string;
+        url: string;
+        permission?: string;
+    }[];
+};
 
 function normalizePath(url: string): string {
-  const path = url.split(/[?#]/, 1)[0].replace(/\/+$/, "")
+    const path = url.split(/[?#]/, 1)[0].replace(/\/+$/, '');
 
-  return path || "/"
+    return path || '/';
 }
 
 function isPathActive(url: string, currentUrl: string): boolean {
-  if (!url || url === "#") {
-    return false
-  }
+    if (!url || url === '#') {
+        return false;
+    }
 
-  const targetPath = normalizePath(url)
-  const currentPath = normalizePath(currentUrl)
+    const targetPath = normalizePath(url);
+    const currentPath = normalizePath(currentUrl);
 
-  return (
-    currentPath === targetPath ||
-    currentPath.startsWith(`${targetPath}/`)
-  )
+    return (
+        currentPath === targetPath || currentPath.startsWith(`${targetPath}/`)
+    );
 }
 
 function NavMainItem({
-  item,
-  currentUrl,
+    item,
+    currentUrl,
 }: {
-  item: NavMainItemData
-  currentUrl: string
+    item: NavMainItemData;
+    currentUrl: string;
 }) {
-  const hasChildren = Boolean(item.items?.length)
-  const hasActiveChild =
-    item.items?.some((subItem) => isPathActive(subItem.url, currentUrl)) ?? false
-  const isCurrentPage = isPathActive(item.url, currentUrl)
-  const [isOpen, setIsOpen] = useState(hasActiveChild)
+    const hasChildren = Boolean(item.items?.length);
+    const hasActiveChild =
+        item.items?.some((subItem) => isPathActive(subItem.url, currentUrl)) ??
+        false;
+    const isCurrentPage = isPathActive(item.url, currentUrl);
+    const [isOpen, setIsOpen] = useState(hasActiveChild);
 
-  useEffect(() => {
-    if (hasActiveChild) {
-      setIsOpen(true)
-    }
-  }, [hasActiveChild])
-
-  return (
-    <Collapsible
-      open={isOpen}
-      onOpenChange={setIsOpen}
-      render={<SidebarMenuItem />}
-    >
-      <SidebarMenuButton
-        tooltip={item.title}
-        isActive={isCurrentPage || (hasActiveChild && !isOpen)}
-        render={
-          hasChildren ? (
-            <CollapsibleTrigger />
-          ) : (
-            <Link href={item.url} />
-          )
+    useEffect(() => {
+        if (hasActiveChild) {
+            setIsOpen(true);
         }
-      >
-        {item.icon}
-        <span>{item.title}</span>
-        {hasChildren ? (
-          <ChevronRightIcon className="ml-auto transition-transform group-aria-expanded/menu-button:rotate-90" />
-        ) : null}
-      </SidebarMenuButton>
-      {hasChildren ? (
-        <CollapsibleContent>
-          <SidebarMenuSub>
-            {item.items?.map((subItem) => (
-              <SidebarMenuSubItem key={subItem.title}>
-                <SidebarMenuSubButton
-                  isActive={isPathActive(subItem.url, currentUrl)}
-                  render={<Link href={subItem.url} />}
-                >
-                  <span>{subItem.title}</span>
-                </SidebarMenuSubButton>
-              </SidebarMenuSubItem>
-            ))}
-          </SidebarMenuSub>
-        </CollapsibleContent>
-      ) : null}
-    </Collapsible>
-  )
+    }, [hasActiveChild]);
+
+    return (
+        <Collapsible
+            open={isOpen}
+            onOpenChange={setIsOpen}
+            render={<SidebarMenuItem />}
+        >
+            <SidebarMenuButton
+                tooltip={item.title}
+                isActive={isCurrentPage || (hasActiveChild && !isOpen)}
+                render={
+                    hasChildren ? (
+                        <CollapsibleTrigger />
+                    ) : (
+                        <Link href={item.url} />
+                    )
+                }
+            >
+                {item.icon}
+                <span>{item.title}</span>
+                {hasChildren ? (
+                    <ChevronRightIcon className="ml-auto transition-transform group-aria-expanded/menu-button:rotate-90" />
+                ) : null}
+            </SidebarMenuButton>
+            {hasChildren ? (
+                <CollapsibleContent>
+                    <SidebarMenuSub>
+                        {item.items?.map((subItem) => (
+                            <SidebarMenuSubItem key={subItem.title}>
+                                <SidebarMenuSubButton
+                                    isActive={isPathActive(
+                                        subItem.url,
+                                        currentUrl,
+                                    )}
+                                    render={<Link href={subItem.url} />}
+                                >
+                                    <span>{subItem.title}</span>
+                                </SidebarMenuSubButton>
+                            </SidebarMenuSubItem>
+                        ))}
+                    </SidebarMenuSub>
+                </CollapsibleContent>
+            ) : null}
+        </Collapsible>
+    );
 }
 
-export function NavMain({
-  items,
-}: {
-  items: NavMainItemData[]
-}) {
-  const currentUrl = usePage().url
+export function NavMain({ items }: { items: NavMainItemData[] }) {
+    const currentUrl = usePage().url;
+    const can = useCan();
+    const accessibleItems = items
+        .map((item) => ({
+            ...item,
+            items: item.items?.filter(
+                (subItem) => !subItem.permission || can(subItem.permission),
+            ),
+        }))
+        .filter((item) => {
+            if (item.permission && !can(item.permission)) {
+                return false;
+            }
 
-  return (
-    <SidebarGroup>
-      <SidebarGroupLabel>Platform</SidebarGroupLabel>
-      <SidebarMenu>
-        {items.map((item) => (
-          <NavMainItem
-            key={item.title}
-            item={item}
-            currentUrl={currentUrl}
-          />
-        ))}
-      </SidebarMenu>
-    </SidebarGroup>
-  )
+            return !item.items || item.items.length > 0;
+        });
+
+    return (
+        <SidebarGroup>
+            <SidebarGroupLabel>Platform</SidebarGroupLabel>
+            <SidebarMenu>
+                {accessibleItems.map((item) => (
+                    <NavMainItem
+                        key={item.title}
+                        item={item}
+                        currentUrl={currentUrl}
+                    />
+                ))}
+            </SidebarMenu>
+        </SidebarGroup>
+    );
 }

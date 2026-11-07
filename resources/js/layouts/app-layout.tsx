@@ -15,12 +15,17 @@ const AppLayout = ({
     const isOpen = usePage().props.sidebarOpen;
 
     return (
-        <div className="[--header-height:calc(--spacing(13))]">
-            <SidebarProvider className="flex flex-col" defaultOpen={isOpen}>
+        <div className="[--header-height:calc(--spacing(13))] h-dvh w-full overflow-hidden">
+            <SidebarProvider
+                className="flex h-full min-h-0 flex-col overflow-hidden"
+                defaultOpen={isOpen}
+            >
                 <SiteHeader breadcrumbs={breadcrumbs} />
-                <div className="flex flex-1">
+                <div className="flex min-h-0 min-w-0 flex-1 overflow-hidden">
                     <AppSidebar />
-                    <SidebarInset>{children}</SidebarInset>
+                    <SidebarInset className="min-h-0 min-w-0 flex-1 overflow-x-hidden overflow-y-auto">
+                        {children}
+                    </SidebarInset>
                 </div>
             </SidebarProvider>
         </div>

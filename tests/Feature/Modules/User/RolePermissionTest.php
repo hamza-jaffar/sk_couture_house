@@ -50,7 +50,7 @@ it('returns only matching roles and defers the permission catalog', function () 
         ]))
         ->assertOk()
         ->assertInertia(fn (AssertableInertia $page) => $page
-            ->component('settings/roles/index')
+            ->component('settings/roles')
             ->missing('roles')
             ->missing('abilities')
             ->has('auth.permissions', 4)

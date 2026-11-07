@@ -37,9 +37,9 @@ const FormDialog = ({
                 role="dialog"
                 aria-modal="true"
                 aria-labelledby="form-dialog-title"
-                className={`relative z-10 flex flex-col rounded-lg bg-background shadow-xl ${width} ${height}`}
+                className={`relative z-10 flex min-h-0 flex-col overflow-clip rounded-lg bg-background shadow-xl ${width} ${height}`}
             >
-                <div className="flex items-center justify-between border-b px-4 py-3">
+                <div className="flex shrink-0 items-center justify-between border-b px-4 py-3">
                     <h2
                         id="form-dialog-title"
                         className="truncate pr-4 text-lg font-semibold text-foreground"
@@ -58,9 +58,11 @@ const FormDialog = ({
                     </Button>
                 </div>
 
-                <div className="flex-1 overflow-y-auto p-4">{children}</div>
+                <div className="min-h-0 flex-1 overflow-y-auto overscroll-contain p-4">
+                    {children}
+                </div>
 
-                <div className="flex items-center justify-end gap-2 border-t px-4 py-3">
+                <div className="flex shrink-0 items-center justify-end gap-2 border-t px-4 py-3">
                     <Button
                         type="button"
                         onClick={() => onOpenChange(false)}

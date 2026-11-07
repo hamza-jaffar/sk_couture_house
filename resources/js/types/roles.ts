@@ -1,3 +1,5 @@
+import { PaginationBase } from "./pagination";
+
 export type Permission = {
     id: number;
     name: string;
@@ -18,18 +20,14 @@ export type Role = {
 
 export type RoleFilters = {
     search: string;
-    is_system: 'all' | '0' | '1';
+    is_system: "all" | "0" | "1";
     permission_id: string;
     sort: string;
-    direction: 'asc' | 'desc';
+    direction: "asc" | "desc";
     page: number;
     per_page: number;
 };
 
 export type PaginatedRoles = {
     data: Role[];
-    current_page: number;
-    last_page: number;
-    per_page: number;
-    total: number;
-};
+} & PaginationBase;

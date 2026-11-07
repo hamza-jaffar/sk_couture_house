@@ -3,6 +3,7 @@
 use Illuminate\Support\Facades\Route;
 use Modules\User\Http\Controllers\Settings\ProfileController;
 use Modules\User\Http\Controllers\Settings\RolePermissionController;
+use Modules\User\Http\Controllers\Settings\UserController;
 
 Route::middleware('auth')->prefix('settings')->name('settings.')->group(function () {
     Route::get('/profile', [ProfileController::class, 'index'])->name('profile');
@@ -15,4 +16,10 @@ Route::middleware('auth')->prefix('settings')->name('settings.')->group(function
     Route::delete('/roles', [RolePermissionController::class, 'bulkDestroy'])->name('roles.bulk-destroy');
     Route::patch('/roles/{role}', [RolePermissionController::class, 'update'])->name('roles.update');
     Route::delete('/roles/{role}', [RolePermissionController::class, 'destroy'])->name('roles.destroy');
+
+    Route::get('/users', [UserController::class, 'index'])->name('users');
+    Route::post('/users', [UserController::class, 'store'])->name('users.store');
+    Route::delete('/users', [UserController::class, 'bulkDestroy'])->name('users.bulk-destroy');
+    Route::patch('/users/{user}', [UserController::class, 'update'])->name('users.update');
+    Route::delete('/users/{user}', [UserController::class, 'destroy'])->name('users.destroy');
 });

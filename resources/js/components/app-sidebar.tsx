@@ -1,9 +1,9 @@
-import * as React from "react";
+import * as React from 'react';
 
-import { NavMain } from "@/components/nav-main";
-import { NavProjects } from "@/components/nav-projects";
-import { NavSecondary } from "@/components/nav-secondary";
-import { NavUser } from "@/components/nav-user";
+import { NavMain } from '@/components/nav-main';
+import { NavProjects } from '@/components/nav-projects';
+import { NavSecondary } from '@/components/nav-secondary';
+import { NavUser } from '@/components/nav-user';
 import {
     Sidebar,
     SidebarContent,
@@ -12,12 +12,8 @@ import {
     SidebarMenu,
     SidebarMenuButton,
     SidebarMenuItem,
-} from "@/components/ui/sidebar";
+} from '@/components/ui/sidebar';
 import {
-    TerminalSquareIcon,
-    BotIcon,
-    BookOpenIcon,
-    Settings2Icon,
     LifeBuoyIcon,
     SendIcon,
     FrameIcon,
@@ -25,107 +21,49 @@ import {
     MapIcon,
     TerminalIcon,
     LayoutDashboard,
-} from "lucide-react";
+    Users,
+} from 'lucide-react';
 
 const data = {
     navMain: [
         {
-            title: "Dashboard",
-            url: "/dashboard",
+            title: 'Dashboard',
+            url: '/dashboard',
             icon: <LayoutDashboard />,
         },
         {
-            title: "Models",
-            url: "#",
-            icon: <BotIcon />,
-            items: [
-                {
-                    title: "Genesis",
-                    url: "#",
-                },
-                {
-                    title: "Explorer",
-                    url: "#",
-                },
-                {
-                    title: "Quantum",
-                    url: "#",
-                },
-            ],
-        },
-        {
-            title: "Documentation",
-            url: "#",
-            icon: <BookOpenIcon />,
-            items: [
-                {
-                    title: "Introduction",
-                    url: "#",
-                },
-                {
-                    title: "Get Started",
-                    url: "#",
-                },
-                {
-                    title: "Tutorials",
-                    url: "#",
-                },
-                {
-                    title: "Changelog",
-                    url: "#",
-                },
-            ],
-        },
-        {
-            title: "Settings",
-            url: "#",
-            icon: <Settings2Icon />,
-            items: [
-                {
-                    title: "General",
-                    url: "#",
-                },
-                {
-                    title: "Team",
-                    url: "#",
-                },
-                {
-                    title: "Billing",
-                    url: "#",
-                },
-                {
-                    title: "Limits",
-                    url: "#",
-                },
-            ],
+            title: 'Customers',
+            url: '#',
+            icon: <Users />,
+            permission: 'customers.view',
         },
     ],
     navSecondary: [
         {
-            title: "Support",
-            url: "#",
+            title: 'Support',
+            url: '#',
             icon: <LifeBuoyIcon />,
         },
         {
-            title: "Feedback",
-            url: "#",
+            title: 'Feedback',
+            url: '#',
             icon: <SendIcon />,
         },
     ],
     projects: [
         {
-            name: "Design Engineering",
-            url: "#",
+            name: 'Design Engineering',
+            url: '#',
             icon: <FrameIcon />,
         },
         {
-            name: "Sales & Marketing",
-            url: "#",
+            name: 'Sales & Marketing',
+            url: '#',
             icon: <PieChartIcon />,
         },
         {
-            name: "Travel",
-            url: "#",
+            name: 'Travel',
+            url: '#',
             icon: <MapIcon />,
         },
     ],

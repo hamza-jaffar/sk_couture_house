@@ -21,7 +21,7 @@ class RolePermissionController
     {
         $filters = $request->validated();
 
-        return Inertia::render('settings/roles/index', [
+        return Inertia::render('settings/roles', [
             'roles' => Inertia::defer(
                 fn () => $this->rolePermissionService->paginateRoles($filters),
                 'role-list',

@@ -31,5 +31,7 @@ class UserSeeder extends Seeder
         );
 
         $admin->syncRoles(['admin']);
+
+        $this->call(UserDemoDataSeeder::class);
     }
 }

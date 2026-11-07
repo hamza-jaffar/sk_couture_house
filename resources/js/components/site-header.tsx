@@ -14,7 +14,7 @@ export function SiteHeader({
     const { toggleSidebar } = useSidebar();
 
     return (
-        <header className="sticky top-0 z-50 flex w-full items-center border-b bg-background">
+        <header className="sticky top-0 z-50 flex w-full shrink-0 items-center border-b bg-background">
             <div className="flex h-(--header-height) w-full items-center gap-2 px-4">
                 <Button
                     className="h-8 w-8"
@@ -28,9 +28,11 @@ export function SiteHeader({
                     orientation="vertical"
                     className="mr-2 data-vertical:h-4 data-vertical:self-auto"
                 />
-                {breadcrumbs.length > 0 && (
+                <div className="hidden md:flex">
+                    {breadcrumbs.length > 0 && (
                     <Breadcrumbs breadcrumbs={breadcrumbs} />
                 )}
+                </div>
                 <SearchForm className="w-full sm:ml-auto sm:w-auto" />
             </div>
         </header>

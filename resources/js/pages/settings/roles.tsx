@@ -1,11 +1,11 @@
-import Heading from "@/components/heading";
-import FormDialog from "@/components/form-dialog";
-import RoleForm from "@/components/forms/setting/role-form";
+import Heading from '@/components/heading';
+import FormDialog from '@/components/form-dialog';
+import RoleForm from '@/components/forms/setting/role-form';
 import {
     DataTable,
     DataTableColumnHeader,
     type DataTableColumnDef,
-} from "@/components/data-table";
+} from '@/components/data-table';
 import {
     AlertDialog,
     AlertDialogAction,
@@ -15,38 +15,46 @@ import {
     AlertDialogFooter,
     AlertDialogHeader,
     AlertDialogTitle,
-} from "@/components/ui/alert-dialog";
-import { Button } from "@/components/ui/button";
-import { Checkbox } from "@/components/ui/checkbox";
+} from '@/components/ui/alert-dialog';
+import { Button } from '@/components/ui/button';
+import { Checkbox } from '@/components/ui/checkbox';
 import {
     DropdownMenu,
     DropdownMenuContent,
     DropdownMenuItem,
     DropdownMenuTrigger,
-} from "@/components/ui/dropdown-menu";
+} from '@/components/ui/dropdown-menu';
 import {
     Select,
     SelectContent,
     SelectItem,
     SelectTrigger,
     SelectValue,
-} from "@/components/ui/select";
-import { Skeleton } from "@/components/ui/skeleton";
-import { useCan } from "@/hooks/use-can";
-import { Combobox } from "@base-ui/react/combobox";
-import type { PaginatedRoles, Permission, Role, RoleFilters } from "@/types";
+} from '@/components/ui/select';
+import { Skeleton } from '@/components/ui/skeleton';
+import {
+    Sheet,
+    SheetContent,
+    SheetDescription,
+    SheetHeader,
+    SheetTitle,
+} from '@/components/ui/sheet';
+import { useCan } from '@/hooks/use-can';
+import { Combobox } from '@base-ui/react/combobox';
+import type { PaginatedRoles, Permission, Role, RoleFilters } from '@/types';
 import {
     bulkDestroy,
     destroy,
     index,
     store,
     update,
-} from "@/actions/Modules/User/Http/Controllers/Settings/RolePermissionController";
-import { Deferred, Form, Head, router } from "@inertiajs/react";
-import type { PaginationState, SortingState } from "@tanstack/table-core";
+} from '@/actions/Modules/User/Http/Controllers/Settings/RolePermissionController';
+import { Deferred, Form, Head, router } from '@inertiajs/react';
+import type { PaginationState, SortingState } from '@tanstack/table-core';
 import {
     Check,
     ChevronDown,
+    Eye,
     MoreHorizontal,
     PenIcon,
     Plus,
@@ -56,8 +64,8 @@ import {
     ShieldCheck,
     Trash2,
     User,
-} from "lucide-react";
-import { useCallback, useEffect, useMemo, useState } from "react";
+} from 'lucide-react';
+import { useCallback, useEffect, useMemo, useState } from 'react';
 
 type Props = {
     roles?: PaginatedRoles;
@@ -91,19 +99,19 @@ function PermissionFilter({
     const options = useMemo<PermissionFilterOption[]>(
         () => [
             {
-                value: "all",
-                label: "All permissions",
-                category: "All",
-                action: "permissions",
+                value: 'all',
+                label: 'All permissions',
+                category: 'All',
+                action: 'permissions',
             },
             ...permissions.map((permission) => {
-                const [category, ...actionParts] = permission.name.split(".");
+                const [category, ...actionParts] = permission.name.split('.');
 
                 return {
                     value: String(permission.id),
                     label: permission.name,
                     category,
-                    action: actionParts.join("."),
+                    action: actionParts.join('.'),
                 };
             }),
         ],
@@ -121,7 +129,7 @@ function PermissionFilter({
     return (
         <Combobox.Root
             items={items}
-            value={value || "all"}
+            value={value || 'all'}
             onValueChange={(selectedValue) => {
                 if (selectedValue !== null) {
                     onValueChange(selectedValue);
@@ -174,7 +182,7 @@ function PermissionFilter({
                                     <Combobox.ItemIndicator className="flex size-4 shrink-0 items-center justify-center">
                                         <Check className="size-4" />
                                     </Combobox.ItemIndicator>
-                                    <span className="rounded bg-muted px-1.5 py-0.5 text-xs font-medium capitalize text-muted-foreground">
+                                    <span className="rounded bg-muted px-1.5 py-0.5 text-xs font-medium text-muted-foreground capitalize">
                                         {option.category}
                                     </span>
                                     <span className="min-w-0 truncate">
@@ -196,6 +204,7 @@ const RoleIndex = ({ roles, filters, permissions }: Props) => {
     const [isLoading, setIsLoading] = useState(false);
     const [formOpen, setFormOpen] = useState(false);
     const [editingRole, setEditingRole] = useState<Role | null>(null);
+    const [viewingRole, setViewingRole] = useState<Role | null>(null);
     const [pendingDelete, setPendingDelete] = useState<PendingDelete | null>(
         null,
     );
@@ -215,7 +224,7 @@ const RoleIndex = ({ roles, filters, permissions }: Props) => {
             };
             const query = Object.fromEntries(
                 Object.entries(nextFilters).filter(
-                    ([, value]) => value !== "" && value !== "all",
+                    ([, value]) => value !== '' && value !== 'all',
                 ),
             );
 
@@ -224,7 +233,7 @@ const RoleIndex = ({ roles, filters, permissions }: Props) => {
                 index.url({ query }),
                 {},
                 {
-                    only: ["roles", "filters"],
+                    only: ['roles', 'filters'],
                     preserveState: true,
                     preserveScroll: true,
                     preserveErrors: true,
@@ -253,6 +262,30 @@ const RoleIndex = ({ roles, filters, permissions }: Props) => {
         setFormOpen(true);
     };
 
+    const rolePermissionGroups = useMemo(() => {
+        if (viewingRole === null || permissions === undefined) {
+            return undefined;
+        }
+
+        const permissionIds = new Set(viewingRole.permission_ids);
+        const groups = new Map<string, Permission[]>();
+
+        for (const permission of permissions) {
+            if (!permissionIds.has(permission.id)) {
+                continue;
+            }
+
+            const [category] = permission.name.split('.');
+            const group = groups.get(category) ?? [];
+            group.push(permission);
+            groups.set(category, group);
+        }
+
+        return Array.from(groups.entries()).sort(([left], [right]) =>
+            left.localeCompare(right),
+        );
+    }, [permissions, viewingRole]);
+
     const submitDelete = () => {
         if (!pendingDelete) {
             return;
@@ -262,7 +295,7 @@ const RoleIndex = ({ roles, filters, permissions }: Props) => {
         setDeleteError(null);
         const options = {
             preserveScroll: true,
-            only: ["roles", "filters"],
+            only: ['roles', 'filters'],
             onSuccess: () => setPendingDelete(null),
             onError: (errors: Record<string, string>) => {
                 setDeleteError(errors.ids ?? errors.role ?? null);
@@ -287,7 +320,7 @@ const RoleIndex = ({ roles, filters, permissions }: Props) => {
     const columns = useMemo<DataTableColumnDef<Role>[]>(
         () => [
             {
-                id: "select",
+                id: 'select',
                 header: ({ table }) => {
                     const selectableRows = table
                         .getRowModel()
@@ -299,7 +332,7 @@ const RoleIndex = ({ roles, filters, permissions }: Props) => {
                     return (
                         <Checkbox
                             aria-label="Select all editable roles on this page"
-                            disabled={!can("roles.delete")}
+                            disabled={!can('roles.delete')}
                             checked={
                                 selectedCount === selectableRows.length &&
                                 selectableRows.length > 0
@@ -321,7 +354,7 @@ const RoleIndex = ({ roles, filters, permissions }: Props) => {
                         aria-label={`Select ${row.original.name}`}
                         checked={row.getIsSelected()}
                         disabled={
-                            !can("roles.delete") || row.original.is_system
+                            !can('roles.delete') || row.original.is_system
                         }
                         onCheckedChange={(checked) =>
                             row.toggleSelected(checked === true)
@@ -332,7 +365,7 @@ const RoleIndex = ({ roles, filters, permissions }: Props) => {
                 enableHiding: false,
             },
             {
-                accessorKey: "name",
+                accessorKey: 'name',
                 header: ({ column }) => (
                     <DataTableColumnHeader column={column} title="Role" />
                 ),
@@ -353,7 +386,7 @@ const RoleIndex = ({ roles, filters, permissions }: Props) => {
                 ),
             },
             {
-                accessorKey: "permissions_count",
+                accessorKey: 'permissions_count',
                 header: ({ column }) => (
                     <DataTableColumnHeader
                         column={column}
@@ -361,40 +394,41 @@ const RoleIndex = ({ roles, filters, permissions }: Props) => {
                     />
                 ),
                 cell: ({ row }) => (
-                    <p className="flex gap-2 items-center">
-                        <ShieldCheck className="size-4 text-muted-foreground" />{" "}
+                    <p className="flex items-center gap-2">
+                        <ShieldCheck className="size-4 text-muted-foreground" />{' '}
                         {row.original.permissions_count}
                     </p>
                 ),
             },
             {
-                accessorKey: "users_count",
+                accessorKey: 'users_count',
                 header: ({ column }) => (
                     <DataTableColumnHeader column={column} title="Users" />
                 ),
                 cell: ({ row }) => (
-                    <p className="flex gap-2 items-center">
-                        <User className="size-4 text-muted-foreground" />{" "}
+                    <p className="flex items-center gap-2">
+                        <User className="size-4 text-muted-foreground" />{' '}
                         {row.original.users_count}
                     </p>
                 ),
             },
             {
-                accessorKey: "created_at",
+                accessorKey: 'created_at',
                 header: ({ column }) => (
                     <DataTableColumnHeader column={column} title="Created" />
                 ),
                 cell: ({ row }) => row.original.created_at.slice(0, 10),
             },
             {
-                id: "actions",
+                id: 'actions',
                 enableHiding: false,
-                cell: ({ row }) =>
-                    row.original.is_system ? (
-                        <span className="text-xs text-muted-foreground">
-                            Immutable
-                        </span>
-                    ) : !can("roles.update") && !can("roles.delete") ? null : (
+                cell: ({ row }) => (
+                    <div className="flex items-center justify-end gap-2">
+                        {row.original.is_system && (
+                            <span className="text-xs text-muted-foreground">
+                                Immutable
+                            </span>
+                        )}
                         <DropdownMenu>
                             <DropdownMenuTrigger
                                 render={
@@ -409,34 +443,43 @@ const RoleIndex = ({ roles, filters, permissions }: Props) => {
                                 }
                             />
                             <DropdownMenuContent align="end">
-                                {can("roles.update") && (
-                                    <DropdownMenuItem
-                                        onClick={() => {
-                                            setEditingRole(row.original);
-                                            setFormOpen(true);
-                                        }}
-                                    >
-                                        <PenIcon />
-                                        Edit role
-                                    </DropdownMenuItem>
-                                )}
-                                {can("roles.delete") && (
-                                    <DropdownMenuItem
-                                        variant="destructive"
-                                        onClick={() =>
-                                            setPendingDelete({
-                                                ids: [row.original.id],
-                                                label: row.original.name,
-                                            })
-                                        }
-                                    >
-                                        <Trash2 />
-                                        Delete role
-                                    </DropdownMenuItem>
-                                )}
+                                <DropdownMenuItem
+                                    onClick={() => setViewingRole(row.original)}
+                                >
+                                    <Eye />
+                                    View permissions
+                                </DropdownMenuItem>
+                                {!row.original.is_system &&
+                                    can('roles.update') && (
+                                        <DropdownMenuItem
+                                            onClick={() => {
+                                                setEditingRole(row.original);
+                                                setFormOpen(true);
+                                            }}
+                                        >
+                                            <PenIcon />
+                                            Edit role
+                                        </DropdownMenuItem>
+                                    )}
+                                {!row.original.is_system &&
+                                    can('roles.delete') && (
+                                        <DropdownMenuItem
+                                            variant="destructive"
+                                            onClick={() =>
+                                                setPendingDelete({
+                                                    ids: [row.original.id],
+                                                    label: row.original.name,
+                                                })
+                                            }
+                                        >
+                                            <Trash2 />
+                                            Delete role
+                                        </DropdownMenuItem>
+                                    )}
                             </DropdownMenuContent>
                         </DropdownMenu>
-                    ),
+                    </div>
+                ),
             },
         ],
         [can],
@@ -445,9 +488,10 @@ const RoleIndex = ({ roles, filters, permissions }: Props) => {
     const sorting: SortingState = [
         {
             id: filters.sort,
-            desc: filters.direction === "desc",
+            desc: filters.direction === 'desc',
         },
     ];
+
     const pagination: PaginationState = {
         pageIndex: (roles?.current_page ?? filters.page) - 1,
         pageSize: roles?.per_page ?? filters.per_page,
@@ -464,7 +508,7 @@ const RoleIndex = ({ roles, filters, permissions }: Props) => {
                     title="Roles & Permissions"
                     description="Manage roles and the permissions assigned to them."
                 />
-                {can("roles.create") && (
+                {can('roles.create') && (
                     <Button onClick={openCreateForm}>
                         <Plus />
                         Create role
@@ -486,16 +530,16 @@ const RoleIndex = ({ roles, filters, permissions }: Props) => {
                 sorting={sorting}
                 onSortingChange={(next) => {
                     const value =
-                        typeof next === "function" ? next(sorting) : next;
+                        typeof next === 'function' ? next(sorting) : next;
                     visitRoles({
-                        sort: value[0]?.id ?? "name",
-                        direction: value[0]?.desc ? "desc" : "asc",
+                        sort: value[0]?.id ?? 'name',
+                        direction: value[0]?.desc ? 'desc' : 'asc',
                     });
                 }}
                 pagination={pagination}
                 onPaginationChange={(next) => {
                     const value =
-                        typeof next === "function" ? next(pagination) : next;
+                        typeof next === 'function' ? next(pagination) : next;
                     visitRoles(
                         {
                             page: value.pageIndex + 1,
@@ -511,34 +555,42 @@ const RoleIndex = ({ roles, filters, permissions }: Props) => {
                 isLoading={isLoading || roles === undefined}
                 toolbarFilters={() => (
                     <div className="flex flex-wrap gap-2">
-                        <Deferred data="permissions" fallback={<Skeleton className="h-8 w-48" />}>
-
-                        <Select
-                            items={[
-                                { value: "all", label: "All Roles" },
-                                { value: "0", label: "Custom Role" },
-                                { value: "1", label: "System Role" },
-                            ]}
-                            value={filters.is_system}
-                            onValueChange={(value) => {
-                                if (
-                                    value === "all" ||
-                                    value === "0" ||
-                                    value === "1"
-                                ) {
-                                    visitRoles({ is_system: value });
-                                }
-                            }}
+                        <Deferred
+                            data="permissions"
+                            fallback={<Skeleton className="h-8 w-48" />}
                         >
-                            <SelectTrigger aria-label="Filter by role type">
-                                <SelectValue placeholder="All roles" />
-                            </SelectTrigger>
-                            <SelectContent>
-                                <SelectItem value="all">All Roles</SelectItem>
-                                <SelectItem value="0">Custom Role</SelectItem>
-                                <SelectItem value="1">System Role</SelectItem>
-                            </SelectContent>
-                        </Select>
+                            <Select
+                                items={[
+                                    { value: 'all', label: 'All Roles' },
+                                    { value: '0', label: 'Custom Role' },
+                                    { value: '1', label: 'System Role' },
+                                ]}
+                                value={filters.is_system}
+                                onValueChange={(value) => {
+                                    if (
+                                        value === 'all' ||
+                                        value === '0' ||
+                                        value === '1'
+                                    ) {
+                                        visitRoles({ is_system: value });
+                                    }
+                                }}
+                            >
+                                <SelectTrigger aria-label="Filter by role type">
+                                    <SelectValue placeholder="All roles" />
+                                </SelectTrigger>
+                                <SelectContent>
+                                    <SelectItem value="all">
+                                        All Roles
+                                    </SelectItem>
+                                    <SelectItem value="0">
+                                        Custom Role
+                                    </SelectItem>
+                                    <SelectItem value="1">
+                                        System Role
+                                    </SelectItem>
+                                </SelectContent>
+                            </Select>
                         </Deferred>
 
                         <Deferred
@@ -551,7 +603,7 @@ const RoleIndex = ({ roles, filters, permissions }: Props) => {
                                 onValueChange={(value) =>
                                     visitRoles({
                                         permission_id:
-                                            value === "all" ? "" : value,
+                                            value === 'all' ? '' : value,
                                     })
                                 }
                             />
@@ -559,7 +611,7 @@ const RoleIndex = ({ roles, filters, permissions }: Props) => {
                     </div>
                 )}
                 batchActions={
-                    can("roles.delete")
+                    can('roles.delete')
                         ? (_table, selectedRoles) => (
                               <Button
                                   variant="destructive"
@@ -585,10 +637,10 @@ const RoleIndex = ({ roles, filters, permissions }: Props) => {
             />
 
             <Form
-                key={editingRole?.id ?? "new-role"}
+                key={editingRole?.id ?? 'new-role'}
                 {...formRoute}
                 options={{
-                    only: ["roles", "filters"],
+                    only: ['roles', 'filters'],
                     preserveScroll: true,
                 }}
                 onSuccess={() => {
@@ -600,9 +652,9 @@ const RoleIndex = ({ roles, filters, permissions }: Props) => {
                     <FormDialog
                         open={formOpen}
                         onOpenChange={setFormOpen}
-                        name={editingRole ? "Edit role" : "Create role"}
+                        name={editingRole ? 'Edit role' : 'Create role'}
                         width="w-full max-w-3xl"
-                        height="max-h-[90vh]"
+                        height="h-[90vh] max-h-[48rem]"
                         processing={processing}
                         submitDisabled={permissions === undefined}
                     >
@@ -614,6 +666,95 @@ const RoleIndex = ({ roles, filters, permissions }: Props) => {
                     </FormDialog>
                 )}
             </Form>
+
+            <Sheet
+                open={viewingRole !== null}
+                onOpenChange={(open) => {
+                    if (!open) {
+                        setViewingRole(null);
+                    }
+                }}
+            >
+                <SheetContent className="w-full sm:max-w-lg">
+                    <SheetHeader className="border-b px-6 py-5">
+                        <SheetTitle className="text-lg">
+                            {viewingRole?.name ?? 'Role permissions'}
+                        </SheetTitle>
+                        <SheetDescription>
+                            Review the permissions assigned to this role.
+                        </SheetDescription>
+                        {viewingRole && (
+                            <div className="flex flex-wrap gap-2 pt-2">
+                                <span className="rounded-full bg-muted px-2.5 py-1 text-xs font-medium capitalize">
+                                    {viewingRole.is_system
+                                        ? 'System role'
+                                        : 'Custom role'}
+                                </span>
+                                <span className="rounded-full bg-primary/10 px-2.5 py-1 text-xs font-medium text-primary">
+                                    {viewingRole.permissions_count}{' '}
+                                    {viewingRole.permissions_count === 1
+                                        ? 'permission'
+                                        : 'permissions'}
+                                </span>
+                            </div>
+                        )}
+                    </SheetHeader>
+                    <div className="min-h-0 flex-1 space-y-4 overflow-y-auto px-6 pb-6">
+                        {permissions === undefined ? (
+                            <div
+                                className="space-y-3"
+                                aria-label="Loading permissions"
+                            >
+                                <Skeleton className="h-28 w-full" />
+                                <Skeleton className="h-28 w-full" />
+                            </div>
+                        ) : rolePermissionGroups?.length ? (
+                            rolePermissionGroups.map(([category, items]) => (
+                                <section
+                                    key={category}
+                                    className="rounded-xl border bg-card p-4"
+                                >
+                                    <div className="mb-3 flex items-center justify-between gap-3">
+                                        <h3 className="font-semibold capitalize">
+                                            {category.replaceAll('_', ' ')}
+                                        </h3>
+                                        <span className="rounded-full bg-muted px-2 py-0.5 text-xs text-muted-foreground">
+                                            {items.length}
+                                        </span>
+                                    </div>
+                                    <ul className="space-y-2">
+                                        {items.map((permission) => (
+                                            <li
+                                                key={permission.id}
+                                                className="flex items-center gap-2 text-sm text-muted-foreground"
+                                            >
+                                                <ShieldCheck className="size-4 shrink-0 text-primary" />
+                                                <span>
+                                                    {permission.name
+                                                        .split('.')
+                                                        .slice(1)
+                                                        .join('.')}
+                                                </span>
+                                            </li>
+                                        ))}
+                                    </ul>
+                                </section>
+                            ))
+                        ) : (
+                            <div className="rounded-xl border border-dashed px-5 py-10 text-center">
+                                <ShieldCheck className="mx-auto mb-3 size-8 text-muted-foreground" />
+                                <h3 className="font-medium">
+                                    No permissions assigned
+                                </h3>
+                                <p className="mt-1 text-sm text-muted-foreground">
+                                    This role currently has no access
+                                    permissions.
+                                </p>
+                            </div>
+                        )}
+                    </div>
+                </SheetContent>
+            </Sheet>
 
             <AlertDialog
                 open={pendingDelete !== null}
@@ -641,7 +782,7 @@ const RoleIndex = ({ roles, filters, permissions }: Props) => {
                             disabled={deleting}
                             onClick={submitDelete}
                         >
-                            {deleting ? "Deleting..." : "Delete"}
+                            {deleting ? 'Deleting...' : 'Delete'}
                         </AlertDialogAction>
                     </AlertDialogFooter>
                 </AlertDialogContent>
@@ -654,7 +795,7 @@ export default RoleIndex;
 
 RoleIndex.layout = {
     breadcrumbs: [
-        { title: "Dashboard", href: "/dashboard" },
-        { title: "Role & Permission", href: "/settings/roles" },
+        { title: 'Dashboard', href: '/dashboard' },
+        { title: 'Role & Permission', href: '/settings/roles' },
     ],
 };
