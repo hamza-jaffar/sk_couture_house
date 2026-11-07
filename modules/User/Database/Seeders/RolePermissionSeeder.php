@@ -22,7 +22,7 @@ class RolePermissionSeeder extends Seeder
             fn (string $name): Permission => Permission::findOrCreate($name, 'web'),
         );
 
-        $adminRole = Role::findOrCreate('admin', 'web');
+        $adminRole = Role::findOrCreate('admin', 'web', true);
         $adminRole->syncPermissions($permissions);
 
         Role::findOrCreate('customer', 'web');
