@@ -52,6 +52,13 @@ class RolePermissionSeeder extends Seeder
             // 'customers.update',
             // 'customers.delete',
 
+            // --- GALLERY ---
+            'gallery.view',
+            'gallery.upload',
+            'gallery.delete',
+            'gallery.restore',
+            'gallery.force-delete',
+
             // --- DISCOUNTS & PROMOTIONS ---
             'coupons.view',
             'coupons.create',

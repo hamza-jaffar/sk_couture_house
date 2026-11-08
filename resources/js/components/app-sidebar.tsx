@@ -22,6 +22,7 @@ import {
     TerminalIcon,
     LayoutDashboard,
     Users,
+    Folder,
 } from "lucide-react";
 
 const data = {
@@ -36,6 +37,12 @@ const data = {
             url: "/dashboard/customers",
             icon: <Users />,
             permission: "customers.view",
+        },
+        {
+            title: "Gallery",
+            url: "/dashboard/gallery",
+            icon: <Folder />,
+            permission: "gallery.view",
         },
     ],
     navSecondary: [
