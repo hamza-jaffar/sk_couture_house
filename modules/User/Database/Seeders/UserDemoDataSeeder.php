@@ -77,7 +77,7 @@ class UserDemoDataSeeder extends Seeder
 
         $this->command->info('Seeding Staff Users...');
         foreach (range(1, self::STAFF_COUNT) as $number) {
-            $identity = $this->demoIdentity('staff', $number);
+            $identity = $this->demoIdentity($number);
             $legacyEmail = sprintf('demo-staff-%03d@example.test', $number);
             $user = User::query()
                 ->whereIn('email', [$legacyEmail, $identity['email']])
@@ -93,24 +93,20 @@ class UserDemoDataSeeder extends Seeder
             $user->syncRoles([$demoRoles->random()]);
         }
         $this->command->info('Seeding Staff Done');
-
-        $this->command->info('Seeding Customers...');
-        $this->call(CustomerDemoDataSeeder::class);
-        $this->command->info('Seeding Customers Done');
     }
 
     /**
      * @return array{name: string, email: string}
      */
-    private function demoIdentity(string $type, int $number): array
+    private function demoIdentity(int $number): array
     {
-        fake()->seed(($type === 'staff' ? 100_000 : 200_000) + $number);
+        fake()->seed(100_000 + $number);
         $name = fake()->name();
         $emailName = Str::slug($name, '.');
 
         return [
             'name' => $name,
-            'email' => sprintf('%s.%s%05d@example.test', $emailName, $type, $number),
+            'email' => sprintf('%s.staff%05d@example.test', $emailName, $number),
         ];
     }
 }

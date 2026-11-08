@@ -26,12 +26,11 @@ class UserService
      * }  $filters
      * @return LengthAwarePaginator<int, User>
      */
-    public function paginateUser(array $filters, bool $customers = false): LengthAwarePaginator
+    public function paginateUser(array $filters): LengthAwarePaginator
     {
         return $this->listingCache->remember(
             $filters,
-            $customers,
-            fn (): LengthAwarePaginator => $this->paginateUserWithoutCache($filters, $customers),
+            fn (): LengthAwarePaginator => $this->paginateUserWithoutCache($filters),
         );
     }
 
@@ -46,19 +45,15 @@ class UserService
      * }  $filters
      * @return LengthAwarePaginator<int, User>
      */
-    private function paginateUserWithoutCache(array $filters, bool $customers): LengthAwarePaginator
+    private function paginateUserWithoutCache(array $filters): LengthAwarePaginator
     {
         $query = User::query();
-        $customerRoleQuery = Role::query()
+        $customerRole = Role::query()
             ->where('name', 'customer')
-            ->where('guard_name', 'web');
-        $customerRole = $customers
-            ? $customerRoleQuery->firstOrFail()
-            : $customerRoleQuery->first();
+            ->where('guard_name', 'web')
+            ->first();
 
-        if ($customers) {
-            $query->role($customerRole);
-        } elseif ($customerRole instanceof Role) {
+        if ($customerRole instanceof Role) {
             $pivotTable = config('permission.table_names.model_has_roles');
             $roleColumn = config('permission.column_names.role_pivot_key') ?: 'role_id';
             $modelColumn = config('permission.column_names.model_morph_key') ?: 'model_id';
@@ -74,7 +69,6 @@ class UserService
                 $customerRole,
             ): void {
                 $assignments
-                    // Avoid materializing all customer IDs before filtering internal users.
                     ->selectRaw('/*+ NO_SEMIJOIN() */ 1')
                     ->from($pivotTable)
                     ->whereColumn("{$pivotTable}.{$modelColumn}", "{$userTable}.id")
@@ -107,16 +101,6 @@ class UserService
         $sortColumn = $sortColumns[$sort];
         $direction = ($filters['direction'] ?? 'asc') === 'desc' ? 'desc' : 'asc';
 
-        if ($customers) {
-            $sortIndexes = [
-                'name' => 'users_name_id_index',
-                'email' => 'users_email_unique',
-                'created_at' => 'users_created_at_id_index',
-            ];
-
-            $query->forceIndex($sortIndexes[$sort]);
-        }
-
         $query
             ->select(['id', 'name', 'email', 'avatar', 'email_verified_at', 'created_at', 'updated_at'])
             ->with('roles:id,name,is_system')
@@ -132,20 +116,13 @@ class UserService
             $roleColumn = config('permission.column_names.role_pivot_key') ?: 'role_id';
             $modelColumn = config('permission.column_names.model_morph_key') ?: 'model_id';
 
-            if ($customers) {
-                $total = DB::table($pivotTable)
-                    ->where($roleColumn, $customerRole->getKey())
-                    ->where('model_type', $userModel->getMorphClass())
-                    ->count();
-            } else {
-                $customerCount = DB::table($pivotTable)
-                    ->where($roleColumn, $customerRole->getKey())
-                    ->where('model_type', $userModel->getMorphClass())
-                    ->distinct()
-                    ->count($modelColumn);
+            $customerCount = DB::table($pivotTable)
+                ->where($roleColumn, $customerRole->getKey())
+                ->where('model_type', $userModel->getMorphClass())
+                ->distinct()
+                ->count($modelColumn);
 
-                $total = DB::table((new User)->getTable())->count() - $customerCount;
-            }
+            $total = DB::table((new User)->getTable())->count() - $customerCount;
 
             return new Paginator(
                 $query->forPage($page, $perPage)->get(),

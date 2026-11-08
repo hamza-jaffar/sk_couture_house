@@ -28,13 +28,13 @@ class UserListingCache
      * @param  Closure(): LengthAwarePaginator<int, User>  $callback
      * @return LengthAwarePaginator<int, User>
      */
-    public function remember(array $filters, bool $customers, Closure $callback): LengthAwarePaginator
+    public function remember(array $filters, Closure $callback): LengthAwarePaginator
     {
         $version = Cache::get(self::VERSION_KEY, 1);
         $key = 'user-listings:'.$version.':'.hash(
             'sha256',
             json_encode(
-                ['customers' => $customers, 'filters' => $filters],
+                ['filters' => $filters],
                 JSON_THROW_ON_ERROR,
             ),
         );

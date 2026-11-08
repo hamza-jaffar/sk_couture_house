@@ -46,12 +46,6 @@ class RolePermissionSeeder extends Seeder
             'orders.fulfill',
             'orders.refund',
 
-            // --- CUSTOMERS ---
-            'customers.view',
-            // 'customers.create',
-            // 'customers.update',
-            // 'customers.delete',
-
             // --- GALLERY ---
             'gallery.view',
             'gallery.upload',
@@ -85,7 +79,5 @@ class RolePermissionSeeder extends Seeder
         );
         $adminRole->update(['is_system' => true]);
         $adminRole->syncPermissions($permissions);
-
-        Role::query()->firstOrCreate(['name' => 'customer', 'guard_name' => 'web'], ['is_system' => true]);
     }
 }

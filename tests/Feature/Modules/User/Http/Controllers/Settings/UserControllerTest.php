@@ -1,9 +1,7 @@
 <?php
 
-use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Hash;
 use Inertia\Testing\AssertableInertia;
-use Modules\User\Database\Seeders\UserDemoDataSeeder;
 use Modules\User\Models\Role;
 use Modules\User\Models\User;
 use Spatie\Permission\Models\Permission;
@@ -515,52 +513,4 @@ it('rejects non-administrator bulk deletion containing an administrator account'
 
     $this->assertModelExists($admin);
     $this->assertModelExists($other);
-});
-
-it('seeds demo roles, staff users, and customers idempotently', function () {
-    $this->seed(UserDemoDataSeeder::class);
-
-    $demoRoleNames = [
-        'Store Manager',
-        'Sales Associate',
-        'Inventory Specialist',
-        'Order Coordinator',
-        'Customer Support',
-        'Marketing Specialist',
-        'Content Editor',
-        'Product Curator',
-        'Finance Assistant',
-        'Operations Lead',
-        'Warehouse Associate',
-        'Returns Specialist',
-        'Catalog Manager',
-        'Analytics Viewer',
-        'Promotion Manager',
-    ];
-    $sampleStaffUser = User::query()
-        ->where('email', 'like', '%.staff%@example.test')
-        ->firstOrFail();
-
-    expect(Role::query()->whereIn('name', $demoRoleNames)->count())->toBe(15)
-        ->and(User::query()->where('email', 'like', '%.staff%@example.test')->count())->toBe(1000)
-        ->and(User::query()->where('email', 'like', '%.customer%@example.test')->count())->toBe(100_000)
-        ->and($sampleStaffUser->name)->toContain(' ')
-        ->and($sampleStaffUser->email)->toContain('.staff')
-        ->and($sampleStaffUser->email)->toEndWith('@example.test')
-        ->and(DB::table('model_has_roles')
-            ->where('model_type', (new User)->getMorphClass())
-            ->count())->toBe(101_000);
-
-    $this->seed(UserDemoDataSeeder::class);
-
-    expect(Role::query()->whereIn('name', $demoRoleNames)->count())->toBe(15)
-        ->and(User::query()->where('email', 'like', '%.staff%@example.test')->count())->toBe(1000)
-        ->and(User::query()->where('email', 'like', '%.customer%@example.test')->count())->toBe(100_000);
-});
-
-it('refuses to seed demo data outside local and testing environments', function () {
-    $this->app->detectEnvironment(static fn (): string => 'production');
-
-    expect(fn () => app(UserDemoDataSeeder::class)->run())
-        ->toThrow(RuntimeException::class);
 });

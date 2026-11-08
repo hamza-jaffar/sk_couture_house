@@ -1,9 +1,9 @@
-import * as React from "react";
+import * as React from 'react';
 
-import { NavMain } from "@/components/nav-main";
-import { NavProjects } from "@/components/nav-projects";
-import { NavSecondary } from "@/components/nav-secondary";
-import { NavUser } from "@/components/nav-user";
+import { NavMain } from '@/components/nav-main';
+import { NavProjects } from '@/components/nav-projects';
+import { NavSecondary } from '@/components/nav-secondary';
+import { NavUser } from '@/components/nav-user';
 import {
     Sidebar,
     SidebarContent,
@@ -12,7 +12,7 @@ import {
     SidebarMenu,
     SidebarMenuButton,
     SidebarMenuItem,
-} from "@/components/ui/sidebar";
+} from '@/components/ui/sidebar';
 import {
     LifeBuoyIcon,
     SendIcon,
@@ -21,56 +21,49 @@ import {
     MapIcon,
     TerminalIcon,
     LayoutDashboard,
-    Users,
     Folder,
-} from "lucide-react";
+} from 'lucide-react';
 
 const data = {
     navMain: [
         {
-            title: "Dashboard",
-            url: "/dashboard",
+            title: 'Dashboard',
+            url: '/dashboard',
             icon: <LayoutDashboard />,
         },
         {
-            title: "Customers",
-            url: "/dashboard/customers",
-            icon: <Users />,
-            permission: "customers.view",
-        },
-        {
-            title: "Gallery",
-            url: "/dashboard/gallery",
+            title: 'Gallery',
+            url: '/dashboard/gallery',
             icon: <Folder />,
-            permission: "gallery.view",
+            permission: 'gallery.view',
         },
     ],
     navSecondary: [
         {
-            title: "Support",
-            url: "#",
+            title: 'Support',
+            url: '#',
             icon: <LifeBuoyIcon />,
         },
         {
-            title: "Feedback",
-            url: "#",
+            title: 'Feedback',
+            url: '#',
             icon: <SendIcon />,
         },
     ],
     projects: [
         {
-            name: "Design Engineering",
-            url: "#",
+            name: 'Design Engineering',
+            url: '#',
             icon: <FrameIcon />,
         },
         {
-            name: "Sales & Marketing",
-            url: "#",
+            name: 'Sales & Marketing',
+            url: '#',
             icon: <PieChartIcon />,
         },
         {
-            name: "Travel",
-            url: "#",
+            name: 'Travel',
+            url: '#',
             icon: <MapIcon />,
         },
     ],

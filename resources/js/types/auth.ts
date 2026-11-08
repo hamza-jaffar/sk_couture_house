@@ -1,7 +1,7 @@
-import { PaginationBase } from "./pagination";
-import type { Role } from "./roles";
+import { PaginationBase } from './pagination';
+import type { Role } from './roles';
 
-export type UserRole = Pick<Role, "id" | "name" | "is_system">;
+export type UserRole = Pick<Role, 'id' | 'name' | 'is_system'>;
 
 export type User = {
     id: number;
@@ -23,15 +23,7 @@ export type UserFilters = {
     search: string;
     role_id: string;
     sort: string;
-    direction: "asc" | "desc";
-    page: number;
-    per_page: number;
-};
-
-export type CustomerFilters = {
-    search: string;
-    sort: string;
-    direction: "asc" | "desc";
+    direction: 'asc' | 'desc';
     page: number;
     per_page: number;
 };
