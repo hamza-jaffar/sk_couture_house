@@ -16,12 +16,10 @@ import { useCallback, useEffect, useRef, useState } from "react";
 import GalleryPickerItem from "./gallery-picker-item";
 import GalleryViewToggle, { type GalleryView } from "./gallery-view-toggle";
 import { galleryCategories } from "@/lib/utils";
-
-type PickerResponse = PaginatedGalleryMedia & {
-    canUpload: boolean;
-};
+import { useCan } from "@/hooks/use-can";
 
 export default function GalleryPicker(props: GalleryPickerProps) {
+    const can = useCan();
     const { open, onOpenChange, trigger } = props;
     const selectionMode = props.selectionMode ?? "multiple";
     const [internalOpen, setInternalOpen] = useState(false);
@@ -34,14 +32,14 @@ export default function GalleryPicker(props: GalleryPickerProps) {
     const [pagination, setPagination] = useState<PaginatedGalleryMedia | null>(
         null,
     );
-    const [canUpload, setCanUpload] = useState(false);
     const [showUploadForm, setShowUploadForm] = useState(false);
     const [requestError, setRequestError] = useState<string | null>(null);
     const [view, setView] = useState<GalleryView>("list");
     const requestId = useRef(0);
-    const { get, processing } = useHttp<Record<string, never>, PickerResponse>(
-        {},
-    );
+    const { get, processing } = useHttp<
+        Record<string, never>,
+        PaginatedGalleryMedia
+    >({});
     const isOpen = open ?? internalOpen;
 
     const setDialogOpen = useCallback(
@@ -78,7 +76,6 @@ export default function GalleryPicker(props: GalleryPickerProps) {
                                 : response.data,
                         );
                         setPagination(response);
-                        setCanUpload(response.canUpload);
                     },
                     onHttpException: () => {
                         if (currentRequestId === requestId.current) {
@@ -180,7 +177,7 @@ export default function GalleryPicker(props: GalleryPickerProps) {
                                     : "Choose one or more files."}
                             </DialogPrimitive.Description>
                         </div>
-                        {!showUploadForm && canUpload && (
+                        {!showUploadForm && can("gallery.upload") && (
                             <Button
                                 type="button"
                                 className="shrink-0"
