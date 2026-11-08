@@ -5,7 +5,7 @@ use Modules\User\Http\Controllers\CustomerController;
 
 Route::prefix('dashboard')->name('dashboard.')->middleware('auth')->group(function () {
     Route::prefix('customers')->name('customer.')->group(function () {
-        Route::get('/', [CustomerController::class, 'index'])->name('index');
+        Route::get('/', [CustomerController::class, 'index'])->middleware('can:customers.view')->name('index');
     });
 });
 
