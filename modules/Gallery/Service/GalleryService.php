@@ -62,12 +62,17 @@ class GalleryService
     /**
      * @param  list<UploadedFile>  $files
      */
-    public function upload(array $files, User $uploader): int
+    /**
+     * @param  list<UploadedFile>  $files
+     * @return list<Media>
+     */
+    public function upload(array $files, User $uploader): array
     {
         $paths = FileHelper::uploadMany($files, 'gallery', self::STORAGE_DISK);
+        $uploadedMedia = [];
 
         try {
-            DB::transaction(function () use ($files, $paths, $uploader): void {
+            DB::transaction(function () use ($files, $paths, $uploader, &$uploadedMedia): void {
                 foreach ($files as $index => $file) {
                     $path = $paths[$index];
                     $originalFileName = $this->safeOriginalFileName($file);
@@ -78,7 +83,7 @@ class GalleryService
                         throw new RuntimeException('Unable to determine the uploaded file size.');
                     }
 
-                    Media::query()->create([
+                    $uploadedMedia[] = Media::query()->create([
                         'uuid' => (string) Str::uuid(),
                         'title' => $originalFileName,
                         'file_name' => basename($path),
@@ -109,7 +114,7 @@ class GalleryService
             $this->invalidateListingCache();
         }
 
-        return count($files);
+        return $uploadedMedia;
     }
 
     public function download(Media $media): StreamedResponse
@@ -288,21 +293,28 @@ class GalleryService
 
         return [
             'data' => array_values($paginator->getCollection()
-                ->map(function (Media $media): array {
-                    $attributes = $media->toArray();
-                    $attributes['url'] = ! $media->trashed() && $media->disk === self::STORAGE_DISK
-                        ? Storage::disk(self::STORAGE_DISK)->url($media->path)
-                        : null;
-                    unset($attributes['disk'], $attributes['path']);
-
-                    return $attributes;
-                })
+                ->map(fn (Media $media): array => $this->serializeMedia($media))
                 ->all()),
             'total' => $paginator->total(),
             'per_page' => $paginator->perPage(),
             'current_page' => $paginator->currentPage(),
             'path' => $paginator->path() ?? request()->url(),
         ];
+    }
+
+    /**
+     * @return array<string, mixed>
+     */
+    public function serializeMedia(Media $media): array
+    {
+        $media->loadMissing('uploader:id,name');
+        $attributes = $media->toArray();
+        $attributes['url'] = ! $media->trashed() && $media->disk === self::STORAGE_DISK
+            ? Storage::disk(self::STORAGE_DISK)->url($media->path)
+            : null;
+        unset($attributes['disk'], $attributes['path']);
+
+        return $attributes;
     }
 
     /**

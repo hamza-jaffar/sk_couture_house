@@ -1,3 +1,4 @@
+import { ReactElement } from 'react';
 import type { PaginationBase } from './pagination';
 
 export type GalleryMedia = {
@@ -27,3 +28,32 @@ export type GalleryFilters = {
     page: number;
     per_page: number;
 };
+
+export type GalleryPageProps = {
+    media?: PaginatedGalleryMedia;
+    filters: GalleryFilters;
+    mode?: "page";
+};
+
+export type GalleryPickerBaseProps = {
+    mode: "dialog";
+    open?: boolean;
+    onOpenChange?: (open: boolean) => void;
+    trigger?: ReactElement;
+};
+
+export type GalleryPickerProps = GalleryPickerBaseProps &
+    (
+        | {
+              selectionMode: "single";
+              onSelect: (selection: GalleryMedia) => void;
+          }
+        | {
+              selectionMode?: "multiple";
+              onSelect: (selection: GalleryMedia[]) => void;
+          }
+    );
+
+export type GalleryProps = GalleryPageProps | GalleryPickerProps;
+export type Category = GalleryFilters["category"];
+export type GalleryView = "grid" | "list";

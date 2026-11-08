@@ -4,10 +4,6 @@ import type { GalleryFilters, PaginatedGalleryMedia } from '@/types';
 type Props = {
     media?: PaginatedGalleryMedia;
     filters: GalleryFilters;
-    canUpload: boolean;
-    canDelete: boolean;
-    canRestore: boolean;
-    canForceDelete: boolean;
 };
 
 export default function Gallery(props: Props) {

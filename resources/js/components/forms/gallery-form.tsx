@@ -3,12 +3,19 @@ import { Button } from '@/components/ui/button';
 import { Card, CardContent } from '@/components/ui/card';
 import InputError from '@/components/ui/input-error';
 import { Label } from '@/components/ui/label';
-import { useForm } from '@inertiajs/react';
+import type { GalleryMedia } from '@/types';
+import { useHttp } from '@inertiajs/react';
 import { File as FileIcon, Upload, X } from 'lucide-react';
 import { useMemo, useState } from 'react';
+import { toast } from 'sonner';
 
 type Props = {
-    onUploadSuccess?: () => void;
+    maxFiles?: number;
+    onUploadSuccess?: (files: GalleryMedia[]) => void;
+};
+
+type UploadResponse = {
+    media: GalleryMedia[];
 };
 
 function formatFileSize(bytes: number): string {
@@ -28,11 +35,11 @@ function formatFileSize(bytes: number): string {
     return `${size.toFixed(size < 10 ? 1 : 0)} ${units[unitIndex]}`;
 }
 
-export default function GalleryForm({ onUploadSuccess }: Props) {
+export default function GalleryForm({ maxFiles = 10, onUploadSuccess }: Props) {
     const [isDragging, setIsDragging] = useState(false);
     const [fileInputKey, setFileInputKey] = useState(0);
     const { data, setData, post, processing, progress, errors, reset } =
-        useForm<{ files: File[] }>({ files: [] });
+        useHttp<{ files: File[] }, UploadResponse>({ files: [] });
 
     const fileError = useMemo(
         () =>
@@ -46,7 +53,13 @@ export default function GalleryForm({ onUploadSuccess }: Props) {
         const files = Array.from(selectedFiles);
 
         if (files.length > 0) {
-            setData('files', [...data.files, ...files]);
+            if (data.files.length + files.length > maxFiles) {
+                toast.error(
+                    `Select no more than ${maxFiles} ${maxFiles === 1 ? 'file' : 'files'}.`,
+                );
+            } else {
+                setData('files', [...data.files, ...files]);
+            }
         }
 
         setFileInputKey((key) => key + 1);
@@ -55,14 +68,17 @@ export default function GalleryForm({ onUploadSuccess }: Props) {
     function submit(event: React.FormEvent<HTMLFormElement>) {
         event.preventDefault();
 
-        post(upload.url(), {
-            forceFormData: true,
-            preserveScroll: true,
-            onSuccess: () => {
+        void post(upload.url(), {
+            onSuccess: (response) => {
                 reset();
                 setFileInputKey((key) => key + 1);
-                onUploadSuccess?.();
+                toast.success(
+                    `${response.media.length} ${response.media.length === 1 ? 'file' : 'files'} uploaded successfully.`,
+                );
+                onUploadSuccess?.(response.media);
             },
+        }).catch(() => {
+            toast.error('The upload failed. Please try again.');
         });
     }
 
@@ -111,7 +127,7 @@ export default function GalleryForm({ onUploadSuccess }: Props) {
                             key={fileInputKey}
                             id="gallery-files"
                             type="file"
-                            multiple
+                            multiple={maxFiles > 1}
                             className="sr-only"
                             onChange={(event) => {
                                 if (event.currentTarget.files) {

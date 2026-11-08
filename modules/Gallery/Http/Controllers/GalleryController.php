@@ -31,10 +31,6 @@ class GalleryController
                 'page' => (int) ($filters['page'] ?? 1),
                 'per_page' => (int) ($filters['per_page'] ?? 24),
             ],
-            'canUpload' => $request->user()?->can('gallery.upload') ?? false,
-            'canDelete' => $request->user()?->can('gallery.delete') ?? false,
-            'canRestore' => $request->user()?->can('gallery.restore') ?? false,
-            'canForceDelete' => $request->user()?->can('gallery.force-delete') ?? false,
         ]);
     }
 
@@ -46,19 +42,30 @@ class GalleryController
             $filters['category'] = 'all';
         }
 
-        return response()->json($this->galleryService->paginate($filters)->toArray());
+        return response()->json([
+            ...$this->galleryService->paginate($filters)->toArray(),
+        ]);
     }
 
-    public function upload(UploadMediaRequest $request): RedirectResponse
+    public function upload(UploadMediaRequest $request): RedirectResponse|JsonResponse
     {
         $user = $request->user();
         abort_unless($user instanceof User, 403);
 
-        $fileCount = $this->galleryService->upload($request->uploadedFiles(), $user);
+        $media = $this->galleryService->upload($request->uploadedFiles(), $user);
+
+        if ($request->expectsJson()) {
+            return response()->json([
+                'media' => array_map(
+                    fn (Media $item): array => $this->galleryService->serializeMedia($item),
+                    $media,
+                ),
+            ]);
+        }
 
         Inertia::flash('toast', [
             'type' => 'success',
-            'message' => trans_choice(':count file uploaded successfully.|:count files uploaded successfully.', $fileCount, ['count' => $fileCount]),
+            'message' => trans_choice(':count file uploaded successfully.|:count files uploaded successfully.', count($media), ['count' => count($media)]),
         ]);
 
         return to_route('dashboard.gallery.index');

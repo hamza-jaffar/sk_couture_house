@@ -88,6 +88,27 @@ it('uploads multiple file types to public storage and lists their public URLs', 
             ->where('media.data.1.uuid', $media[0]->uuid));
 });
 
+it('returns uploaded media as JSON for the gallery picker upload flow', function () {
+    Storage::fake('public');
+    $uploader = galleryUploader();
+
+    $this->actingAs($uploader)
+        ->withHeader('Accept', 'application/json')
+        ->post(route('dashboard.gallery.upload'), [
+            'files' => [
+                UploadedFile::fake()->image('picker-upload.png'),
+                UploadedFile::fake()->createWithContent('picker-notes.txt', 'New picker file.'),
+            ],
+        ])
+        ->assertOk()
+        ->assertJsonPath('media.0.original_file_name', 'picker-upload.png')
+        ->assertJsonPath('media.1.original_file_name', 'picker-notes.txt')
+        ->assertJsonPath('media.0.uploader.id', $uploader->id);
+
+    $this->assertDatabaseCount('media', 2);
+    expect(Media::query()->pluck('disk')->unique()->all())->toBe(['public']);
+});
+
 it('downloads a gallery file as an attachment with content sniffing disabled', function () {
     Storage::fake('public');
     Storage::fake('local');
@@ -297,7 +318,8 @@ it('returns active media as JSON for the reusable gallery picker', function () {
         ->get(route('dashboard.gallery.picker', ['category' => 'image']))
         ->assertOk()
         ->assertJsonPath('total', 1)
-        ->assertJsonPath('data.0.uuid', $image->uuid);
+        ->assertJsonPath('data.0.uuid', $image->uuid)
+        ->assertJsonPath('canUpload', true);
 });
 
 it('forbids gallery viewers without management permissions from deleting files', function () {
