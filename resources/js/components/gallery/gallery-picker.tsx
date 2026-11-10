@@ -1,30 +1,35 @@
-import { picker } from "@/actions/Modules/Gallery/Http/Controllers/GalleryController";
-import GalleryForm from "@/components/forms/gallery-form";
-import { Button } from "@/components/ui/button";
-import { Input } from "@/components/ui/input";
-import { Skeleton } from "@/components/ui/skeleton";
+import { picker } from '@/actions/Modules/Gallery/Http/Controllers/GalleryController';
+import GalleryForm from '@/components/forms/gallery-form';
+import { Button } from '@/components/ui/button';
+import { Input } from '@/components/ui/input';
+import { Skeleton } from '@/components/ui/skeleton';
 import type {
     Category,
     GalleryMedia,
     GalleryPickerProps,
     PaginatedGalleryMedia,
-} from "@/types";
-import { Dialog as DialogPrimitive } from "@base-ui/react/dialog";
-import { useHttp } from "@inertiajs/react";
-import { Upload } from "lucide-react";
-import { useCallback, useEffect, useRef, useState } from "react";
-import GalleryPickerItem from "./gallery-picker-item";
-import GalleryViewToggle, { type GalleryView } from "./gallery-view-toggle";
-import { galleryCategories } from "@/lib/utils";
-import { useCan } from "@/hooks/use-can";
+} from '@/types';
+import { Dialog as DialogPrimitive } from '@base-ui/react/dialog';
+import { useHttp } from '@inertiajs/react';
+import { Upload } from 'lucide-react';
+import { useCallback, useEffect, useRef, useState } from 'react';
+import GalleryPickerItem from './gallery-picker-item';
+import GalleryViewToggle, { type GalleryView } from './gallery-view-toggle';
+import { galleryCategories } from '@/lib/utils';
+import { useCan } from '@/hooks/use-can';
 
 export default function GalleryPicker(props: GalleryPickerProps) {
     const can = useCan();
-    const { open, onOpenChange, trigger } = props;
-    const selectionMode = props.selectionMode ?? "multiple";
+    const {
+        open,
+        onOpenChange,
+        initialCategory = 'all',
+        allowedCategories,
+    } = props;
+    const selectionMode = props.selectionMode ?? 'multiple';
     const [internalOpen, setInternalOpen] = useState(false);
-    const [category, setCategory] = useState<Category>("all");
-    const [search, setSearch] = useState("");
+    const [category, setCategory] = useState<Category>(initialCategory);
+    const [search, setSearch] = useState('');
     const [selectedFiles, setSelectedFiles] = useState<
         Record<string, GalleryMedia>
     >({});
@@ -34,7 +39,7 @@ export default function GalleryPicker(props: GalleryPickerProps) {
     );
     const [showUploadForm, setShowUploadForm] = useState(false);
     const [requestError, setRequestError] = useState<string | null>(null);
-    const [view, setView] = useState<GalleryView>("list");
+    const [view, setView] = useState<GalleryView>('list');
     const requestId = useRef(0);
     const { get, processing } = useHttp<
         Record<string, never>,
@@ -79,20 +84,20 @@ export default function GalleryPicker(props: GalleryPickerProps) {
                     },
                     onHttpException: () => {
                         if (currentRequestId === requestId.current) {
-                            setRequestError("Unable to load gallery files.");
+                            setRequestError('Unable to load gallery files.');
                         }
                     },
                     onNetworkError: () => {
                         if (currentRequestId === requestId.current) {
                             setRequestError(
-                                "A network error prevented loading files.",
+                                'A network error prevented loading files.',
                             );
                         }
                     },
                 },
             ).catch(() => {
                 if (currentRequestId === requestId.current) {
-                    setRequestError("Unable to load gallery files.");
+                    setRequestError('Unable to load gallery files.');
                 }
             });
         },
@@ -114,7 +119,7 @@ export default function GalleryPicker(props: GalleryPickerProps) {
 
     function toggleFile(file: GalleryMedia, checked: boolean) {
         setSelectedFiles((current) => {
-            const next = selectionMode === "single" ? {} : { ...current };
+            const next = selectionMode === 'single' ? {} : { ...current };
 
             if (checked) {
                 next[file.uuid] = file;
@@ -128,12 +133,12 @@ export default function GalleryPicker(props: GalleryPickerProps) {
 
     function selectUploadedFiles(uploadedFiles: GalleryMedia[]) {
         const filesToSelect =
-            selectionMode === "single"
+            selectionMode === 'single'
                 ? uploadedFiles.slice(0, 1)
                 : uploadedFiles;
 
         setSelectedFiles((current) => {
-            const next = selectionMode === "single" ? {} : { ...current };
+            const next = selectionMode === 'single' ? {} : { ...current };
 
             for (const file of filesToSelect) {
                 next[file.uuid] = file;
@@ -150,16 +155,16 @@ export default function GalleryPicker(props: GalleryPickerProps) {
                     ),
             ),
         ]);
-        setCategory("all");
-        setSearch("");
+        setCategory(initialCategory);
+        setSearch('');
         setShowUploadForm(false);
     }
 
     const selected = Object.values(selectedFiles);
     const listClassName =
-        view === "grid"
-            ? "grid gap-3 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4"
-            : "flex flex-col gap-3";
+        view === 'grid'
+            ? 'grid gap-3 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4'
+            : 'flex flex-col gap-3';
 
     return (
         <DialogPrimitive.Root open={isOpen} onOpenChange={setDialogOpen}>
@@ -172,12 +177,12 @@ export default function GalleryPicker(props: GalleryPickerProps) {
                                 Select from gallery
                             </DialogPrimitive.Title>
                             <DialogPrimitive.Description className="text-sm text-muted-foreground">
-                                {selectionMode === "single"
-                                    ? "Choose one file."
-                                    : "Choose one or more files."}
+                                {selectionMode === 'single'
+                                    ? 'Choose one file.'
+                                    : 'Choose one or more files.'}
                             </DialogPrimitive.Description>
                         </div>
-                        {!showUploadForm && can("gallery.upload") && (
+                        {!showUploadForm && can('gallery.upload') && (
                             <Button
                                 type="button"
                                 className="shrink-0"
@@ -204,7 +209,14 @@ export default function GalleryPicker(props: GalleryPickerProps) {
                                 className="flex flex-wrap gap-1"
                             >
                                 {galleryCategories
-                                    .filter(({ value }) => value !== "deleted")
+                                    .filter(
+                                        ({ value }) =>
+                                            value !== 'deleted' &&
+                                            (allowedCategories === undefined ||
+                                                allowedCategories.includes(
+                                                    value,
+                                                )),
+                                    )
                                     .map(({ label, value }) => (
                                         <Button
                                             key={value}
@@ -212,8 +224,8 @@ export default function GalleryPicker(props: GalleryPickerProps) {
                                             size="sm"
                                             variant={
                                                 category === value
-                                                    ? "secondary"
-                                                    : "ghost"
+                                                    ? 'secondary'
+                                                    : 'ghost'
                                             }
                                             aria-pressed={category === value}
                                             onClick={() => setCategory(value)}
@@ -242,7 +254,7 @@ export default function GalleryPicker(props: GalleryPickerProps) {
                     <div className="min-h-0 flex-1 overflow-y-auto">
                         {showUploadForm ? (
                             <GalleryForm
-                                maxFiles={selectionMode === "single" ? 1 : 10}
+                                maxFiles={selectionMode === 'single' ? 1 : 10}
                                 onUploadSuccess={selectUploadedFiles}
                             />
                         ) : requestError ? (
@@ -292,8 +304,8 @@ export default function GalleryPicker(props: GalleryPickerProps) {
                                         }
                                     >
                                         {processing
-                                            ? "Loading..."
-                                            : "Load more"}
+                                            ? 'Loading...'
+                                            : 'Load more'}
                                     </Button>
                                 </div>
                             )}
@@ -314,7 +326,7 @@ export default function GalleryPicker(props: GalleryPickerProps) {
                                 type="button"
                                 disabled={selected.length === 0}
                                 onClick={() => {
-                                    if (props.selectionMode === "single") {
+                                    if (props.selectionMode === 'single') {
                                         const file = selected[0];
 
                                         if (file) {

@@ -92,7 +92,7 @@ it('returns uploaded media as JSON for the gallery picker upload flow', function
     Storage::fake('public');
     $uploader = galleryUploader();
 
-    $this->actingAs($uploader)
+    $response = $this->actingAs($uploader)
         ->withHeader('Accept', 'application/json')
         ->post(route('dashboard.gallery.upload'), [
             'files' => [
@@ -107,6 +107,10 @@ it('returns uploaded media as JSON for the gallery picker upload flow', function
 
     $this->assertDatabaseCount('media', 2);
     expect(Media::query()->pluck('disk')->unique()->all())->toBe(['public']);
+    $response->assertJsonPath(
+        'media.0.path',
+        Media::query()->where('original_file_name', 'picker-upload.png')->value('path'),
+    );
 });
 
 it('downloads a gallery file as an attachment with content sniffing disabled', function () {
@@ -319,6 +323,7 @@ it('returns active media as JSON for the reusable gallery picker', function () {
         ->assertOk()
         ->assertJsonPath('total', 1)
         ->assertJsonPath('data.0.uuid', $image->uuid)
+        ->assertJsonPath('data.0.path', $image->path)
         ->assertJsonPath('canUpload', true);
 });
 

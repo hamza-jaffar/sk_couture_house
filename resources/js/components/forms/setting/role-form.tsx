@@ -9,6 +9,7 @@ import {
     Activity,
     Boxes,
     FileBarChart,
+    Folder,
     KeyRound,
     MessageSquareText,
     Package,
@@ -25,18 +26,20 @@ import type { LucideIcon } from 'lucide-react';
 import { useState } from 'react';
 
 const permissionGroupIcons: Record<string, LucideIcon> = {
-    analytics: Activity,
-    categories: Tags,
-    coupons: TicketPercent,
-    customers: UserRound,
-    orders: ShoppingCart,
+    collection: Tags,
     products: Package,
+    gallery: Folder,
+    customers: UserRound,
+    coupons: TicketPercent,
+    orders: ShoppingCart,
     reports: FileBarChart,
     reviews: MessageSquareText,
     roles: ShieldCheck,
     settings: Settings2,
     transactions: ReceiptText,
     users: Users,
+    analytics: Activity,
+
 };
 
 type Props = {

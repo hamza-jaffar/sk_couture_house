@@ -585,7 +585,7 @@ export default function Users({ users, filters, roles, isAdmin }: Props) {
 
             <Form
                 key={`${editingUser?.id ?? 'new-user'}-${formOpen}`}
-                {...(editingUser ? update.form(editingUser.id) : store.form())}
+                action={editingUser ? update(editingUser.id) : store()}
                 resetOnSuccess
                 options={{
                     only: ['users', 'filters'],

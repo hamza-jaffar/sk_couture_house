@@ -20,11 +20,11 @@ class RolePermissionSeeder extends Seeder
             'roles.update',
             'roles.delete',
 
-            // --- CATEGORY ---
-            'categories.view',
-            'categories.create',
-            'categories.update',
-            'categories.delete',
+            // --- COLLECTION ---
+            'collections.view',
+            'collections.create',
+            'collections.update',
+            'collections.delete',
 
             // --- PRODUCTS ---
             'products.view',

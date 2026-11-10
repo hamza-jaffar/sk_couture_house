@@ -60,6 +60,24 @@ class GalleryService
     }
 
     /**
+     * @param  array{search?: string|null, category?: string|null, per_page?: int|string, page?: int|string}  $filters
+     * @return LengthAwarePaginator<int, array<string, mixed>>
+     */
+    public function paginateForPicker(array $filters): LengthAwarePaginator
+    {
+        $paginator = $this->paginate($filters);
+        $paths = Media::query()
+            ->whereIn('uuid', collect($paginator->items())->pluck('uuid'))
+            ->where('disk', self::STORAGE_DISK)
+            ->pluck('path', 'uuid');
+
+        return $paginator->through(fn (array $media): array => [
+            ...$media,
+            'path' => $paths->get($media['uuid']),
+        ]);
+    }
+
+    /**
      * @param  list<UploadedFile>  $files
      */
     /**
@@ -305,7 +323,7 @@ class GalleryService
     /**
      * @return array<string, mixed>
      */
-    public function serializeMedia(Media $media): array
+    public function serializeMedia(Media $media, bool $includePath = false): array
     {
         $media->loadMissing('uploader:id,name');
         $attributes = $media->toArray();
@@ -313,6 +331,10 @@ class GalleryService
             ? Storage::disk(self::STORAGE_DISK)->url($media->path)
             : null;
         unset($attributes['disk'], $attributes['path']);
+
+        if ($includePath && ! $media->trashed() && $media->disk === self::STORAGE_DISK) {
+            $attributes['path'] = $media->path;
+        }
 
         return $attributes;
     }

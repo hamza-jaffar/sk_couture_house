@@ -26,6 +26,7 @@ import { useCallback, useEffect, useState } from "react";
 import GalleryFileCard from "./gallery-file-card";
 import GalleryViewToggle, { type GalleryView } from "./gallery-view-toggle";
 import { galleryCategories } from "@/lib/utils";
+import Heading from "../heading";
 
 export default function GalleryManager({ media, filters }: GalleryPageProps) {
     const can = useCan();
@@ -151,18 +152,16 @@ export default function GalleryManager({ media, filters }: GalleryPageProps) {
     return (
         <>
             <Head title={showUploadForm ? "Upload files" : "Gallery"} />
-            <main className="flex flex-1 flex-col gap-6 p-4 md:p-6">
-                <header className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
-                    <div className="flex flex-col gap-1">
-                        <h1 className="text-2xl font-semibold tracking-tight">
-                            {showUploadForm ? "Upload files" : "Gallery"}
-                        </h1>
-                        <p className="text-sm text-muted-foreground">
-                            {showUploadForm
+            <main className="flex flex-1 flex-col gap-2 p-4 md:p-6">
+                <header className="flex flex-col gap-3 sm:flex-row sm:items-start sm:justify-between">
+                    <Heading
+                        title={showUploadForm ? "Upload files" : "Gallery"}
+                        description={
+                            showUploadForm
                                 ? "Add private files to your gallery."
-                                : "Browse and manage your uploaded files."}
-                        </p>
-                    </div>
+                                : "Browse and manage your uploaded files."
+                        }
+                    />
                     {can("gallery.upload") && (
                         <Button
                             type="button"

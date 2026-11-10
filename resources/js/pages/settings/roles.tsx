@@ -442,7 +442,7 @@ const RoleIndex = ({ roles, filters, permissions }: Props) => {
                                     </Button>
                                 }
                             />
-                            <DropdownMenuContent align="end">
+                            <DropdownMenuContent align="end" className="w-full">
                                 <DropdownMenuItem
                                     onClick={() => setViewingRole(row.original)}
                                 >
@@ -497,7 +497,7 @@ const RoleIndex = ({ roles, filters, permissions }: Props) => {
         pageSize: roles?.per_page ?? filters.per_page,
     };
 
-    const formRoute = editingRole ? update.form(editingRole.id) : store.form();
+    const formRoute = editingRole ? update(editingRole.id) : store();
 
     return (
         <div className="space-y-6">
@@ -638,7 +638,7 @@ const RoleIndex = ({ roles, filters, permissions }: Props) => {
 
             <Form
                 key={editingRole?.id ?? 'new-role'}
-                {...formRoute}
+                action={formRoute}
                 options={{
                     only: ['roles', 'filters'],
                     preserveScroll: true,

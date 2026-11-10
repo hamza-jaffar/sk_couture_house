@@ -7,6 +7,7 @@ export type GalleryMedia = {
     original_file_name: string;
     mime_type: string;
     size: number;
+    path?: string | null;
     type: 'image' | 'video' | 'audio' | 'document' | 'archive' | 'other';
     metadata: Record<string, unknown> | null;
     url: string | null;
@@ -32,28 +33,30 @@ export type GalleryFilters = {
 export type GalleryPageProps = {
     media?: PaginatedGalleryMedia;
     filters: GalleryFilters;
-    mode?: "page";
+    mode?: 'page';
 };
 
 export type GalleryPickerBaseProps = {
-    mode: "dialog";
+    mode: 'dialog';
     open?: boolean;
     onOpenChange?: (open: boolean) => void;
     trigger?: ReactElement;
+    initialCategory?: Exclude<Category, 'deleted'>;
+    allowedCategories?: Exclude<Category, 'deleted'>[];
 };
 
 export type GalleryPickerProps = GalleryPickerBaseProps &
     (
         | {
-              selectionMode: "single";
+              selectionMode: 'single';
               onSelect: (selection: GalleryMedia) => void;
           }
         | {
-              selectionMode?: "multiple";
+              selectionMode?: 'multiple';
               onSelect: (selection: GalleryMedia[]) => void;
           }
     );
 
 export type GalleryProps = GalleryPageProps | GalleryPickerProps;
-export type Category = GalleryFilters["category"];
-export type GalleryView = "grid" | "list";
+export type Category = GalleryFilters['category'];
+export type GalleryView = 'grid' | 'list';

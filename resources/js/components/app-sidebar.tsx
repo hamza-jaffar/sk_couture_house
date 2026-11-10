@@ -22,6 +22,7 @@ import {
     TerminalIcon,
     LayoutDashboard,
     Folder,
+    Layers,
 } from 'lucide-react';
 
 const data = {
@@ -30,6 +31,11 @@ const data = {
             title: 'Dashboard',
             url: '/dashboard',
             icon: <LayoutDashboard />,
+        },
+        {
+            title: 'Collections',
+            url: '/dashboard/collection',
+            icon: <Layers />,
         },
         {
             title: 'Gallery',

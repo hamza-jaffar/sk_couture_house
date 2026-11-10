@@ -37,9 +37,19 @@ class SlugHelper
         string $table,
         string $column = 'slug',
         ?int $ignoreId = null,
-        string $separator = '-'
+        string $separator = '-',
+        ?string $fallback = null
     ): string {
-        $slug = self::generate($value, $separator);
+        try {
+            $slug = self::generate($value, $separator);
+        } catch (InvalidArgumentException $exception) {
+            if ($fallback === null) {
+                throw $exception;
+            }
+
+            $slug = self::generate($fallback, $separator);
+        }
+
         $originalSlug = $slug;
         $counter = 1;
 

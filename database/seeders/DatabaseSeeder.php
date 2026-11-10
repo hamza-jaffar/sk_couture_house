@@ -4,7 +4,7 @@ namespace Database\Seeders;
 
 use Illuminate\Database\Console\Seeds\WithoutModelEvents;
 use Illuminate\Database\Seeder;
-use Modules\Gallery\Database\Seeders\GalleryPermissionSeeder;
+use Modules\Category\Database\Seeders\CategorySeeder;
 use Modules\User\Database\Seeders\RolePermissionSeeder;
 use Modules\User\Database\Seeders\UserSeeder;
 
@@ -18,8 +18,9 @@ class DatabaseSeeder extends Seeder
     public function run(): void
     {
         $this->call([
-            RolePermissionSeeder::class,
-            UserSeeder::class,
+            // RolePermissionSeeder::class,
+            // UserSeeder::class,
+            CategorySeeder::class,
         ]);
     }
 }

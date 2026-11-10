@@ -43,7 +43,8 @@ class GalleryController
         }
 
         return response()->json([
-            ...$this->galleryService->paginate($filters)->toArray(),
+            ...$this->galleryService->paginateForPicker($filters)->toArray(),
+            'canUpload' => $request->user()?->can('gallery.upload') ?? false,
         ]);
     }
 
@@ -57,7 +58,7 @@ class GalleryController
         if ($request->expectsJson()) {
             return response()->json([
                 'media' => array_map(
-                    fn (Media $item): array => $this->galleryService->serializeMedia($item),
+                    fn (Media $item): array => $this->galleryService->serializeMedia($item, includePath: true),
                     $media,
                 ),
             ]);
