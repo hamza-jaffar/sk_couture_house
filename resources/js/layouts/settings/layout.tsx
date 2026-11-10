@@ -6,10 +6,16 @@ import { useCurrentUrl } from "@/hooks/use-current-url";
 import { cn, toUrl } from "@/lib/utils";
 import { NavItem } from "@/types/ui";
 import { Link } from "@inertiajs/react";
-import { SunMoon, User, UserCog, UserShield } from "lucide-react";
+import { Globe, SunMoon, User, UserCog, UserShield } from "lucide-react";
 import React from "react";
 
 const sidebarNavItems: NavItem[] = [
+    {
+        title: "Platform",
+        href: "/settings/platform",
+        icon: Globe,
+        permission: "settings.view",
+    },
     {
         title: "Profile",
         href: "/settings/profile",
