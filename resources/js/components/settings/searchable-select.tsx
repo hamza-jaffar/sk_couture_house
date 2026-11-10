@@ -79,12 +79,13 @@ export default function SearchableSelect({
     );
 
     return (
-        <div className="grid gap-2">
+        <div className="grid gap-2 w-full">
             {!hideLabel ? <Label htmlFor={id}>{label}</Label> : null}
             <Combobox.Root
                 items={items}
                 value={value || null}
                 autoHighlight
+
                 onValueChange={(selectedValue) => {
                     if (selectedValue !== null) {
                         onChange(selectedValue);

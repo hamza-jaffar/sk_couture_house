@@ -1,9 +1,9 @@
-import { data as currencyData } from 'currency-codes';
-import { useMemo } from 'react';
+import { data as currencyData } from "currency-codes";
+import { useMemo } from "react";
 import SearchableSelect, {
     type SearchableOption,
-} from '@/components/settings/searchable-select';
-import { Label } from '@/components/ui/label';
+} from "@/components/settings/searchable-select";
+import { Label } from "@/components/ui/label";
 
 type Props = {
     currency: string;
@@ -13,13 +13,13 @@ type Props = {
 };
 
 function getCurrencyIcon(currency: string): string {
-    const currencyPart = new Intl.NumberFormat('en', {
-        style: 'currency',
+    const currencyPart = new Intl.NumberFormat("en", {
+        style: "currency",
         currency,
-        currencyDisplay: 'narrowSymbol',
+        currencyDisplay: "narrowSymbol",
     })
         .formatToParts(0)
-        .find((part) => part.type === 'currency');
+        .find((part) => part.type === "currency");
 
     if (!currencyPart) {
         throw new Error(`Unable to resolve the symbol for ${currency}.`);
@@ -49,29 +49,30 @@ export default function CurrencyField({
 
     return (
         <div className="grid gap-2">
-            <div className="flex items-center justify-between gap-3">
-                <Label htmlFor="store-currency">Currency</Label>
+            <Label htmlFor="store-currency">Currency</Label>
+            <div className="flex items-center gap-2">
                 <span
-                    className="grid size-8 place-items-center rounded-md border bg-muted/40 text-sm font-semibold"
+                    className="grid w-fit h-9 p-2 place-items-center rounded-md border bg-muted/40 text-sm font-semibold"
                     aria-label={`Currency symbol ${currencyIcon}`}
                 >
                     {currencyIcon}
                 </span>
+                <SearchableSelect
+                    id="store-currency"
+                    name="currency"
+                    label="Currency code"
+
+                    hideLabel
+                    value={currency}
+                    options={options}
+                    placeholder="Select a currency"
+                    searchPlaceholder="Search currency code or name..."
+                    error={error}
+                    onChange={(nextCurrency) =>
+                        onChange(nextCurrency, getCurrencyIcon(nextCurrency))
+                    }
+                />
             </div>
-            <SearchableSelect
-                id="store-currency"
-                name="currency"
-                label="Currency code"
-                hideLabel
-                value={currency}
-                options={options}
-                placeholder="Select a currency"
-                searchPlaceholder="Search currency code or name..."
-                error={error}
-                onChange={(nextCurrency) =>
-                    onChange(nextCurrency, getCurrencyIcon(nextCurrency))
-                }
-            />
             <input type="hidden" name="currency_icon" value={currencyIcon} />
         </div>
     );
