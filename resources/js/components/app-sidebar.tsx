@@ -23,6 +23,7 @@ import {
     LayoutDashboard,
     Folder,
     Layers,
+    Shirt,
 } from 'lucide-react';
 
 const data = {
@@ -36,6 +37,12 @@ const data = {
             title: 'Collections',
             url: '/dashboard/collection',
             icon: <Layers />,
+        },
+        {
+            title: 'Products',
+            url: '/dashboard/product',
+            icon: <Shirt />,
+            permission: 'products.view',
         },
         {
             title: 'Gallery',

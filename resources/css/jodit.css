@@ -1,0 +1,197 @@
+/* Jodit Editor Theme Styling - matches application theme (light and dark) */
+
+.jodit-container,
+.jodit-popup,
+.jodit-dialog {
+    --jd-color-border: var(--border);
+    --jd-color-text: var(--foreground);
+    --jd-color-icon: var(--foreground);
+    --jd-color-button-background-hover: var(--accent);
+    --jd-font-default: var(--font-sans);
+    --jd-dark-background-color: var(--background);
+    --jd-dark-background-darknes: var(--background);
+    --jd-dark-background-ligher: var(--accent);
+    --jd-dark-border-color: var(--border);
+    --jd-dark-text-color: var(--foreground);
+    --jd-dark-text-color-opacity80: var(--muted-foreground);
+    --jd-dark-text-color-opacity50: var(--muted-foreground);
+    --jd-dark-icon-color: var(--foreground);
+    --jd-dark-toolbar-color: var(--card);
+}
+
+/* Container wrapper */
+.jodit-container {
+    border-color: var(--border) !important;
+    border-radius: calc(var(--radius) * 0.8) !important;
+    background-color: var(--background) !important;
+    color: var(--foreground) !important;
+    font-family: inherit !important;
+    transition: border-color 0.15s ease, box-shadow 0.15s ease;
+    overflow: hidden;
+}
+
+.jodit-container:focus-within {
+    border-color: var(--ring) !important;
+    box-shadow: 0 0 0 1px var(--ring) !important;
+}
+
+/* Toolbar styling */
+.jodit-toolbar__box:not(:empty) {
+    background-color: var(--card) !important;
+    border-bottom: 1px solid var(--border) !important;
+}
+
+.jodit-toolbar-collection_mode_horizontal,
+.jodit-toolbar-editor-collection_mode_horizontal {
+    background-color: transparent !important;
+    background-image: none !important;
+}
+
+.jodit-toolbar-collection_mode_horizontal::after,
+.jodit-toolbar-editor-collection_mode_horizontal::after {
+    display: none !important;
+}
+
+.jodit-ui-group_separated_true:not(:last-child, .jodit-ui-group_before-spacer_true)::after {
+    border-right-color: var(--border) !important;
+}
+
+/* Toolbar buttons & icons */
+.jodit-toolbar-button__button,
+.jodit-ui-button__button,
+.jodit-toolbar-button,
+.jodit-ui-button,
+.jodit-toolbar-select {
+    color: var(--foreground) !important;
+}
+
+.jodit-toolbar-button svg,
+.jodit-ui-button svg,
+.jodit-toolbar-select svg,
+.jodit-icon {
+    fill: var(--foreground) !important;
+}
+
+.jodit-toolbar-button__button:hover:not([disabled]),
+.jodit-ui-button__button:hover:not([disabled]),
+.jodit-toolbar-select__button:hover:not([disabled]),
+.jodit-toolbar-button__trigger:hover:not([disabled]),
+.jodit-ui-button__trigger:hover:not([disabled]) {
+    background-color: var(--accent) !important;
+    color: var(--accent-foreground) !important;
+}
+
+.jodit-toolbar-button__button:hover:not([disabled]) svg,
+.jodit-ui-button__button:hover:not([disabled]) svg,
+.jodit-toolbar-select__button:hover:not([disabled]) svg {
+    fill: var(--accent-foreground) !important;
+}
+
+.jodit-toolbar-button_active .jodit-toolbar-button__button,
+.jodit-toolbar-button[aria-pressed="true"] .jodit-toolbar-button__button,
+.jodit-ui-button[aria-pressed="true"] {
+    background-color: var(--accent) !important;
+    color: var(--accent-foreground) !important;
+}
+
+.jodit-toolbar-button_active svg,
+.jodit-toolbar-button[aria-pressed="true"] svg,
+.jodit-ui-button[aria-pressed="true"] svg {
+    fill: var(--accent-foreground) !important;
+}
+
+/* Workplace & Editor body */
+.jodit-container:not(.jodit_inline) .jodit-workplace {
+    background-color: var(--background) !important;
+    border-color: var(--border) !important;
+}
+
+.jodit-wysiwyg {
+    background-color: var(--background) !important;
+    color: var(--foreground) !important;
+    font-family: inherit !important;
+    font-size: 0.875rem !important;
+    line-height: 1.5 !important;
+    padding: 0.75rem 1rem !important;
+}
+
+.jodit-placeholder {
+    color: var(--muted-foreground) !important;
+    font-family: inherit !important;
+    font-size: 0.875rem !important;
+    padding: 0.75rem 1rem !important;
+}
+
+/* Status bar */
+.jodit-status-bar,
+.jodit-status-bar:not(:empty) {
+    background-color: var(--card) !important;
+    border-top: 1px solid var(--border) !important;
+    color: var(--muted-foreground) !important;
+    font-size: 0.75rem !important;
+}
+
+.jodit-status-bar__item,
+.jodit-status-bar__item a,
+.jodit-status-bar__item span,
+.jodit-status-bar a.jodit-status-bar-link {
+    color: var(--muted-foreground) !important;
+}
+
+.jodit-status-bar__item a:hover,
+.jodit-status-bar a.jodit-status-bar-link:hover {
+    color: var(--foreground) !important;
+}
+
+/* Popups & Dialogs */
+.jodit-popup,
+.jodit-popup__content,
+.jodit-dialog__box,
+.jodit-dialog__header,
+.jodit-dialog__content,
+.jodit-dialog__footer {
+    background-color: var(--popover) !important;
+    color: var(--popover-foreground) !important;
+    border-color: var(--border) !important;
+}
+
+.jodit-popup__content {
+    border: 1px solid var(--border) !important;
+    border-radius: var(--radius) !important;
+    box-shadow: 0 10px 15px -3px rgb(0 0 0 / 0.1), 0 4px 6px -4px rgb(0 0 0 / 0.1) !important;
+}
+
+.jodit-ui-list__item {
+    color: var(--popover-foreground) !important;
+}
+
+.jodit-ui-list__item:hover,
+.jodit-ui-list__item_active_true {
+    background-color: var(--accent) !important;
+    color: var(--accent-foreground) !important;
+}
+
+.jodit-dialog__header {
+    border-bottom: 1px solid var(--border) !important;
+}
+
+.jodit-dialog__footer {
+    border-top: 1px solid var(--border) !important;
+}
+
+.jodit-input,
+.jodit-select,
+.jodit-form textarea,
+.jodit-form input[type='text'],
+.jodit-form input[type='url'],
+.jodit-form input[type='number'] {
+    background-color: var(--input) !important;
+    border: 1px solid var(--border) !important;
+    color: var(--foreground) !important;
+    border-radius: calc(var(--radius) * 0.6) !important;
+}
+
+.jodit-resizer > i {
+    border-color: var(--ring) !important;
+    background-color: var(--ring) !important;
+}
