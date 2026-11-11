@@ -55,6 +55,13 @@ class ProductController
         ]);
     }
 
+    public function show(Product $product): Response
+    {
+        return Inertia::render('dashboard/product/show', [
+            'product' => $this->productService->productForDetail($product),
+        ]);
+    }
+
     public function store(ProductDataRequest $request): RedirectResponse
     {
         $this->productService->createProduct($request->productData());

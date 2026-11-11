@@ -4,9 +4,14 @@ namespace App\Http\Middleware;
 
 use Illuminate\Http\Request;
 use Inertia\Middleware;
+use Modules\Setting\Services\SiteSettingService;
 
 class HandleInertiaRequests extends Middleware
 {
+    public function __construct(
+        private SiteSettingService $settings,
+    ) {}
+
     /**
      * The root template that's loaded on the first page visit.
      *
@@ -48,6 +53,7 @@ class HandleInertiaRequests extends Middleware
                     ->values()
                     ->all() ?? [],
             ],
+            'settings' => $this->settings->all(),
             'sidebarOpen' => ! $request->hasCookie('sidebar_state') || $request->cookie('sidebar_state') === 'true',
         ];
     }

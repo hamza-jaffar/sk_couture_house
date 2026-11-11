@@ -66,5 +66,5 @@ export function formatFileSize(bytes: number): string {
 export function formatPrice(value: string, currencyIcon: string): string {
     const spacing = currencyIcon.length > 1 ? " " : "";
 
-    return `${currencyIcon}${spacing}${Number(value).toFixed(2)}`;
+    return `${currencyIcon}${spacing}${Number(value).toFixed(0)}`;
 }

@@ -16,7 +16,10 @@ use Modules\Setting\Services\SiteSettingService;
 
 class ProductService
 {
-    public function __construct(private SiteSettingService $settings) {}
+    public function __construct(
+        private SiteSettingService $settings,
+        private ProductListingCache $listingCache,
+    ) {}
 
     /**
      * @param  array<string, mixed>  $filters
@@ -24,52 +27,54 @@ class ProductService
      */
     public function paginateProducts(array $filters): LengthAwarePaginator
     {
-        $query = Product::query()
-            ->with([
-                'category:id,name,slug',
-                'variants:id,product_id,sku,name,price,sale_price,stock,attributes,image',
-            ])
-            ->withCount('variants');
+        return $this->listingCache->remember($filters, function () use ($filters): LengthAwarePaginator {
+            $query = Product::query()
+                ->with([
+                    'category:id,name,slug',
+                    'variants:id,product_id,sku,name,price,sale_price,stock,attributes,image',
+                ])
+                ->withCount('variants');
 
-        $status = $filters['status'] ?? 'all';
+            $status = $filters['status'] ?? 'all';
 
-        if ($status === 'deleted') {
-            $query->onlyTrashed();
-        } elseif ($status !== 'all') {
-            $query->where('status', $status);
-        }
+            if ($status === 'deleted') {
+                $query->onlyTrashed();
+            } elseif ($status !== 'all') {
+                $query->where('status', $status);
+            }
 
-        if (filled($filters['search'] ?? null)) {
-            $search = trim($filters['search']);
-            $query->where(function (Builder $products) use ($search): void {
-                $products
-                    ->where('title', 'like', "%{$search}%")
-                    ->orWhere('slug', 'like', "%{$search}%")
-                    ->orWhere('sku', 'like', "%{$search}%");
-            });
-        }
+            if (filled($filters['search'] ?? null)) {
+                $search = trim($filters['search']);
+                $query->where(function (Builder $products) use ($search): void {
+                    $products
+                        ->where('title', 'like', "%{$search}%")
+                        ->orWhere('slug', 'like', "%{$search}%")
+                        ->orWhere('sku', 'like', "%{$search}%");
+                });
+            }
 
-        if (filled($filters['category'] ?? null)) {
-            $query->whereHas(
-                'category',
-                fn (Builder $categories) => $categories->where('slug', $filters['category']),
-            );
-        }
+            if (filled($filters['category'] ?? null)) {
+                $query->whereHas(
+                    'category',
+                    fn (Builder $categories) => $categories->where('slug', $filters['category']),
+                );
+            }
 
-        if (($filters['type'] ?? 'all') !== 'all') {
-            $query->where('type', $filters['type']);
-        }
+            if (($filters['type'] ?? 'all') !== 'all') {
+                $query->where('type', $filters['type']);
+            }
 
-        $sort = $filters['sort'] ?? 'created_at';
-        $direction = $filters['direction'] ?? 'desc';
+            $sort = $filters['sort'] ?? 'created_at';
+            $direction = $filters['direction'] ?? 'desc';
 
-        $paginator = $query
-            ->orderBy($sort, $direction)
-            ->orderBy('id', $direction)
-            ->paginate((int) ($filters['per_page'] ?? 10))
-            ->withQueryString();
+            $paginator = $query
+                ->orderBy($sort, $direction)
+                ->orderBy('id', $direction)
+                ->paginate((int) ($filters['per_page'] ?? 10))
+                ->withQueryString();
 
-        return $paginator->through(fn (Product $product): array => $this->presentProduct($product));
+            return $paginator->through(fn (Product $product): array => $this->presentProduct($product));
+        });
     }
 
     /**
@@ -82,31 +87,33 @@ class ProductService
      */
     public function formOptions(): array
     {
-        $settings = $this->settings->all();
+        return $this->listingCache->rememberFormOptions(function (): array {
+            $settings = $this->settings->all();
 
-        return [
-            'categories' => Category::query()
-                ->where('is_active', true)
-                ->orderBy('name')
-                ->orderBy('id')
-                ->get(['id', 'name', 'slug'])
-                ->map(fn (Category $category): array => [
-                    'id' => (int) $category->id,
-                    'name' => $category->name,
-                    'slug' => $category->slug,
-                ])
-                ->all(),
-            'variant_presets' => array_values(array_map(
-                fn (array $variant): array => [
-                    'id' => (string) $variant['id'],
-                    'name' => (string) $variant['name'],
-                    'values' => array_values($variant['values']),
-                ],
-                $settings['variants'],
-            )),
-            'currency' => $settings['general']['currency'],
-            'currency_icon' => $settings['general']['currency_icon'],
-        ];
+            return [
+                'categories' => Category::query()
+                    ->where('is_active', true)
+                    ->orderBy('name')
+                    ->orderBy('id')
+                    ->get(['id', 'name', 'slug'])
+                    ->map(fn (Category $category): array => [
+                        'id' => (int) $category->id,
+                        'name' => $category->name,
+                        'slug' => $category->slug,
+                    ])
+                    ->all(),
+                'variant_presets' => array_values(array_map(
+                    fn (array $variant): array => [
+                        'id' => (string) $variant['id'],
+                        'name' => (string) $variant['name'],
+                        'values' => array_values($variant['values']),
+                    ],
+                    $settings['variants'],
+                )),
+                'currency' => $settings['general']['currency'],
+                'currency_icon' => $settings['general']['currency_icon'],
+            ];
+        });
     }
 
     /**
@@ -123,10 +130,25 @@ class ProductService
     }
 
     /**
+     * @return array<string, mixed>
+     */
+    public function productForDetail(Product $product): array
+    {
+        $product->load([
+            'category:id,name,slug',
+            'variants:id,product_id,sku,name,price,sale_price,stock,attributes,image',
+        ])->loadCount('variants');
+
+        return $this->presentProduct($product);
+    }
+
+    /**
      * @param  array<string, mixed>  $data
      */
     public function createProduct(array $data): Product
     {
+        $this->listingCache->invalidateAfterCommit();
+
         return DB::transaction(function () use ($data): Product {
             $product = Product::query()->create([
                 ...Arr::only($data, $this->productFields()),
@@ -148,6 +170,8 @@ class ProductService
      */
     public function updateProduct(Product $product, array $data): Product
     {
+        $this->listingCache->invalidateAfterCommit();
+
         return DB::transaction(function () use ($product, $data): Product {
             $product = Product::query()
                 ->whereKey($product->getKey())
@@ -172,6 +196,8 @@ class ProductService
 
     public function deleteProduct(Product $product): void
     {
+        $this->listingCache->invalidateAfterCommit();
+
         DB::transaction(function () use ($product): void {
             Product::query()
                 ->whereKey($product->getKey())
@@ -183,6 +209,8 @@ class ProductService
 
     public function restoreProduct(Product $product): void
     {
+        $this->listingCache->invalidateAfterCommit();
+
         DB::transaction(function () use ($product): void {
             Product::withTrashed()
                 ->whereKey($product->getKey())
@@ -195,6 +223,8 @@ class ProductService
 
     public function forceDeleteProduct(Product $product): void
     {
+        $this->listingCache->invalidateAfterCommit();
+
         DB::transaction(function () use ($product): void {
             Product::withTrashed()
                 ->whereKey($product->getKey())

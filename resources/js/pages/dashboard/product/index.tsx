@@ -5,12 +5,13 @@ import {
     forceDelete,
     index,
     restore,
-} from '@/actions/Modules/Product/Http/Controller/ProductController';
+    show,
+} from "@/actions/Modules/Product/Http/Controller/ProductController";
 import {
     DataTable,
     DataTableColumnHeader,
     type DataTableColumnDef,
-} from '@/components/data-table';
+} from "@/components/data-table";
 import {
     AlertDialog,
     AlertDialogAction,
@@ -20,39 +21,40 @@ import {
     AlertDialogFooter,
     AlertDialogHeader,
     AlertDialogTitle,
-} from '@/components/ui/alert-dialog';
-import { Button } from '@/components/ui/button';
+} from "@/components/ui/alert-dialog";
+import { Button } from "@/components/ui/button";
 import {
     Select,
     SelectContent,
     SelectItem,
     SelectTrigger,
     SelectValue,
-} from '@/components/ui/select';
-import { Skeleton } from '@/components/ui/skeleton';
-import { useCan } from '@/hooks/use-can';
+} from "@/components/ui/select";
+import { Skeleton } from "@/components/ui/skeleton";
+import { useCan } from "@/hooks/use-can";
 import type {
     PaginatedProducts,
     ProductFilters,
     ProductFormOptions,
     ProductRecord,
-} from '@/types';
-import { Combobox } from '@base-ui/react/combobox';
-import { Deferred, Head, router } from '@inertiajs/react';
-import type { PaginationState, SortingState } from '@tanstack/table-core';
+} from "@/types";
+import { Combobox } from "@base-ui/react/combobox";
+import { Deferred, Head, router } from "@inertiajs/react";
+import type { PaginationState, SortingState } from "@tanstack/table-core";
 import {
     ArchiveRestore,
     Check,
     ChevronDown,
+    Eye,
     ImageIcon,
     Pencil,
     Plus,
     Search,
     Trash2,
-} from 'lucide-react';
-import { useCallback, useEffect, useMemo, useState } from 'react';
-import Heading from '@/components/heading';
-import { formatPrice } from '@/lib/utils';
+} from "lucide-react";
+import { useCallback, useEffect, useMemo, useState } from "react";
+import Heading from "@/components/heading";
+import { formatPrice } from "@/lib/utils";
 
 type Props = {
     products?: PaginatedProducts;
@@ -61,19 +63,9 @@ type Props = {
 };
 
 type PendingAction = {
-    type: 'delete' | 'restore' | 'force-delete';
+    type: "delete" | "restore" | "force-delete";
     product: ProductRecord;
 };
-
-function ProductTableSkeleton() {
-    return (
-        <div className="grid gap-3">
-            {Array.from({ length: 6 }, (_, index) => (
-                <Skeleton key={index} className="h-14 w-full rounded-lg" />
-            ))}
-        </div>
-    );
-}
 
 function ProductImageCell({ product }: { product: ProductRecord }) {
     const image = product.images[0];
@@ -107,12 +99,12 @@ function CollectionFilter({
     onValueChange,
 }: {
     value: string;
-    categories: ProductFormOptions['categories'];
+    categories: ProductFormOptions["categories"];
     onValueChange: (value: string) => void;
 }) {
     const items = useMemo(
         () => [
-            { value: 'all', label: 'All collections' },
+            { value: "all", label: "All collections" },
             ...categories.map((category) => ({
                 value: category.slug,
                 label: category.name,
@@ -135,7 +127,7 @@ function CollectionFilter({
     return (
         <Combobox.Root
             items={comboboxItems}
-            value={value || 'all'}
+            value={value || "all"}
             onValueChange={(nextValue) => {
                 if (nextValue !== null) {
                     onValueChange(nextValue);
@@ -150,7 +142,7 @@ function CollectionFilter({
                         className="flex h-8 min-w-44 items-center justify-between gap-2 rounded-lg border border-input bg-transparent px-2.5 text-left text-sm whitespace-nowrap transition-colors outline-none hover:bg-muted/50 focus-visible:border-ring focus-visible:ring-3 focus-visible:ring-ring/50 dark:bg-input/30 dark:hover:bg-input/50"
                     >
                         <span className="truncate">
-                            {selectedOption?.label ?? 'All collections'}
+                            {selectedOption?.label ?? "All collections"}
                         </span>
                         <ChevronDown className="size-4 shrink-0 text-muted-foreground" />
                     </button>
@@ -216,7 +208,7 @@ function ProductTable({
     isLoading,
 }: {
     products?: PaginatedProducts;
-    categories: ProductFormOptions['categories'];
+    categories: ProductFormOptions["categories"];
     filters: ProductFilters;
     can: (permission: string) => boolean;
     search: string;
@@ -230,16 +222,16 @@ function ProductTable({
     const columns = useMemo<DataTableColumnDef<ProductRecord>[]>(
         () => [
             {
-                accessorKey: 'title',
+                accessorKey: "title",
                 header: ({ column }) => (
                     <DataTableColumnHeader column={column} title="Product" />
                 ),
                 cell: ({ row }) => <ProductImageCell product={row.original} />,
             },
             {
-                id: 'category',
-                accessorFn: (product) => product.category?.name ?? '',
-                header: () => 'Collection',
+                id: "category",
+                accessorFn: (product) => product.category?.name ?? "",
+                header: () => "Collection",
                 cell: ({ row }) =>
                     row.original.category?.name ?? (
                         <span className="text-muted-foreground">
@@ -249,7 +241,7 @@ function ProductTable({
                 enableSorting: false,
             },
             {
-                accessorKey: 'price',
+                accessorKey: "price",
                 header: ({ column }) => (
                     <DataTableColumnHeader column={column} title="Price" />
                 ),
@@ -260,7 +252,7 @@ function ProductTable({
                         </span>
                         {row.original.sale_price && (
                             <span className="text-xs text-muted-foreground">
-                                Sale{' '}
+                                Sale{" "}
                                 {formatPrice(
                                     row.original.sale_price,
                                     currencyIcon,
@@ -271,14 +263,14 @@ function ProductTable({
                 ),
             },
             {
-                accessorKey: 'stock',
+                accessorKey: "stock",
                 header: ({ column }) => (
                     <DataTableColumnHeader column={column} title="Stock" />
                 ),
                 cell: ({ row }) => (
                     <span>
                         {row.original.stock}
-                        {row.original.type === 'variable' && (
+                        {row.original.type === "variable" && (
                             <span className="ml-1 text-xs text-muted-foreground">
                                 across {row.original.variants_count} variants
                             </span>
@@ -287,7 +279,7 @@ function ProductTable({
                 ),
             },
             {
-                accessorKey: 'status',
+                accessorKey: "status",
                 header: ({ column }) => (
                     <DataTableColumnHeader column={column} title="Status" />
                 ),
@@ -303,14 +295,14 @@ function ProductTable({
                     ),
             },
             {
-                accessorKey: 'created_at',
+                accessorKey: "created_at",
                 header: ({ column }) => (
                     <DataTableColumnHeader column={column} title="Created" />
                 ),
                 cell: ({ row }) => row.original.created_at.slice(0, 10),
             },
             {
-                id: 'actions',
+                id: "actions",
                 header: () => <span className="sr-only">Actions</span>,
                 enableSorting: false,
                 cell: ({ row }) => {
@@ -320,7 +312,7 @@ function ProductTable({
                         <div className="flex justify-end gap-1">
                             {product.deleted_at ? (
                                 <>
-                                    {can('products.delete') && (
+                                    {can("products.delete") && (
                                         <>
                                             <Button
                                                 type="button"
@@ -328,13 +320,12 @@ function ProductTable({
                                                 size="sm"
                                                 onClick={() =>
                                                     onAction({
-                                                        type: 'restore',
+                                                        type: "restore",
                                                         product,
                                                     })
                                                 }
                                             >
                                                 <ArchiveRestore />
-                                                Restore
                                             </Button>
                                             <Button
                                                 type="button"
@@ -343,7 +334,7 @@ function ProductTable({
                                                 aria-label={`Permanently delete ${product.title}`}
                                                 onClick={() =>
                                                     onAction({
-                                                        type: 'force-delete',
+                                                        type: "force-delete",
                                                         product,
                                                     })
                                                 }
@@ -355,7 +346,23 @@ function ProductTable({
                                 </>
                             ) : (
                                 <>
-                                    {can('products.update') && (
+                                    {can("products.view") && (
+                                        <Button
+                                            type="button"
+                                            variant="ghost"
+                                            size="icon"
+                                            aria-label={`View ${product.title}`}
+                                            title="View product"
+                                            onClick={() =>
+                                                router.visit(
+                                                    show.url(product.slug),
+                                                )
+                                            }
+                                        >
+                                            <Eye />
+                                        </Button>
+                                    )}
+                                    {can("products.update") && (
                                         <Button
                                             type="button"
                                             variant="ghost"
@@ -367,7 +374,7 @@ function ProductTable({
                                             <Pencil />
                                         </Button>
                                     )}
-                                    {can('products.delete') && (
+                                    {can("products.delete") && (
                                         <Button
                                             type="button"
                                             variant="ghost"
@@ -375,7 +382,7 @@ function ProductTable({
                                             aria-label={`Move ${product.title} to trash`}
                                             onClick={() =>
                                                 onAction({
-                                                    type: 'delete',
+                                                    type: "delete",
                                                     product,
                                                 })
                                             }
@@ -396,7 +403,7 @@ function ProductTable({
     const sorting: SortingState = [
         {
             id: filters.sort,
-            desc: filters.direction === 'desc',
+            desc: filters.direction === "desc",
         },
     ];
     const pagination: PaginationState = {
@@ -418,28 +425,28 @@ function ProductTable({
             searchPlaceholder="Search products..."
             sorting={sorting}
             onSortingChange={(next) => {
-                const value = typeof next === 'function' ? next(sorting) : next;
+                const value = typeof next === "function" ? next(sorting) : next;
                 const sort = value[0]?.id;
 
                 if (
-                    sort !== 'title' &&
-                    sort !== 'price' &&
-                    sort !== 'stock' &&
-                    sort !== 'status' &&
-                    sort !== 'created_at'
+                    sort !== "title" &&
+                    sort !== "price" &&
+                    sort !== "stock" &&
+                    sort !== "status" &&
+                    sort !== "created_at"
                 ) {
                     return;
                 }
 
                 onFiltersChange({
                     sort,
-                    direction: value[0]?.desc ? 'desc' : 'asc',
+                    direction: value[0]?.desc ? "desc" : "asc",
                 });
             }}
             pagination={pagination}
             onPaginationChange={(next) => {
                 const value =
-                    typeof next === 'function' ? next(pagination) : next;
+                    typeof next === "function" ? next(pagination) : next;
                 onFiltersChange({
                     page: value.pageIndex + 1,
                     per_page: value.pageSize,
@@ -451,14 +458,14 @@ function ProductTable({
             pageSizeOptions={[10, 20, 50, 100]}
             isLoading={isLoading || products === undefined}
             emptyTitle={
-                filters.status === 'deleted'
-                    ? 'The product trash is empty'
-                    : 'No products found'
+                filters.status === "deleted"
+                    ? "The product trash is empty"
+                    : "No products found"
             }
             emptyDescription={
                 filters.search
-                    ? 'Try changing your search or filters.'
-                    : 'Create a product to start building your catalog.'
+                    ? "Try changing your search or filters."
+                    : "Create a product to start building your catalog."
             }
             toolbarFilters={() => (
                 <div className="flex flex-wrap gap-2">
@@ -473,9 +480,9 @@ function ProductTable({
                         value={filters.type}
                         onValueChange={(value) => {
                             if (
-                                value === 'all' ||
-                                value === 'simple' ||
-                                value === 'variable'
+                                value === "all" ||
+                                value === "simple" ||
+                                value === "variable"
                             ) {
                                 onFiltersChange({ type: value });
                             }
@@ -486,11 +493,11 @@ function ProductTable({
                             aria-label="Filter by product type"
                         >
                             <SelectValue>
-                                {filters.type === 'all'
-                                    ? 'All types'
-                                    : filters.type === 'simple'
-                                      ? 'Simple'
-                                      : 'Variable'}
+                                {filters.type === "all"
+                                    ? "All types"
+                                    : filters.type === "simple"
+                                      ? "Simple"
+                                      : "Variable"}
                             </SelectValue>
                         </SelectTrigger>
                         <SelectContent>
@@ -503,11 +510,11 @@ function ProductTable({
                         value={filters.status}
                         onValueChange={(value) => {
                             if (
-                                value === 'all' ||
-                                value === 'draft' ||
-                                value === 'published' ||
-                                value === 'archived' ||
-                                value === 'deleted'
+                                value === "all" ||
+                                value === "draft" ||
+                                value === "published" ||
+                                value === "archived" ||
+                                value === "deleted"
                             ) {
                                 onFiltersChange({ status: value });
                             }
@@ -518,15 +525,15 @@ function ProductTable({
                             aria-label="Filter by product status"
                         >
                             <SelectValue>
-                                {filters.status === 'all'
-                                    ? 'All statuses'
-                                    : filters.status === 'draft'
-                                      ? 'Draft'
-                                      : filters.status === 'published'
-                                        ? 'Published'
-                                        : filters.status === 'archived'
-                                          ? 'Archived'
-                                          : 'Trash'}
+                                {filters.status === "all"
+                                    ? "All statuses"
+                                    : filters.status === "draft"
+                                      ? "Draft"
+                                      : filters.status === "published"
+                                        ? "Published"
+                                        : filters.status === "archived"
+                                          ? "Archived"
+                                          : "Trash"}
                             </SelectValue>
                         </SelectTrigger>
                         <SelectContent>
@@ -570,7 +577,7 @@ export default function ProductIndex({
             };
             const query = Object.fromEntries(
                 Object.entries(nextFilters).filter(
-                    ([, value]) => value !== '' && value !== 'all',
+                    ([, value]) => value !== "" && value !== "all",
                 ),
             );
 
@@ -579,7 +586,7 @@ export default function ProductIndex({
                 index.url({ query }),
                 {},
                 {
-                    only: ['products', 'filters'],
+                    only: ["products", "filters"],
                     preserveState: true,
                     preserveScroll: true,
                     replace: true,
@@ -608,20 +615,20 @@ export default function ProductIndex({
         setProcessingAction(true);
         setActionError(null);
         const options = {
-            only: ['products', 'filters'],
+            only: ["products", "filters"],
             preserveScroll: true,
             onSuccess: () => setPendingAction(null),
             onError: (errors: Record<string, string>) =>
                 setActionError(
-                    errors.product ?? 'Unable to update this product.',
+                    errors.product ?? "Unable to update this product.",
                 ),
             onFinish: () => setProcessingAction(false),
         };
         const slug = pendingAction.product.slug;
 
-        if (pendingAction.type === 'delete') {
+        if (pendingAction.type === "delete") {
             router.delete(destroy.url(slug), options);
-        } else if (pendingAction.type === 'restore') {
+        } else if (pendingAction.type === "restore") {
             router.patch(restore.url(slug), {}, options);
         } else {
             router.delete(forceDelete.url(slug), options);
@@ -637,7 +644,7 @@ export default function ProductIndex({
                     description="Manage catalog information, pricing, stock, and
                         variants."
                 />
-                {can('products.create') && (
+                {can("products.create") && (
                     <Button
                         type="button"
                         onClick={() => router.visit(create.url())}
@@ -648,28 +655,19 @@ export default function ProductIndex({
                 )}
             </header>
 
-            <Deferred data="products" fallback={<ProductTableSkeleton />}>
-                <Deferred
-                    data="formOptions"
-                    fallback={<ProductTableSkeleton />}
-                >
-                    <ProductTable
-                        products={products}
-                        categories={formOptions?.categories ?? []}
-                        filters={filters}
-                        can={can}
-                        search={search}
-                        currencyIcon={formOptions?.currency_icon ?? '$'}
-                        onSearchChange={setSearch}
-                        onEdit={(product) =>
-                            router.visit(edit.url(product.slug))
-                        }
-                        onAction={setPendingAction}
-                        onFiltersChange={visitProducts}
-                        isLoading={isLoading}
-                    />
-                </Deferred>
-            </Deferred>
+            <ProductTable
+                products={products}
+                categories={formOptions?.categories ?? []}
+                filters={filters}
+                can={can}
+                search={search}
+                currencyIcon={formOptions?.currency_icon ?? "$"}
+                onSearchChange={setSearch}
+                onEdit={(product) => router.visit(edit.url(product.slug))}
+                onAction={setPendingAction}
+                onFiltersChange={visitProducts}
+                isLoading={isLoading}
+            />
 
             <AlertDialog
                 open={pendingAction !== null}
@@ -683,17 +681,17 @@ export default function ProductIndex({
                 <AlertDialogContent>
                     <AlertDialogHeader>
                         <AlertDialogTitle>
-                            {pendingAction?.type === 'delete'
-                                ? 'Move product to trash?'
-                                : pendingAction?.type === 'restore'
-                                  ? 'Restore product?'
-                                  : 'Permanently delete product?'}
+                            {pendingAction?.type === "delete"
+                                ? "Move product to trash?"
+                                : pendingAction?.type === "restore"
+                                  ? "Restore product?"
+                                  : "Permanently delete product?"}
                         </AlertDialogTitle>
                         <AlertDialogDescription>
                             {actionError ??
-                                (pendingAction?.type === 'force-delete'
+                                (pendingAction?.type === "force-delete"
                                     ? `${pendingAction.product.title} will be permanently deleted. This cannot be undone.`
-                                    : pendingAction?.type === 'restore'
+                                    : pendingAction?.type === "restore"
                                       ? `${pendingAction.product.title} will be restored.`
                                       : `${pendingAction?.product.title} will be moved to trash.`)}
                         </AlertDialogDescription>
@@ -704,20 +702,20 @@ export default function ProductIndex({
                         </AlertDialogCancel>
                         <AlertDialogAction
                             variant={
-                                pendingAction?.type === 'restore'
-                                    ? 'default'
-                                    : 'destructive'
+                                pendingAction?.type === "restore"
+                                    ? "default"
+                                    : "destructive"
                             }
                             disabled={processingAction}
                             onClick={submitAction}
                         >
                             {processingAction
-                                ? 'Working...'
-                                : pendingAction?.type === 'delete'
-                                  ? 'Move to trash'
-                                  : pendingAction?.type === 'restore'
-                                    ? 'Restore'
-                                    : 'Delete permanently'}
+                                ? "Working..."
+                                : pendingAction?.type === "delete"
+                                  ? "Move to trash"
+                                  : pendingAction?.type === "restore"
+                                    ? "Restore"
+                                    : "Delete permanently"}
                         </AlertDialogAction>
                     </AlertDialogFooter>
                 </AlertDialogContent>
@@ -728,7 +726,7 @@ export default function ProductIndex({
 
 ProductIndex.layout = {
     breadcrumbs: [
-        { title: 'Dashboard', href: '/dashboard' },
-        { title: 'Products', href: '/dashboard/product' },
+        { title: "Dashboard", href: "/dashboard" },
+        { title: "Products", href: "/dashboard/product" },
     ],
 };

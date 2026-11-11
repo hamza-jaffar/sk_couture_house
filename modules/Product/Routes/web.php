@@ -10,6 +10,9 @@ Route::prefix('dashboard/product')->name('dashboard.product.')->middleware('auth
     Route::get('/create', [ProductController::class, 'create'])
         ->middleware('can:products.create')
         ->name('create');
+    Route::get('/{product}', [ProductController::class, 'show'])
+        ->middleware('can:products.view')
+        ->name('show');
     Route::get('/{product}/edit', [ProductController::class, 'edit'])
         ->middleware('can:products.update')
         ->name('edit');
