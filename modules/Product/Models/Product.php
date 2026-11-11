@@ -31,6 +31,10 @@ class Product extends Model
         ];
     }
 
+    protected $appends = [
+        'effective_order_type',
+    ];
+
     public function getRouteKeyName(): string
     {
         return 'slug';
@@ -63,7 +67,19 @@ class Product extends Model
     protected function effectiveOrderType(): Attribute
     {
         return Attribute::make(
-            get: fn () => $this->category?->order_type ?? OrderTypeEnum::DIRECT
+            get: function (): string {
+                $type = $this->category?->order_type;
+
+                if ($type instanceof OrderTypeEnum) {
+                    return $type->value;
+                }
+
+                if (is_string($type) && filled($type)) {
+                    return $type;
+                }
+
+                return OrderTypeEnum::DIRECT->value;
+            }
         );
     }
 }

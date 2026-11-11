@@ -10,6 +10,7 @@ use Illuminate\Support\Arr;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Str;
 use Illuminate\Validation\ValidationException;
+use Modules\Category\Enum\OrderTypeEnum;
 use Modules\Category\Models\Category;
 use Modules\Product\Models\Product;
 use Modules\Setting\Services\SiteSettingService;
@@ -30,7 +31,7 @@ class ProductService
         return $this->listingCache->remember($filters, function () use ($filters): LengthAwarePaginator {
             $query = Product::query()
                 ->with([
-                    'category:id,name,slug',
+                    'category:id,name,slug,order_type',
                     'variants:id,product_id,sku,name,price,sale_price,stock,attributes,image',
                 ])
                 ->withCount('variants');
@@ -79,7 +80,7 @@ class ProductService
 
     /**
      * @return array{
-     *     categories: list<array{id: int, name: string, slug: string}>,
+     *     categories: list<array{id: int, name: string, slug: string, order_type: string}>,
      *     variant_presets: list<array{id: string, name: string, values: list<string>}>,
      *     currency: string,
      *     currency_icon: string
@@ -95,11 +96,14 @@ class ProductService
                     ->where('is_active', true)
                     ->orderBy('name')
                     ->orderBy('id')
-                    ->get(['id', 'name', 'slug'])
+                    ->get(['id', 'name', 'slug', 'order_type'])
                     ->map(fn (Category $category): array => [
                         'id' => (int) $category->id,
                         'name' => $category->name,
                         'slug' => $category->slug,
+                        'order_type' => $category->order_type instanceof OrderTypeEnum
+                            ? $category->order_type->value
+                            : (string) ($category->order_type ?? OrderTypeEnum::DIRECT->value),
                     ])
                     ->all(),
                 'variant_presets' => array_values(array_map(
@@ -122,7 +126,7 @@ class ProductService
     public function productForForm(Product $product): array
     {
         $product->load([
-            'category:id,name,slug',
+            'category:id,name,slug,order_type',
             'variants',
         ])->loadCount('variants');
 
@@ -135,7 +139,7 @@ class ProductService
     public function productForDetail(Product $product): array
     {
         $product->load([
-            'category:id,name,slug',
+            'category:id,name,slug,order_type',
             'variants:id,product_id,sku,name,price,sale_price,stock,attributes,image',
         ])->loadCount('variants');
 
@@ -161,7 +165,7 @@ class ProductService
 
             $this->syncVariants($product, $data['variants'] ?? []);
 
-            return $product->load(['category:id,name,slug', 'variants']);
+            return $product->load(['category:id,name,slug,order_type', 'variants']);
         });
     }
 
@@ -190,7 +194,7 @@ class ProductService
 
             $this->syncVariants($product, $data['variants'] ?? []);
 
-            return $product->load(['category:id,name,slug', 'variants']);
+            return $product->load(['category:id,name,slug,order_type', 'variants']);
         });
     }
 
@@ -275,8 +279,6 @@ class ProductService
         $product->variants()->delete();
 
         if ($product->type !== 'variable') {
-            $product->update(['stock' => (int) $product->stock]);
-
             return;
         }
 
@@ -303,11 +305,8 @@ class ProductService
             ]);
         }
 
-        $totalStock = 0;
-
         foreach ($variants as $variant) {
             $attributes = $variant['attributes'];
-            $totalStock += (int) $variant['stock'];
             $sku = Str::upper('P-'.substr(
                 hash('sha256', $product->slug.'|'.json_encode($attributes, JSON_THROW_ON_ERROR)),
                 0,
@@ -317,17 +316,13 @@ class ProductService
             $product->variants()->create([
                 'sku' => $sku,
                 'name' => implode(' / ', array_values($attributes)),
-                'price' => filled($variant['price'] ?? null) ? $variant['price'] : null,
-                'sale_price' => filled($variant['sale_price'] ?? null)
-                    ? $variant['sale_price']
-                    : null,
-                'stock' => (int) $variant['stock'],
+                'price' => null,
+                'sale_price' => null,
+                'stock' => 0,
                 'attributes' => $attributes,
                 'image' => null,
             ]);
         }
-
-        $product->update(['stock' => $totalStock]);
     }
 
     /**

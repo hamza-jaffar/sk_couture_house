@@ -67,7 +67,7 @@ class ProductDataRequest extends FormRequest
                 'max:255',
                 Rule::unique('products', 'sku')->ignore($productId),
             ],
-            'stock' => ['required_if:type,simple', 'nullable', 'integer', 'min:0', 'max:4294967295'],
+            'stock' => ['required', 'integer', 'min:0', 'max:4294967295'],
             'type' => ['required', Rule::in(['simple', 'variable'])],
             'status' => ['required', Rule::in(['draft', 'published', 'archived'])],
             'is_featured' => ['required', 'boolean'],
@@ -95,9 +95,9 @@ class ProductDataRequest extends FormRequest
             'variants' => ['required_if:type,variable', 'array', 'max:100'],
             'variants.*.attributes' => ['required', 'array', 'min:1', 'max:10'],
             'variants.*.attributes.*' => ['required', 'string', 'max:120'],
-            'variants.*.price' => ['nullable', 'numeric', 'min:0', 'max:99999999.99'],
-            'variants.*.sale_price' => ['nullable', 'numeric', 'min:0', 'max:99999999.99'],
-            'variants.*.stock' => ['required', 'integer', 'min:0', 'max:4294967295'],
+            'variants.*.price' => ['nullable'],
+            'variants.*.sale_price' => ['nullable'],
+            'variants.*.stock' => ['nullable'],
             'meta_title' => ['nullable', 'string', 'max:255'],
             'meta_description' => ['nullable', 'string', 'max:160'],
             'meta_keywords' => ['nullable', 'string', 'max:255'],
@@ -176,10 +176,8 @@ class ProductDataRequest extends FormRequest
                     return;
                 }
 
-                $totalStock = 0;
                 foreach ($variants as $index => $variant) {
                     $attributes = $variant['attributes'] ?? null;
-                    $totalStock += (int) ($variant['stock'] ?? 0);
 
                     if (! is_array($attributes)) {
                         continue;
@@ -208,27 +206,6 @@ class ProductDataRequest extends FormRequest
                             continue 2;
                         }
                     }
-
-                    $variantPrice = $variant['price'] ?? $this->input('price');
-                    $variantSalePrice = $variant['sale_price'] ?? null;
-
-                    if (
-                        $variantSalePrice !== null
-                        && $variantSalePrice !== ''
-                        && (float) $variantSalePrice >= (float) $variantPrice
-                    ) {
-                        $validator->errors()->add(
-                            "variants.{$index}.sale_price",
-                            __('Sale price must be lower than the regular price.'),
-                        );
-                    }
-                }
-
-                if ($totalStock > 4294967295) {
-                    $validator->errors()->add(
-                        'variants',
-                        __('The combined variant stock cannot exceed the product stock limit.'),
-                    );
                 }
             },
         ];

@@ -1,5 +1,6 @@
 import type { Auth } from "@/types/auth";
 import { PlatformSettings } from "./settings";
+import type { CategoryOrderTypeOption } from "./categories";
 
 declare module "react" {
     interface InputHTMLAttributes<T> {
@@ -14,6 +15,7 @@ declare module "@inertiajs/core" {
             auth: Auth;
             settings: PlatformSettings;
             sidebarOpen: boolean;
+            orderTypeOptions: CategoryOrderTypeOption[];
             [key: string]: unknown;
         };
     }

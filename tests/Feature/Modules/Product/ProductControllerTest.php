@@ -189,6 +189,7 @@ it('creates products with gallery paths, unique slugs, and variant inventory', f
         'type' => 'variable',
         'category_id' => $category->id,
         'price' => '80.00',
+        'stock' => 5,
         'images' => [$image->path],
         'variant_options' => [
             ['name' => 'Size', 'values' => ['S', 'M']],
@@ -196,15 +197,9 @@ it('creates products with gallery paths, unique slugs, and variant inventory', f
         'variants' => [
             [
                 'attributes' => ['Size' => 'S'],
-                'price' => '80.00',
-                'sale_price' => null,
-                'stock' => 3,
             ],
             [
                 'attributes' => ['Size' => 'M'],
-                'price' => '85.00',
-                'sale_price' => '75.00',
-                'stock' => 2,
             ],
         ],
     ]);
@@ -231,8 +226,6 @@ it('creates products with gallery paths, unique slugs, and variant inventory', f
     $this->assertDatabaseHas('product_variants', [
         'product_id' => $product->id,
         'name' => 'M',
-        'sale_price' => '75.00',
-        'stock' => 2,
     ]);
 });
 

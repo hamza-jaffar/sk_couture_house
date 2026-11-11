@@ -29,21 +29,21 @@ const STATUS_STYLES: Record<ProductRecord["status"], string> = {
 };
 
 export default function ShowProduct({ product }: Props) {
-    const { settings } = usePage().props;
-
-    console.log(settings.general.currency_icon);
-
+    const { settings, orderTypeOptions } = usePage().props;
     const [activeImage, setActiveImage] = useState(0);
-
     const hasImages = product.images.length > 0;
     const isVariable = product.type === "variable";
+
+    const orderTypeLabel =
+        orderTypeOptions.find(
+            (opt) => opt.value === product.effective_order_type,
+        )?.label ?? product.effective_order_type;
 
     const now = new Date();
     const saleActive =
         !!product.sale_price &&
         (!product.sale_start_at || new Date(product.sale_start_at) <= now) &&
         (!product.sale_end_at || new Date(product.sale_end_at) >= now);
-
     return (
         <div className="flex flex-1 flex-col gap-6 p-4 md:p-6">
             <Head title={product.title} />
@@ -190,17 +190,13 @@ export default function ShowProduct({ product }: Props) {
                                     <thead className="bg-muted/40">
                                         <tr className="text-left text-xs font-medium text-muted-foreground">
                                             <th className="px-4 py-2.5">
-                                                Name
-                                            </th>
-                                            <th className="px-4 py-2.5">SKU</th>
-                                            <th className="px-4 py-2.5">
-                                                Price
+                                                Variant
                                             </th>
                                             <th className="px-4 py-2.5">
-                                                Sale
+                                                Attributes
                                             </th>
                                             <th className="px-4 py-2.5 text-right">
-                                                Stock
+                                                SKU
                                             </th>
                                         </tr>
                                     </thead>
@@ -213,48 +209,19 @@ export default function ShowProduct({ product }: Props) {
                                                 <td className="px-4 py-3 font-medium">
                                                     {variant.name}
                                                 </td>
-                                                <td className="px-4 py-3 font-mono text-xs text-muted-foreground">
+                                                <td className="px-4 py-3 text-xs text-muted-foreground">
+                                                    {variant.attributes &&
+                                                        Object.entries(
+                                                            variant.attributes,
+                                                        )
+                                                            .map(
+                                                                ([k, v]) =>
+                                                                    `${k}: ${v}`,
+                                                            )
+                                                            .join(", ")}
+                                                </td>
+                                                <td className="px-4 py-3 font-mono text-xs text-muted-foreground text-right">
                                                     {variant.sku}
-                                                </td>
-                                                <td className="px-4 py-3">
-                                                    {variant.price &&
-                                                    settings.general
-                                                        .currency_icon
-                                                        ? formatPrice(
-                                                              variant.price,
-                                                              settings.general
-                                                                  .currency_icon,
-                                                          )
-                                                        : (variant.price ?? (
-                                                              <span className="text-muted-foreground">
-                                                                  —
-                                                              </span>
-                                                          ))}
-                                                </td>
-                                                <td className="px-4 py-3">
-                                                    {variant.sale_price &&
-                                                    settings.general
-                                                        .currency_icon
-                                                        ? formatPrice(
-                                                              variant.sale_price,
-                                                              settings.general
-                                                                  .currency_icon,
-                                                          )
-                                                        : (variant.sale_price ?? (
-                                                              <span className="text-muted-foreground">
-                                                                  —
-                                                              </span>
-                                                          ))}
-                                                </td>
-                                                <td
-                                                    className={[
-                                                        "px-4 py-3 text-right font-medium",
-                                                        variant.stock === 0
-                                                            ? "text-destructive"
-                                                            : "",
-                                                    ].join(" ")}
-                                                >
-                                                    {variant.stock}
                                                 </td>
                                             </tr>
                                         ))}
@@ -358,6 +325,15 @@ export default function ShowProduct({ product }: Props) {
                                 </span>
                                 <span className="font-medium capitalize">
                                     {product.type}
+                                </span>
+                            </div>
+
+                            <div className="flex items-center justify-between gap-2">
+                                <span className="text-muted-foreground">
+                                    Order Type
+                                </span>
+                                <span className="font-medium capitalize">
+                                    {orderTypeLabel}
                                 </span>
                             </div>
 

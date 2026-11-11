@@ -1,4 +1,4 @@
-import type { PaginationBase } from './pagination';
+import type { PaginationBase } from "./pagination";
 
 export type ProductVariantOption = {
     name: string;
@@ -9,11 +9,11 @@ export type ProductVariantInventory = {
     id?: number;
     sku: string;
     name: string;
-    price: string | null;
-    sale_price: string | null;
-    stock: number;
+    price?: string | null;
+    sale_price?: string | null;
+    stock?: number;
     attributes: Record<string, string>;
-    image: string | null;
+    image?: string | null;
 };
 
 export type ProductImage = {
@@ -33,8 +33,8 @@ export type ProductRecord = {
     sale_end_at: string | null;
     sku: string | null;
     stock: number;
-    type: 'simple' | 'variable';
-    status: 'draft' | 'published' | 'archived';
+    type: "simple" | "variable";
+    status: "draft" | "published" | "archived";
     is_featured: boolean;
     category_id: number | null;
     category: { id: number; name: string; slug: string } | null;
@@ -53,6 +53,7 @@ export type ProductRecord = {
     robots_meta: string;
     created_at: string;
     deleted_at: string | null;
+    effective_order_type: string;
 };
 
 export type PaginatedProducts = {
@@ -62,10 +63,10 @@ export type PaginatedProducts = {
 export type ProductFilters = {
     search: string;
     category: string;
-    type: 'all' | 'simple' | 'variable';
-    status: 'all' | 'draft' | 'published' | 'archived' | 'deleted';
-    sort: 'title' | 'price' | 'stock' | 'status' | 'created_at';
-    direction: 'asc' | 'desc';
+    type: "all" | "simple" | "variable";
+    status: "all" | "draft" | "published" | "archived" | "deleted";
+    sort: "title" | "price" | "stock" | "status" | "created_at";
+    direction: "asc" | "desc";
     page: number;
     per_page: number;
 };
@@ -77,7 +78,7 @@ export type ProductVariantPreset = {
 };
 
 export type ProductFormOptions = {
-    categories: { id: number; name: string; slug: string }[];
+    categories: { id: number; name: string; slug: string; order_type: string }[];
     variant_presets: ProductVariantPreset[];
     currency: string;
     currency_icon: string;

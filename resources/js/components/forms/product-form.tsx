@@ -28,7 +28,7 @@ import type {
 } from "@/types";
 import { Combobox } from "@base-ui/react/combobox";
 import { Popover } from "@base-ui/react/popover";
-import { router, useForm } from "@inertiajs/react";
+import { router, useForm, usePage } from "@inertiajs/react";
 import { format } from "date-fns";
 import {
     ArrowDownAZ,
@@ -57,9 +57,6 @@ import { toast } from "sonner";
 
 type VariantInput = {
     attributes: Record<string, string>;
-    price: string;
-    sale_price: string;
-    stock: string;
 };
 
 type ProductFormData = {
@@ -212,9 +209,6 @@ function initialFormData(product: ProductRecord | null): ProductFormData {
         variants:
             product?.variants.map((variant) => ({
                 attributes: variant.attributes,
-                price: variant.price ?? "",
-                sale_price: variant.sale_price ?? "",
-                stock: String(variant.stock),
             })) ?? [],
         meta_title: product?.meta_title ?? "",
         meta_description: product?.meta_description ?? "",
@@ -580,6 +574,7 @@ function OptionValuesEditor({
 
 export default function ProductForm({ product, options }: Props) {
     const form = useForm<ProductFormData>(initialFormData(product));
+    const { orderTypeOptions } = usePage().props;
     const [galleryTarget, setGalleryTarget] = useState<
         "images" | "og-image" | null
     >(null);
@@ -614,10 +609,11 @@ export default function ProductForm({ product, options }: Props) {
 
     const categoryOptions = useMemo(
         () => [
-            { value: "none", label: "No collection" },
+            { value: "none", label: "No collection", order_type: null as string | null },
             ...options.categories.map((category) => ({
                 value: String(category.id),
                 label: category.name,
+                order_type: category.order_type,
             })),
         ],
         [options.categories],
@@ -635,6 +631,13 @@ export default function ProductForm({ product, options }: Props) {
     const selectedCategory = categoryOptions.find(
         (option) => option.value === (form.data.category_id || "none"),
     );
+
+    const selectedCategoryOrderType = selectedCategory?.order_type ?? null;
+
+    const selectedCategoryOrderTypeLabel = selectedCategoryOrderType
+        ? (orderTypeOptions.find((o) => o.value === selectedCategoryOrderType)
+              ?.label ?? selectedCategoryOrderType)
+        : null;
 
     useEffect(() => {
         let isMounted = true;
@@ -670,47 +673,20 @@ export default function ProductForm({ product, options }: Props) {
         variantCombinationCount(form.data.variant_options) > 100;
 
     function updateOptions(variantOptions: ProductVariantOption[]) {
-        const existingVariants = new Map(
-            form.data.variants.map((variant) => [
-                attributesKey(variant.attributes),
-                variant,
-            ]),
-        );
         const nextCombinations = combinations(variantOptions);
 
         form.setData((current) => ({
             ...current,
+            // Automatically switch type based on whether options exist
+            type: variantOptions.length > 0 ? "variable" : "simple",
             variant_options: variantOptions,
             variants:
                 nextCombinations.length <= 100
-                    ? nextCombinations.map(
-                          (attributes) =>
-                              existingVariants.get(
-                                  attributesKey(attributes),
-                              ) ?? {
-                                  attributes,
-                                  price: "",
-                                  sale_price: "",
-                                  stock: "0",
-                              },
-                      )
+                    ? nextCombinations.map((attributes) => ({
+                          attributes,
+                      }))
                     : [],
         }));
-    }
-
-    function updateVariant(
-        index: number,
-        field: keyof Omit<VariantInput, "attributes">,
-        value: string,
-    ) {
-        form.setData(
-            "variants",
-            form.data.variants.map((variant, variantIndex) =>
-                variantIndex === index
-                    ? { ...variant, [field]: value }
-                    : variant,
-            ),
-        );
     }
 
     function selectImages(media: GalleryMedia[]) {
@@ -937,6 +913,9 @@ export default function ProductForm({ product, options }: Props) {
                         </Combobox.Root>
                         <FieldDescription>
                             Organize the product under an active collection.
+                            {selectedCategoryOrderTypeLabel && (
+                                <> Order type: <strong>{selectedCategoryOrderTypeLabel}</strong>.</>
+                            )}
                         </FieldDescription>
                         {form.errors.category_id && (
                             <InputError message={form.errors.category_id} />
@@ -951,7 +930,17 @@ export default function ProductForm({ product, options }: Props) {
                                     value === "simple" ||
                                     value === "variable"
                                 ) {
-                                    form.setData("type", value);
+                                    if (value === "simple") {
+                                        // Switching to simple clears all variant data
+                                        form.setData((current) => ({
+                                            ...current,
+                                            type: "simple",
+                                            variant_options: [],
+                                            variants: [],
+                                        }));
+                                    } else {
+                                        form.setData("type", value);
+                                    }
                                 }
                             }}
                         >
@@ -1057,30 +1046,26 @@ export default function ProductForm({ product, options }: Props) {
                             <InputError message={form.errors.sku} />
                         )}
                     </div>
-                    {form.data.type === "simple" && (
-                        <div className="grid gap-2">
-                            <Label htmlFor="product-stock">
-                                Stock quantity
-                            </Label>
-                            <Input
-                                id="product-stock"
-                                type="number"
-                                min="0"
-                                step="1"
-                                value={form.data.stock}
-                                onChange={(event) =>
-                                    form.setData(
-                                        "stock",
-                                        event.currentTarget.value,
-                                    )
-                                }
-                                required
-                            />
-                            {form.errors.stock && (
-                                <InputError message={form.errors.stock} />
-                            )}
-                        </div>
-                    )}
+                    <div className="grid gap-2">
+                        <Label htmlFor="product-stock">Stock quantity</Label>
+                        <Input
+                            id="product-stock"
+                            type="number"
+                            min="0"
+                            step="1"
+                            value={form.data.stock}
+                            onChange={(event) =>
+                                form.setData("stock", event.currentTarget.value)
+                            }
+                            required
+                        />
+                        <FieldDescription>
+                            Total available inventory for this product.
+                        </FieldDescription>
+                        {form.errors.stock && (
+                            <InputError message={form.errors.stock} />
+                        )}
+                    </div>
                 </section>
 
                 <section className="grid gap-4 rounded-xl border p-4">
@@ -1278,11 +1263,12 @@ export default function ProductForm({ product, options }: Props) {
                         <div className="grid gap-3">
                             <div>
                                 <h4 className="text-sm font-medium">
-                                    Variant inventory
+                                    Generated variants
                                 </h4>
                                 <FieldDescription>
-                                    {productCombinations.length} combinations
-                                    generated.
+                                    {productCombinations.length} combination
+                                    {productCombinations.length === 1 ? "" : "s"}{" "}
+                                    generated from options above.
                                 </FieldDescription>
                             </div>
                             {isVariantLimitExceeded ? (
@@ -1290,86 +1276,21 @@ export default function ProductForm({ product, options }: Props) {
                                     A product can have at most 100 variant
                                     combinations.
                                 </p>
-                            ) : (
-                                productCombinations.map((attributes, index) => {
-                                    const variant = form.data.variants[index];
-
-                                    if (!variant) {
-                                        return null;
-                                    }
-
-                                    return (
-                                        <div
+                            ) : productCombinations.length > 0 ? (
+                                <div className="flex flex-wrap gap-2 rounded-lg border bg-muted/20 p-3">
+                                    {productCombinations.map((attributes) => (
+                                        <span
                                             key={attributesKey(attributes)}
-                                            className="grid gap-3 rounded-lg border p-3 sm:grid-cols-[minmax(0,1.3fr)_1fr_1fr_1fr]"
+                                            className="inline-flex items-center gap-1.5 rounded-md border bg-background px-3 py-1.5 text-xs font-medium text-foreground shadow-xs"
                                         >
-                                            <p className="self-center text-sm font-medium">
-                                                {Object.values(attributes).join(
-                                                    " / ",
-                                                )}
-                                            </p>
-                                            <Input
-                                                aria-label={`${Object.values(attributes).join(" ")} price`}
-                                                type="number"
-                                                min="0"
-                                                step="0.01"
-                                                placeholder="Price override"
-                                                value={variant.price}
-                                                onChange={(event) =>
-                                                    updateVariant(
-                                                        index,
-                                                        "price",
-                                                        event.currentTarget
-                                                            .value,
-                                                    )
-                                                }
-                                            />
-                                            <Input
-                                                aria-label={`${Object.values(attributes).join(" ")} sale price`}
-                                                type="number"
-                                                min="0"
-                                                step="0.01"
-                                                placeholder="Sale price"
-                                                value={variant.sale_price}
-                                                onChange={(event) =>
-                                                    updateVariant(
-                                                        index,
-                                                        "sale_price",
-                                                        event.currentTarget
-                                                            .value,
-                                                    )
-                                                }
-                                            />
-                                            <Input
-                                                aria-label={`${Object.values(attributes).join(" ")} stock`}
-                                                type="number"
-                                                min="0"
-                                                step="1"
-                                                placeholder="Stock"
-                                                value={variant.stock}
-                                                onChange={(event) =>
-                                                    updateVariant(
-                                                        index,
-                                                        "stock",
-                                                        event.currentTarget
-                                                            .value,
-                                                    )
-                                                }
-                                            />
-                                            {form.errors[
-                                                `variants.${index}.sale_price`
-                                            ] && (
-                                                <InputError
-                                                    message={
-                                                        form.errors[
-                                                            `variants.${index}.sale_price`
-                                                        ]
-                                                    }
-                                                />
-                                            )}
-                                        </div>
-                                    );
-                                })
+                                            {Object.values(attributes).join(" / ")}
+                                        </span>
+                                    ))}
+                                </div>
+                            ) : (
+                                <p className="text-xs text-muted-foreground">
+                                    Add values to options above to preview generated variants.
+                                </p>
                             )}
                             {form.errors.variants && (
                                 <InputError message={form.errors.variants} />
@@ -1455,7 +1376,7 @@ export default function ProductForm({ product, options }: Props) {
                         <Button
                             type="button"
                             variant="outline"
-                            className="size-24 flex-col"
+                            className="size-24 flex-col w-fit!"
                             onClick={() => setGalleryTarget("images")}
                         >
                             <ImagePlus />
