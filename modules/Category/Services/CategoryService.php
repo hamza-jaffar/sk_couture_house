@@ -68,7 +68,8 @@ class CategoryService
      *     is_featured: bool,
      *     meta_title: string|null,
      *     meta_description: string|null,
-     *     meta_keywords: string|null
+     *     meta_keywords: string|null,
+     *     order_type?: string
      * }  $data
      */
     public function createCategory(array $data): Category
@@ -102,7 +103,8 @@ class CategoryService
      *     is_featured: bool,
      *     meta_title: string|null,
      *     meta_description: string|null,
-     *     meta_keywords: string|null
+     *     meta_keywords: string|null,
+     *     order_type?: string
      * }  $data
      */
     public function updateCategory(Category $category, array $data): Category

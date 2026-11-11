@@ -2,6 +2,7 @@
 
 use Illuminate\Support\Str;
 use Inertia\Testing\AssertableInertia;
+use Modules\Category\Enum\OrderTypeEnum;
 use Modules\Category\Models\Category;
 use Modules\Gallery\Models\Media;
 use Modules\User\Models\User;
@@ -422,4 +423,40 @@ it('denies access without collection permissions and rejects invalid server filt
 it('returns a category 404 for guests', function () {
     $this->get(route('dashboard.collection.index'))
         ->assertRedirect(route('login'));
+});
+
+it('shares dynamic order type options and creates/updates categories with order_type', function () {
+    $manager = categoryManager('collections.view', 'collections.create', 'collections.update');
+
+    $this->actingAs($manager)
+        ->get(route('dashboard.collection.index'))
+        ->assertOk()
+        ->assertInertia(fn (AssertableInertia $page) => $page
+            ->component('dashboard/collection')
+            ->where('orderTypeOptions', OrderTypeEnum::options())
+        );
+
+    $this->actingAs($manager)
+        ->post(route('dashboard.collection.store'), categoryPayload([
+            'name' => 'WhatsApp Order Category',
+            'order_type' => OrderTypeEnum::WHATSAPP->value,
+        ]))
+        ->assertRedirect();
+
+    $category = Category::query()->where('name', 'WhatsApp Order Category')->firstOrFail();
+    expect($category->order_type)->toBe(OrderTypeEnum::WHATSAPP);
+
+    $this->patch(route('dashboard.collection.update', $category->slug), categoryPayload([
+        'name' => 'Direct Order Category',
+        'order_type' => OrderTypeEnum::DIRECT->value,
+    ]))
+        ->assertRedirect();
+
+    expect($category->fresh()->order_type)->toBe(OrderTypeEnum::DIRECT);
+
+    $this->post(route('dashboard.collection.store'), categoryPayload([
+        'name' => 'Invalid Order Type Category',
+        'order_type' => 'invalid-order-type',
+    ]))
+        ->assertSessionHasErrors('order_type');
 });

@@ -8,6 +8,7 @@ use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Database\Eloquent\Relations\HasMany;
 use Illuminate\Database\Eloquent\SoftDeletes;
+use Modules\Category\Enum\OrderTypeEnum;
 use Modules\Category\Models\Category;
 
 #[Fillable('title', 'slug', 'short_description', 'description', 'price', 'sale_price', 'sale_start_at', 'sale_end_at', 'sku', 'stock', 'type', 'status', 'is_featured', 'category_id', 'metadata', 'images', 'variant_options', 'meta_title', 'meta_description', 'meta_keywords', 'canonical_url', 'og_title', 'og_description', 'og_image', 'robots_meta')]
@@ -56,6 +57,13 @@ class Product extends Model
     {
         return Attribute::make(
             get: fn () => $this->meta_description ?? $this->short_description ?? str($this->description)->limit(150)
+        );
+    }
+
+    protected function effectiveOrderType(): Attribute
+    {
+        return Attribute::make(
+            get: fn () => $this->category?->order_type ?? OrderTypeEnum::DIRECT
         );
     }
 }

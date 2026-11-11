@@ -4,6 +4,7 @@ namespace Modules\Category\Database\Factories;
 
 use Illuminate\Database\Eloquent\Factories\Factory;
 use Illuminate\Support\Str;
+use Modules\Category\Enum\OrderTypeEnum;
 use Modules\Category\Models\Category;
 
 /**
@@ -26,6 +27,7 @@ class CategoryFactory extends Factory
             'banner_path' => null,
             'is_active' => true,
             'is_featured' => false,
+            'order_type' => OrderTypeEnum::DIRECT,
             'meta_title' => fake()->optional()->sentence(4),
             'meta_description' => fake()->optional()->sentence(),
             'meta_keywords' => fake()->optional()->words(4, true),

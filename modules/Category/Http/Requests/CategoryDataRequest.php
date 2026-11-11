@@ -4,6 +4,7 @@ namespace Modules\Category\Http\Requests;
 
 use Illuminate\Foundation\Http\FormRequest;
 use Illuminate\Validation\Rule;
+use Modules\Category\Enum\OrderTypeEnum;
 use Modules\Category\Models\Category;
 
 class CategoryDataRequest extends FormRequest
@@ -51,6 +52,7 @@ class CategoryDataRequest extends FormRequest
             ],
             'is_active' => ['required', 'boolean'],
             'is_featured' => ['required', 'boolean'],
+            'order_type' => ['nullable', Rule::enum(OrderTypeEnum::class)],
             'meta_title' => ['nullable', 'string', 'max:255'],
             'meta_description' => ['nullable', 'string', 'max:1000'],
             'meta_keywords' => ['nullable', 'string', 'max:500'],
@@ -68,7 +70,8 @@ class CategoryDataRequest extends FormRequest
      *     is_featured: bool,
      *     meta_title: string|null,
      *     meta_description: string|null,
-     *     meta_keywords: string|null
+     *     meta_keywords: string|null,
+     *     order_type: string
      * }
      */
     public function categoryData(): array
@@ -83,6 +86,7 @@ class CategoryDataRequest extends FormRequest
             'banner_path' => $validated['banner_path'] ?? null,
             'is_active' => (bool) $validated['is_active'],
             'is_featured' => (bool) $validated['is_featured'],
+            'order_type' => $validated['order_type'] ?? OrderTypeEnum::DIRECT->value,
             'meta_title' => $validated['meta_title'] ?? null,
             'meta_description' => $validated['meta_description'] ?? null,
             'meta_keywords' => $validated['meta_keywords'] ?? null,

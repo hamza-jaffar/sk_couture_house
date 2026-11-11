@@ -5,6 +5,7 @@ namespace Modules\Category\Http\Controllers;
 use Illuminate\Http\RedirectResponse;
 use Inertia\Inertia;
 use Inertia\Response;
+use Modules\Category\Enum\OrderTypeEnum;
 use Modules\Category\Http\Requests\CategoryBulkRequest;
 use Modules\Category\Http\Requests\CategoryDataRequest;
 use Modules\Category\Http\Requests\CategoryDeleteRequest;
@@ -31,6 +32,7 @@ class CategoryController
                 fn () => $this->categoryService->parentOptions(),
                 'category-options',
             ),
+            'orderTypeOptions' => OrderTypeEnum::options(),
             'filters' => [
                 'search' => $filters['search'] ?? '',
                 'parent' => (string) ($filters['parent'] ?? '__all__'),

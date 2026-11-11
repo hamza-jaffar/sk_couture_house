@@ -53,6 +53,7 @@ import { Skeleton } from '@/components/ui/skeleton';
 import { useCan } from '@/hooks/use-can';
 import type {
     CategoryFilters,
+    CategoryOrderTypeOption,
     CategoryParentOption,
     CollectionCategory,
     PaginatedCategories,
@@ -71,6 +72,7 @@ import {
     PenIcon,
     Plus,
     Search,
+    ShoppingBag,
     Star,
     Sparkles,
     Trash2,
@@ -80,6 +82,7 @@ import { useCallback, useEffect, useMemo, useState } from 'react';
 type Props = {
     categories?: PaginatedCategories;
     parentOptions?: CategoryParentOption[];
+    orderTypeOptions?: CategoryOrderTypeOption[];
     filters: CategoryFilters;
 };
 
@@ -182,12 +185,27 @@ function CategoryParentFilter({
     );
 }
 
-function CategoryDetails({ category }: { category: CollectionCategory }) {
+function CategoryDetails({
+    category,
+    orderTypeOptions = [],
+}: {
+    category: CollectionCategory;
+    orderTypeOptions?: CategoryOrderTypeOption[];
+}) {
+    const orderTypeLabel =
+        orderTypeOptions.find((opt) => opt.value === category.order_type)
+            ?.label ?? category.order_type;
+
     const details = [
         {
             label: 'Parent collection',
             value: category.parent?.name ?? 'Top-level collection',
             icon: FolderTree,
+        },
+        {
+            label: 'Order type',
+            value: orderTypeLabel,
+            icon: ShoppingBag,
         },
         {
             label: 'Child collections',
@@ -343,6 +361,7 @@ function CategoryDetails({ category }: { category: CollectionCategory }) {
 export default function Collection({
     categories,
     parentOptions,
+    orderTypeOptions = [],
     filters,
 }: Props) {
     const can = useCan();
@@ -381,7 +400,7 @@ export default function Collection({
                 index.url({ query }),
                 {},
                 {
-                    only: ['categories', 'filters'],
+                    only: ['categories', 'filters', 'orderTypeOptions'],
                     preserveState: true,
                     preserveScroll: true,
                     preserveErrors: true,
@@ -575,6 +594,24 @@ export default function Collection({
                 cell: ({ row }) => row.original.children_count,
             },
             {
+                accessorKey: 'order_type',
+                header: ({ column }) => (
+                    <DataTableColumnHeader column={column} title="Order Type" />
+                ),
+                cell: ({ row }) => {
+                    const type = row.original.order_type;
+                    const label =
+                        orderTypeOptions.find((opt) => opt.value === type)
+                            ?.label ?? type;
+
+                    return (
+                        <span className="rounded-md border bg-muted/50 px-2 py-0.5 text-xs font-medium">
+                            {label}
+                        </span>
+                    );
+                },
+            },
+            {
                 accessorKey: 'is_active',
                 header: ({ column }) => (
                     <DataTableColumnHeader column={column} title="Status" />
@@ -706,7 +743,7 @@ export default function Collection({
                 ),
             },
         ],
-        [can, filters.status],
+        [can, filters.status, orderTypeOptions],
     );
 
     const sorting: SortingState = [
@@ -906,7 +943,12 @@ export default function Collection({
                     key={editingCategory?.id ?? 'new-category'}
                     action={formRoute}
                     options={{
-                        only: ['categories', 'filters', 'parentOptions'],
+                        only: [
+                            'categories',
+                            'filters',
+                            'parentOptions',
+                            'orderTypeOptions',
+                        ],
                         preserveScroll: true,
                     }}
                     onSuccess={() => {
@@ -930,6 +972,7 @@ export default function Collection({
                             <CategoryForm
                                 category={editingCategory}
                                 parentOptions={parentOptions}
+                                orderTypeOptions={orderTypeOptions}
                                 errors={errors}
                             />
                         </FormDialog>
@@ -979,7 +1022,10 @@ export default function Collection({
                                     </div>
                                 </div>
                             </SheetHeader>
-                            <CategoryDetails category={viewingCategory} />
+                            <CategoryDetails
+                                category={viewingCategory}
+                                orderTypeOptions={orderTypeOptions}
+                            />
                         </>
                     )}
                 </SheetContent>

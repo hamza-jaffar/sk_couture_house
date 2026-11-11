@@ -1,23 +1,33 @@
-import { Combobox } from '@base-ui/react/combobox';
-import Gallery from '@/components/gallery';
-import { Button } from '@/components/ui/button';
-import InputError from '@/components/ui/input-error';
-import { Input } from '@/components/ui/input';
-import { Label } from '@/components/ui/label';
-import { Checkbox } from '@/components/ui/checkbox';
+import { Combobox } from "@base-ui/react/combobox";
+import Gallery from "@/components/gallery";
+import { Button } from "@/components/ui/button";
+import InputError from "@/components/ui/input-error";
+import { Input } from "@/components/ui/input";
+import { Label } from "@/components/ui/label";
+import { Checkbox } from "@/components/ui/checkbox";
+import {
+    Select,
+    SelectContent,
+    SelectItem,
+    SelectTrigger,
+    SelectValue,
+} from "@/components/ui/select";
 import type {
+    CategoryOrderTypeOption,
     CategoryParentOption,
     CollectionCategory,
     GalleryMedia,
-} from '@/types';
-import type { FormDataErrors } from '@inertiajs/core';
-import { Check, ChevronDown, ImagePlus, Search, X } from 'lucide-react';
-import { useMemo, useState } from 'react';
-import { toast } from 'sonner';
+} from "@/types";
+import type { FormDataErrors } from "@inertiajs/core";
+import { usePage } from "@inertiajs/react";
+import { Check, ChevronDown, ImagePlus, Search, X } from "lucide-react";
+import { useEffect, useMemo, useState } from "react";
+import { toast } from "sonner";
 
 type Props = {
     category: CollectionCategory | null;
     parentOptions?: CategoryParentOption[];
+    orderTypeOptions?: CategoryOrderTypeOption[];
     errors: FormDataErrors<Record<string, unknown>>;
 };
 
@@ -61,8 +71,20 @@ function imageUrl(path: string | null, url: string | null): string | null {
 export default function CategoryForm({
     category,
     parentOptions,
+    orderTypeOptions = [],
     errors,
 }: Props) {
+    const page = usePage<{ orderTypeOptions?: CategoryOrderTypeOption[] }>();
+    const effectiveOrderTypeOptions = useMemo<CategoryOrderTypeOption[]>(() => {
+        if (orderTypeOptions && orderTypeOptions.length > 0) {
+            return orderTypeOptions;
+        }
+        if (page.props.orderTypeOptions && page.props.orderTypeOptions.length > 0) {
+            return page.props.orderTypeOptions;
+        }
+        return [];
+    }, [orderTypeOptions, page.props.orderTypeOptions]);
+
     const options = parentOptions ?? [];
     const optionsById = new Map(
         options.map((option) => [option.id, option] as const),
@@ -76,7 +98,7 @@ export default function CategoryForm({
     );
     const parentItems = useMemo<ParentOption[]>(
         () => [
-            { value: 'none', label: 'No parent (top-level collection)' },
+            { value: "none", label: "No parent (top-level collection)" },
             ...availableParents.map((option) => ({
                 value: String(option.id),
                 label: option.name,
@@ -93,32 +115,35 @@ export default function CategoryForm({
         [parentItems],
     );
     const [parentId, setParentId] = useState(
-        category?.parent_id ? String(category.parent_id) : 'none',
+        category?.parent_id ? String(category.parent_id) : "none",
+    );
+    const [orderType, setOrderType] = useState<string>(
+        category?.order_type || effectiveOrderTypeOptions[0]?.value || "direct",
     );
     const [isActive, setIsActive] = useState(category?.is_active ?? true);
     const [isFeatured, setIsFeatured] = useState(
         category?.is_featured ?? false,
     );
-    const [imagePicker, setImagePicker] = useState<'image' | 'banner' | null>(
+    const [imagePicker, setImagePicker] = useState<"image" | "banner" | null>(
         null,
     );
     const [image, setImage] = useState<SelectedImage>({
         path: category?.image_path ?? null,
         url: category?.image_url ?? null,
-        title: category?.image_path?.split('/').pop() ?? null,
+        title: category?.image_path?.split("/").pop() ?? null,
     });
     const [banner, setBanner] = useState<SelectedImage>({
         path: category?.banner_path ?? null,
         url: category?.banner_url ?? null,
-        title: category?.banner_path?.split('/').pop() ?? null,
+        title: category?.banner_path?.split("/").pop() ?? null,
     });
     const selectedParent = parentItems.find(
         (option) => option.value === parentId,
     );
 
-    function selectImage(field: 'image' | 'banner', media: GalleryMedia) {
+    function selectImage(field: "image" | "banner", media: GalleryMedia) {
         if (!media.path) {
-            toast.error('The selected gallery file has no available path.');
+            toast.error("The selected gallery file has no available path.");
 
             return;
         }
@@ -129,7 +154,7 @@ export default function CategoryForm({
             title: media.original_file_name,
         };
 
-        if (field === 'image') {
+        if (field === "image") {
             setImage(selected);
         } else {
             setBanner(selected);
@@ -139,12 +164,12 @@ export default function CategoryForm({
     }
 
     function renderImageField(
-        field: 'image' | 'banner',
+        field: "image" | "banner",
         label: string,
         selected: SelectedImage,
         setSelected: (image: SelectedImage) => void,
     ) {
-        const pathName = field === 'image' ? 'image_path' : 'banner_path';
+        const pathName = field === "image" ? "image_path" : "banner_path";
         const previewUrl = imageUrl(selected.path, selected.url);
 
         return (
@@ -154,7 +179,7 @@ export default function CategoryForm({
                     id={`category-${pathName}`}
                     type="hidden"
                     name={pathName}
-                    value={selected.path ?? ''}
+                    value={selected.path ?? ""}
                 />
                 <div className="flex flex-col gap-3 rounded-lg border p-3 sm:flex-row sm:items-center">
                     <div className="flex h-24 w-full items-center justify-center overflow-hidden rounded-md bg-muted sm:w-36">
@@ -170,7 +195,7 @@ export default function CategoryForm({
                     </div>
                     <div className="flex min-w-0 flex-1 flex-col gap-2">
                         <p className="truncate text-sm text-muted-foreground">
-                            {selected.title ?? 'No file selected'}
+                            {selected.title ?? "No file selected"}
                         </p>
                         <div className="flex flex-wrap gap-2">
                             <Button
@@ -216,7 +241,7 @@ export default function CategoryForm({
                     <Input
                         id="category-name"
                         name="name"
-                        defaultValue={category?.name ?? ''}
+                        defaultValue={category?.name ?? ""}
                         required
                         maxLength={255}
                         aria-invalid={Boolean(errors.name)}
@@ -240,7 +265,7 @@ export default function CategoryForm({
                         <input
                             type="hidden"
                             name="parent_id"
-                            value={parentId === 'none' ? '' : parentId}
+                            value={parentId === "none" ? "" : parentId}
                         />
                         <Combobox.Trigger
                             render={
@@ -253,7 +278,7 @@ export default function CategoryForm({
                                 >
                                     <span className="truncate">
                                         {selectedParent?.label ??
-                                            'Choose a parent collection'}
+                                            "Choose a parent collection"}
                                     </span>
                                     <ChevronDown className="size-4 shrink-0 text-muted-foreground" />
                                 </button>
@@ -313,7 +338,7 @@ export default function CategoryForm({
                 <textarea
                     id="category-description"
                     name="description"
-                    defaultValue={category?.description ?? ''}
+                    defaultValue={category?.description ?? ""}
                     maxLength={5000}
                     rows={4}
                     className="rounded-lg border border-input bg-background px-3 py-2 text-sm outline-none focus-visible:ring-3 focus-visible:ring-ring/50"
@@ -325,52 +350,98 @@ export default function CategoryForm({
             </div>
 
             <section className="grid gap-4 sm:grid-cols-2">
-                <div className="grid gap-2">
-                    <Label
-                        htmlFor="category-active"
-                        className="flex items-center gap-2"
-                    >
-                        <Checkbox
-                            id="category-active"
-                            checked={isActive}
-                            onCheckedChange={(checked) =>
-                                setIsActive(checked === true)
-                            }
-                            aria-invalid={Boolean(errors.is_active)}
+                <div className="flex w-full">
+                    <div className="grid gap-2 w-1/2">
+                        <Label
+                            htmlFor="category-active"
+                            className="flex items-center gap-2"
+                        >
+                            <Checkbox
+                                id="category-active"
+                                checked={isActive}
+                                onCheckedChange={(checked) =>
+                                    setIsActive(checked === true)
+                                }
+                                aria-invalid={Boolean(errors.is_active)}
+                            />
+                            Active
+                        </Label>
+                        <input
+                            type="hidden"
+                            name="is_active"
+                            value={isActive ? "1" : "0"}
                         />
-                        Active
-                    </Label>
-                    <input
-                        type="hidden"
-                        name="is_active"
-                        value={isActive ? '1' : '0'}
-                    />
-                    {errors.is_active && (
-                        <InputError message={String(errors.is_active)} />
-                    )}
+                        {errors.is_active && (
+                            <InputError message={String(errors.is_active)} />
+                        )}
+                    </div>
+                    <div className="grid gap-2 w-1/2">
+                        <Label
+                            htmlFor="category-featured"
+                            className="flex items-center gap-2"
+                        >
+                            <Checkbox
+                                id="category-featured"
+                                checked={isFeatured}
+                                onCheckedChange={(checked) =>
+                                    setIsFeatured(checked === true)
+                                }
+                                aria-invalid={Boolean(errors.is_featured)}
+                            />
+                            Featured
+                        </Label>
+                        <input
+                            type="hidden"
+                            name="is_featured"
+                            value={isFeatured ? "1" : "0"}
+                        />
+                        {errors.is_featured && (
+                            <InputError message={String(errors.is_featured)} />
+                        )}
+                    </div>
                 </div>
                 <div className="grid gap-2">
-                    <Label
-                        htmlFor="category-featured"
-                        className="flex items-center gap-2"
-                    >
-                        <Checkbox
-                            id="category-featured"
-                            checked={isFeatured}
-                            onCheckedChange={(checked) =>
-                                setIsFeatured(checked === true)
+                    <Label htmlFor="category-order-type">Order Type</Label>
+                    <Select
+                        value={orderType}
+                        onValueChange={(value) => {
+                            if (value) {
+                                setOrderType(value);
                             }
-                            aria-invalid={Boolean(errors.is_featured)}
-                        />
-                        Featured
-                    </Label>
+                        }}
+                    >
+                        <SelectTrigger
+                            id="category-order-type"
+                            className="h-9 w-full bg-background px-3 text-sm"
+                            aria-invalid={Boolean(errors.order_type)}
+                        >
+                            <SelectValue placeholder="Select order type">
+                                {(value: string) =>
+                                    effectiveOrderTypeOptions.find(
+                                        (opt) =>
+                                            opt.value === (value || orderType),
+                                    )?.label ?? (value || orderType)
+                                }
+                            </SelectValue>
+                        </SelectTrigger>
+                        <SelectContent className="z-50 min-w-48">
+                            {effectiveOrderTypeOptions.map((option) => (
+                                <SelectItem
+                                    key={option.value}
+                                    value={option.value}
+                                >
+                                    {option.label}
+                                </SelectItem>
+                            ))}
+                        </SelectContent>
+                    </Select>
                     <input
                         type="hidden"
-                        name="is_featured"
-                        value={isFeatured ? '1' : '0'}
+                        name="order_type"
+                        value={orderType}
                     />
-                    {errors.is_featured && (
-                        <InputError message={String(errors.is_featured)} />
+                    {errors.order_type && (
+                        <InputError message={String(errors.order_type)} />
                     )}
                 </div>
             </section>
@@ -383,10 +454,10 @@ export default function CategoryForm({
                         files in Gallery.
                     </p>
                 </div>
-                {renderImageField('image', 'Collection image', image, setImage)}
+                {renderImageField("image", "Collection image", image, setImage)}
                 {renderImageField(
-                    'banner',
-                    'Collection banner',
+                    "banner",
+                    "Collection banner",
                     banner,
                     setBanner,
                 )}
@@ -404,7 +475,7 @@ export default function CategoryForm({
                     <Input
                         id="category-meta-title"
                         name="meta_title"
-                        defaultValue={category?.meta_title ?? ''}
+                        defaultValue={category?.meta_title ?? ""}
                         maxLength={255}
                         aria-invalid={Boolean(errors.meta_title)}
                     />
@@ -419,7 +490,7 @@ export default function CategoryForm({
                     <textarea
                         id="category-meta-description"
                         name="meta_description"
-                        defaultValue={category?.meta_description ?? ''}
+                        defaultValue={category?.meta_description ?? ""}
                         maxLength={1000}
                         rows={3}
                         className="rounded-lg border border-input bg-background px-3 py-2 text-sm outline-none focus-visible:ring-3 focus-visible:ring-ring/50"
@@ -436,7 +507,7 @@ export default function CategoryForm({
                     <Input
                         id="category-meta-keywords"
                         name="meta_keywords"
-                        defaultValue={category?.meta_keywords ?? ''}
+                        defaultValue={category?.meta_keywords ?? ""}
                         maxLength={500}
                         aria-invalid={Boolean(errors.meta_keywords)}
                     />
@@ -456,7 +527,7 @@ export default function CategoryForm({
                 }}
                 selectionMode="single"
                 initialCategory="image"
-                allowedCategories={['image']}
+                allowedCategories={["image"]}
                 onSelect={(media) => {
                     if (imagePicker !== null) {
                         selectImage(imagePicker, media);

@@ -8,11 +8,17 @@ export type CategoryParentOption = {
     deleted_at: string | null;
 };
 
+export type CategoryOrderTypeOption = {
+    value: string;
+    label: string;
+};
+
 export type CollectionCategory = {
     id: number;
     parent_id: number | null;
     name: string;
     slug: string;
+    order_type: string;
     description: string | null;
     image_path: string | null;
     image_url: string | null;

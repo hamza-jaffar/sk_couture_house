@@ -10,6 +10,7 @@ use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Database\Eloquent\Relations\HasMany;
 use Illuminate\Database\Eloquent\SoftDeletes;
 use Modules\Category\Database\Factories\CategoryFactory;
+use Modules\Category\Enum\OrderTypeEnum;
 
 #[UseFactory(CategoryFactory::class)]
 #[Fillable(
@@ -24,6 +25,7 @@ use Modules\Category\Database\Factories\CategoryFactory;
     'meta_title',
     'meta_description',
     'meta_keywords',
+    'order_type',
 )]
 class Category extends Model
 {
@@ -34,6 +36,7 @@ class Category extends Model
         return [
             'is_active' => 'boolean',
             'is_featured' => 'boolean',
+            'order_type' => OrderTypeEnum::class,
         ];
     }
 
