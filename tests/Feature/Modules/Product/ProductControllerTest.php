@@ -151,7 +151,6 @@ it('renders dedicated create and edit pages with the product data needed by the 
     $product->variants()->create([
         'sku' => 'product-edit-size-m',
         'name' => 'M',
-        'stock' => 2,
         'attributes' => ['Size' => 'M'],
     ]);
 
@@ -328,7 +327,6 @@ it('moves products to trash, restores them by slug, and permanently deletes them
     $product->variants()->create([
         'sku' => 'archive-variant-1',
         'name' => 'Default',
-        'stock' => 1,
         'attributes' => ['Size' => 'M'],
     ]);
 
@@ -371,4 +369,37 @@ it('moves products to trash, restores them by slug, and permanently deletes them
         'id' => $product->id,
     ]);
     expect(ProductVariant::query()->where('product_id', $product->id)->exists())->toBeFalse();
+});
+
+it('creates simple and variable products using the ProductFactory', function () {
+    $simple = Product::factory()->simple()->create([
+        'title' => 'Silk Scarf',
+    ]);
+
+    expect($simple->type)->toBe('simple')
+        ->and($simple->variant_options)->toBe([])
+        ->and($simple->variants)->toHaveCount(0);
+
+    $category = Category::factory()->create();
+    $variable = Product::factory()
+        ->forCategory($category)
+        ->variable([
+            ['name' => 'Size', 'values' => ['S', 'M']],
+            ['name' => 'Color', 'values' => ['Red', 'Blue']],
+        ])
+        ->create();
+
+    expect($variable->type)->toBe('variable')
+        ->and($variable->category_id)->toBe($category->id)
+        ->and($variable->variants)->toHaveCount(4);
+
+    $this->assertDatabaseCount('product_variants', 4);
+});
+
+it('creates standalone product variants using the ProductVariantFactory', function () {
+    $variant = ProductVariant::factory()->create();
+
+    expect($variant->product)->toBeInstanceOf(Product::class)
+        ->and($variant->attributes)->toBeArray()
+        ->and($variant->sku)->toStartWith('P-');
 });

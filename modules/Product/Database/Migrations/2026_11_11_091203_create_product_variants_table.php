@@ -15,13 +15,6 @@ return new class extends Migration
             $table->string('sku')->unique();
             $table->string('name'); // e.g., "Black / Medium"
 
-            // Variant-specific pricing & sales
-            $table->decimal('price', 10, 2)->nullable(); // Falls back to parent product if null
-            $table->decimal('sale_price', 10, 2)->nullable();
-
-            // Variant Inventory
-            $table->unsignedInteger('stock')->default(0);
-
             // Storing option attributes (e.g., {"color": "Black", "size": "Medium"})
             $table->json('attributes');
 

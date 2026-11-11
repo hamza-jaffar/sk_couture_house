@@ -32,7 +32,7 @@ class ProductService
             $query = Product::query()
                 ->with([
                     'category:id,name,slug,order_type',
-                    'variants:id,product_id,sku,name,price,sale_price,stock,attributes,image',
+                    'variants:id,product_id,sku,name,attributes,image',
                 ])
                 ->withCount('variants');
 
@@ -140,7 +140,7 @@ class ProductService
     {
         $product->load([
             'category:id,name,slug,order_type',
-            'variants:id,product_id,sku,name,price,sale_price,stock,attributes,image',
+            'variants:id,product_id,sku,name,attributes,image',
         ])->loadCount('variants');
 
         return $this->presentProduct($product);
@@ -316,9 +316,6 @@ class ProductService
             $product->variants()->create([
                 'sku' => $sku,
                 'name' => implode(' / ', array_values($attributes)),
-                'price' => null,
-                'sale_price' => null,
-                'stock' => 0,
                 'attributes' => $attributes,
                 'image' => null,
             ]);

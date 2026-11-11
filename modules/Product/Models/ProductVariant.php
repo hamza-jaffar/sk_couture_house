@@ -3,18 +3,21 @@
 namespace Modules\Product\Models;
 
 use Illuminate\Database\Eloquent\Attributes\Fillable;
+use Illuminate\Database\Eloquent\Attributes\UseFactory;
+use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
+use Modules\Product\Database\Factories\ProductVariantFactory;
 
-#[Fillable('product_id', 'sku', 'name', 'price', 'sale_price', 'stock', 'attributes', 'image')]
+#[UseFactory(ProductVariantFactory::class)]
+#[Fillable('product_id', 'sku', 'name', 'attributes', 'image')]
 class ProductVariant extends Model
 {
+    use HasFactory;
+
     protected function casts(): array
     {
         return [
-            'price' => 'decimal:2',
-            'sale_price' => 'decimal:2',
-            'stock' => 'integer',
             'attributes' => 'array',
         ];
     }
