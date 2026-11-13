@@ -24,6 +24,7 @@ import {
     Folder,
     Layers,
     Shirt,
+    Star,
     Tag,
 } from 'lucide-react';
 
@@ -56,6 +57,12 @@ const data = {
             url: '/dashboard/coupons',
             icon: <Tag />,
             permission: 'coupons.view',
+        },
+        {
+            title: 'Reviews',
+            url: '/dashboard/reviews',
+            icon: <Star />,
+            permission: 'reviews.view',
         },
     ],
     navSecondary: [

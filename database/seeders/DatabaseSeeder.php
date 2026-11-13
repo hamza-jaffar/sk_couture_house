@@ -7,6 +7,7 @@ use Illuminate\Database\Seeder;
 use Modules\Category\Database\Seeders\CategorySeeder;
 use Modules\Coupon\Database\Seeders\CouponSeeder;
 use Modules\Product\Database\Seeders\ProductSeeder;
+use Modules\Review\Database\Seeders\ReviewSeeder;
 use Modules\User\Database\Seeders\RolePermissionSeeder;
 use Modules\User\Database\Seeders\UserSeeder;
 
@@ -25,6 +26,7 @@ class DatabaseSeeder extends Seeder
             CategorySeeder::class,
             ProductSeeder::class,
             CouponSeeder::class,
+            ReviewSeeder::class,
         ]);
     }
 }

@@ -5,6 +5,7 @@ use Modules\Category\Providers\CategoryServiceProvider;
 use Modules\Coupon\Providers\CouponServiceProvider;
 use Modules\Gallery\Providers\GalleryServiceProvider;
 use Modules\Product\Providers\ProductServiceProvider;
+use Modules\Review\Providers\ReviewServiceProvider;
 use Modules\Setting\Providers\SettingServiceProvider;
 use Modules\User\Providers\UserServiceProvider;
 
@@ -16,4 +17,5 @@ return [
     SettingServiceProvider::class,
     ProductServiceProvider::class,
     CouponServiceProvider::class,
+    ReviewServiceProvider::class,
 ];
