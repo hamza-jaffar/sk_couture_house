@@ -5,6 +5,7 @@ namespace Modules\Product\Http\Controller;
 use Illuminate\Http\RedirectResponse;
 use Inertia\Inertia;
 use Inertia\Response;
+use Modules\Product\Http\Requests\ProductBulkRequest;
 use Modules\Product\Http\Requests\ProductDataRequest;
 use Modules\Product\Http\Requests\ProductIndexRequest;
 use Modules\Product\Models\Product;
@@ -98,6 +99,18 @@ class ProductController
         return back();
     }
 
+    public function bulkDestroy(ProductBulkRequest $request): RedirectResponse
+    {
+        $this->productService->deleteProducts($request->productIds());
+
+        Inertia::flash('toast', [
+            'type' => 'success',
+            'message' => __('Selected products moved to trash.'),
+        ]);
+
+        return back();
+    }
+
     public function restore(Product $product): RedirectResponse
     {
         $this->productService->restoreProduct($product);
@@ -110,6 +123,18 @@ class ProductController
         return back();
     }
 
+    public function bulkRestore(ProductBulkRequest $request): RedirectResponse
+    {
+        $this->productService->restoreProducts($request->productIds());
+
+        Inertia::flash('toast', [
+            'type' => 'success',
+            'message' => __('Selected products restored successfully.'),
+        ]);
+
+        return back();
+    }
+
     public function forceDelete(Product $product): RedirectResponse
     {
         $this->productService->forceDeleteProduct($product);
@@ -117,6 +142,18 @@ class ProductController
         Inertia::flash('toast', [
             'type' => 'success',
             'message' => __('Product permanently deleted.'),
+        ]);
+
+        return back();
+    }
+
+    public function bulkForceDelete(ProductBulkRequest $request): RedirectResponse
+    {
+        $this->productService->forceDeleteProducts($request->productIds());
+
+        Inertia::flash('toast', [
+            'type' => 'success',
+            'message' => __('Selected products permanently deleted.'),
         ]);
 
         return back();

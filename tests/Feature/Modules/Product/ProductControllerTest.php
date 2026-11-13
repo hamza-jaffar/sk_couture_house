@@ -403,3 +403,33 @@ it('creates standalone product variants using the ProductVariantFactory', functi
         ->and($variant->attributes)->toBeArray()
         ->and($variant->sku)->toStartWith('P-');
 });
+
+it('supports bulk deleting, restoring, and force deleting products', function () {
+    $deleter = productManagerForTest('products.delete');
+    $products = Product::factory()->count(3)->create();
+    $ids = $products->pluck('id')->all();
+
+    $this->actingAs($deleter)
+        ->delete(route('dashboard.product.bulk-destroy'), ['ids' => $ids])
+        ->assertRedirect();
+
+    foreach ($ids as $id) {
+        $this->assertSoftDeleted('products', ['id' => $id]);
+    }
+
+    $this->actingAs($deleter)
+        ->post(route('dashboard.product.bulk-restore'), ['ids' => $ids])
+        ->assertRedirect();
+
+    foreach ($ids as $id) {
+        $this->assertNotSoftDeleted('products', ['id' => $id]);
+    }
+
+    $this->actingAs($deleter)
+        ->delete(route('dashboard.product.bulk-force-delete'), ['ids' => $ids])
+        ->assertRedirect();
+
+    foreach ($ids as $id) {
+        $this->assertDatabaseMissing('products', ['id' => $id]);
+    }
+});

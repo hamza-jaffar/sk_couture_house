@@ -211,6 +211,27 @@ class ProductService
         });
     }
 
+    /**
+     * @param  list<int>  $ids
+     */
+    public function deleteProducts(array $ids): void
+    {
+        $this->listingCache->invalidateAfterCommit();
+
+        DB::transaction(function () use ($ids): void {
+            $products = Product::query()
+                ->whereKey($ids)
+                ->lockForUpdate()
+                ->get();
+
+            $this->assertAllFound($products->count(), $ids);
+
+            foreach ($products as $product) {
+                $product->delete();
+            }
+        });
+    }
+
     public function restoreProduct(Product $product): void
     {
         $this->listingCache->invalidateAfterCommit();
@@ -222,6 +243,28 @@ class ProductService
                 ->lockForUpdate()
                 ->firstOrFail()
                 ->restore();
+        });
+    }
+
+    /**
+     * @param  list<int>  $ids
+     */
+    public function restoreProducts(array $ids): void
+    {
+        $this->listingCache->invalidateAfterCommit();
+
+        DB::transaction(function () use ($ids): void {
+            $products = Product::withTrashed()
+                ->whereKey($ids)
+                ->whereNotNull('deleted_at')
+                ->lockForUpdate()
+                ->get();
+
+            $this->assertAllFound($products->count(), $ids);
+
+            foreach ($products as $product) {
+                $product->restore();
+            }
         });
     }
 
@@ -237,6 +280,39 @@ class ProductService
                 ->firstOrFail()
                 ->forceDelete();
         });
+    }
+
+    /**
+     * @param  list<int>  $ids
+     */
+    public function forceDeleteProducts(array $ids): void
+    {
+        $this->listingCache->invalidateAfterCommit();
+
+        DB::transaction(function () use ($ids): void {
+            $products = Product::withTrashed()
+                ->whereKey($ids)
+                ->lockForUpdate()
+                ->get();
+
+            $this->assertAllFound($products->count(), $ids);
+
+            foreach ($products as $product) {
+                $product->forceDelete();
+            }
+        });
+    }
+
+    /**
+     * @param  list<int>  $ids
+     */
+    private function assertAllFound(int $found, array $ids): void
+    {
+        if ($found !== count(array_unique($ids))) {
+            throw ValidationException::withMessages([
+                'ids' => __('One or more selected products are no longer available. Refresh and try again.'),
+            ]);
+        }
     }
 
     /**

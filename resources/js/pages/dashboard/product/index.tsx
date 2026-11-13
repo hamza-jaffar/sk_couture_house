@@ -1,4 +1,7 @@
 import {
+    bulkDestroy,
+    bulkForceDelete,
+    bulkRestore,
     create,
     destroy,
     edit,
@@ -23,6 +26,13 @@ import {
     AlertDialogTitle,
 } from "@/components/ui/alert-dialog";
 import { Button } from "@/components/ui/button";
+import { Checkbox } from "@/components/ui/checkbox";
+import {
+    DropdownMenu,
+    DropdownMenuContent,
+    DropdownMenuItem,
+    DropdownMenuTrigger,
+} from "@/components/ui/dropdown-menu";
 import {
     Select,
     SelectContent,
@@ -47,6 +57,7 @@ import {
     ChevronDown,
     Eye,
     ImageIcon,
+    MoreHorizontal,
     Pencil,
     Plus,
     Search,
@@ -64,7 +75,8 @@ type Props = {
 
 type PendingAction = {
     type: "delete" | "restore" | "force-delete";
-    product: ProductRecord;
+    ids: number[];
+    label: string;
 };
 
 function ProductImageCell({ product }: { product: ProductRecord }) {
@@ -222,6 +234,45 @@ function ProductTable({
     const columns = useMemo<DataTableColumnDef<ProductRecord>[]>(
         () => [
             {
+                id: "select",
+                header: ({ table }) => {
+                    const rows = table.getRowModel().rows;
+                    const selectedCount = rows.filter((row) =>
+                        row.getIsSelected(),
+                    ).length;
+
+                    return (
+                        <Checkbox
+                            aria-label="Select all products on this page"
+                            disabled={!can("products.delete")}
+                            checked={
+                                rows.length > 0 && selectedCount === rows.length
+                            }
+                            indeterminate={
+                                selectedCount > 0 && selectedCount < rows.length
+                            }
+                            onCheckedChange={(checked) =>
+                                rows.forEach((row) =>
+                                    row.toggleSelected(checked === true),
+                                )
+                            }
+                        />
+                    );
+                },
+                cell: ({ row }) => (
+                    <Checkbox
+                        aria-label={`Select ${row.original.title}`}
+                        checked={row.getIsSelected()}
+                        disabled={!can("products.delete")}
+                        onCheckedChange={(checked) =>
+                            row.toggleSelected(checked === true)
+                        }
+                    />
+                ),
+                enableSorting: false,
+                enableHiding: false,
+            },
+            {
                 accessorKey: "title",
                 header: ({ column }) => (
                     <DataTableColumnHeader column={column} title="Product" />
@@ -309,89 +360,92 @@ function ProductTable({
                     const product = row.original;
 
                     return (
-                        <div className="flex justify-end gap-1">
-                            {product.deleted_at ? (
-                                <>
-                                    {can("products.delete") && (
+                        <div className="flex justify-end">
+                            <DropdownMenu>
+                                <DropdownMenuTrigger
+                                    render={
+                                        <Button
+                                            type="button"
+                                            variant="ghost"
+                                            size="icon"
+                                            aria-label={`Actions for ${product.title}`}
+                                        >
+                                            <MoreHorizontal className="size-4" />
+                                        </Button>
+                                    }
+                                />
+                                <DropdownMenuContent align="end" className="w-full">
+                                    {product.deleted_at ? (
+                                        can("products.delete") && (
+                                            <>
+                                                <DropdownMenuItem
+                                                    onClick={() =>
+                                                        onAction({
+                                                            type: "restore",
+                                                            ids: [product.id],
+                                                            label: product.title,
+                                                        })
+                                                    }
+                                                >
+                                                    <ArchiveRestore />
+                                                    Restore product
+                                                </DropdownMenuItem>
+                                                <DropdownMenuItem
+                                                    variant="destructive"
+                                                    onClick={() =>
+                                                        onAction({
+                                                            type: "force-delete",
+                                                            ids: [product.id],
+                                                            label: product.title,
+                                                        })
+                                                    }
+                                                >
+                                                    <Trash2 />
+                                                    Delete permanently
+                                                </DropdownMenuItem>
+                                            </>
+                                        )
+                                    ) : (
                                         <>
-                                            <Button
-                                                type="button"
-                                                variant="outline"
-                                                size="sm"
-                                                onClick={() =>
-                                                    onAction({
-                                                        type: "restore",
-                                                        product,
-                                                    })
-                                                }
-                                            >
-                                                <ArchiveRestore />
-                                            </Button>
-                                            <Button
-                                                type="button"
-                                                variant="destructive"
-                                                size="icon"
-                                                aria-label={`Permanently delete ${product.title}`}
-                                                onClick={() =>
-                                                    onAction({
-                                                        type: "force-delete",
-                                                        product,
-                                                    })
-                                                }
-                                            >
-                                                <Trash2 />
-                                            </Button>
+                                            {can("products.view") && (
+                                                <DropdownMenuItem
+                                                    onClick={() =>
+                                                        router.visit(
+                                                            show.url(product.slug),
+                                                        )
+                                                    }
+                                                >
+                                                    <Eye />
+                                                    View details
+                                                </DropdownMenuItem>
+                                            )}
+                                            {can("products.update") && (
+                                                <DropdownMenuItem
+                                                    onClick={() => onEdit(product)}
+                                                >
+                                                    <Pencil />
+                                                    Edit product
+                                                </DropdownMenuItem>
+                                            )}
+                                            {can("products.delete") && (
+                                                <DropdownMenuItem
+                                                    variant="destructive"
+                                                    onClick={() =>
+                                                        onAction({
+                                                            type: "delete",
+                                                            ids: [product.id],
+                                                            label: product.title,
+                                                        })
+                                                    }
+                                                >
+                                                    <Trash2 />
+                                                    Move to trash
+                                                </DropdownMenuItem>
+                                            )}
                                         </>
                                     )}
-                                </>
-                            ) : (
-                                <>
-                                    {can("products.view") && (
-                                        <Button
-                                            type="button"
-                                            variant="ghost"
-                                            size="icon"
-                                            aria-label={`View ${product.title}`}
-                                            title="View product"
-                                            onClick={() =>
-                                                router.visit(
-                                                    show.url(product.slug),
-                                                )
-                                            }
-                                        >
-                                            <Eye />
-                                        </Button>
-                                    )}
-                                    {can("products.update") && (
-                                        <Button
-                                            type="button"
-                                            variant="ghost"
-                                            size="icon"
-                                            aria-label={`Edit ${product.title}`}
-                                            title="Edit product"
-                                            onClick={() => onEdit(product)}
-                                        >
-                                            <Pencil />
-                                        </Button>
-                                    )}
-                                    {can("products.delete") && (
-                                        <Button
-                                            type="button"
-                                            variant="ghost"
-                                            size="icon"
-                                            aria-label={`Move ${product.title} to trash`}
-                                            onClick={() =>
-                                                onAction({
-                                                    type: "delete",
-                                                    product,
-                                                })
-                                            }
-                                        >
-                                            <Trash2 />
-                                        </Button>
-                                    )}
-                                </>
-                            )}
+                                </DropdownMenuContent>
+                            </DropdownMenu>
                         </div>
                     );
                 },
@@ -415,7 +469,7 @@ function ProductTable({
         <DataTable
             columns={columns}
             data={products?.data ?? []}
-            getRowId={(product) => product.slug}
+            getRowId={(product) => String(product.id)}
             selectionResetKey={JSON.stringify(filters)}
             manualFiltering
             manualSorting
@@ -466,6 +520,66 @@ function ProductTable({
                 filters.search
                     ? "Try changing your search or filters."
                     : "Create a product to start building your catalog."
+            }
+            batchActions={
+                can("products.delete")
+                    ? (_table, selectedProducts) => (
+                          <div className="flex gap-2">
+                              {filters.status !== "deleted" ? (
+                                  <Button
+                                      variant="destructive"
+                                      size="sm"
+                                      onClick={() =>
+                                          onAction({
+                                              type: "delete",
+                                              ids: selectedProducts.map(
+                                                  (product) => product.id,
+                                              ),
+                                              label: `${selectedProducts.length} selected products`,
+                                          })
+                                      }
+                                  >
+                                      <Trash2 />
+                                      Move selected to trash
+                                  </Button>
+                              ) : (
+                                  <>
+                                      <Button
+                                          variant="outline"
+                                          size="sm"
+                                          onClick={() =>
+                                              onAction({
+                                                  type: "restore",
+                                                  ids: selectedProducts.map(
+                                                      (product) => product.id,
+                                                  ),
+                                                  label: `${selectedProducts.length} selected products`,
+                                              })
+                                          }
+                                      >
+                                          Restore selected
+                                      </Button>
+                                      <Button
+                                          variant="destructive"
+                                          size="sm"
+                                          onClick={() =>
+                                              onAction({
+                                                  type: "force-delete",
+                                                  ids: selectedProducts.map(
+                                                      (product) => product.id,
+                                                  ),
+                                                  label: `${selectedProducts.length} selected products`,
+                                              })
+                                          }
+                                      >
+                                          <Trash2 />
+                                          Delete permanently
+                                      </Button>
+                                  </>
+                              )}
+                          </div>
+                      )
+                    : undefined
             }
             toolbarFilters={() => (
                 <div className="flex flex-wrap gap-2">
@@ -620,18 +734,73 @@ export default function ProductIndex({
             onSuccess: () => setPendingAction(null),
             onError: (errors: Record<string, string>) =>
                 setActionError(
-                    errors.product ?? "Unable to update this product.",
+                    errors.ids ?? errors.product ?? "Unable to update product(s).",
                 ),
             onFinish: () => setProcessingAction(false),
         };
-        const slug = pendingAction.product.slug;
 
         if (pendingAction.type === "delete") {
-            router.delete(destroy.url(slug), options);
-        } else if (pendingAction.type === "restore") {
-            router.patch(restore.url(slug), {}, options);
+            if (pendingAction.ids.length === 1) {
+                const product = products?.data.find(
+                    (item) => item.id === pendingAction.ids[0],
+                );
+                if (!product) {
+                    setActionError(
+                        "The selected product is no longer available.",
+                    );
+                    setProcessingAction(false);
+                    return;
+                }
+                router.delete(destroy.url(product.slug), options);
+            } else {
+                router.delete(bulkDestroy.url(), {
+                    data: { ids: pendingAction.ids },
+                    ...options,
+                });
+            }
+            return;
+        }
+
+        if (pendingAction.type === "restore") {
+            if (pendingAction.ids.length === 1) {
+                const product = products?.data.find(
+                    (item) => item.id === pendingAction.ids[0],
+                );
+                if (!product) {
+                    setActionError(
+                        "The selected product is no longer available.",
+                    );
+                    setProcessingAction(false);
+                    return;
+                }
+                router.patch(restore.url(product.slug), {}, options);
+            } else {
+                router.post(
+                    bulkRestore.url(),
+                    { ids: pendingAction.ids },
+                    options,
+                );
+            }
+            return;
+        }
+
+        if (pendingAction.ids.length === 1) {
+            const product = products?.data.find(
+                (item) => item.id === pendingAction.ids[0],
+            );
+            if (!product) {
+                setActionError(
+                    "The selected product is no longer available.",
+                );
+                setProcessingAction(false);
+                return;
+            }
+            router.delete(forceDelete.url(product.slug), options);
         } else {
-            router.delete(forceDelete.url(slug), options);
+            router.delete(bulkForceDelete.url(), {
+                data: { ids: pendingAction.ids },
+                ...options,
+            });
         }
     }
 
@@ -682,18 +851,18 @@ export default function ProductIndex({
                     <AlertDialogHeader>
                         <AlertDialogTitle>
                             {pendingAction?.type === "delete"
-                                ? "Move product to trash?"
+                                ? "Move to trash?"
                                 : pendingAction?.type === "restore"
-                                  ? "Restore product?"
-                                  : "Permanently delete product?"}
+                                  ? "Restore product(s)?"
+                                  : "Permanently delete?"}
                         </AlertDialogTitle>
                         <AlertDialogDescription>
                             {actionError ??
                                 (pendingAction?.type === "force-delete"
-                                    ? `${pendingAction.product.title} will be permanently deleted. This cannot be undone.`
+                                    ? `${pendingAction?.label} will be permanently deleted. This cannot be undone.`
                                     : pendingAction?.type === "restore"
-                                      ? `${pendingAction.product.title} will be restored.`
-                                      : `${pendingAction?.product.title} will be moved to trash.`)}
+                                      ? `${pendingAction?.label} will be restored.`
+                                      : `${pendingAction?.label} will be moved to trash.`)}
                         </AlertDialogDescription>
                     </AlertDialogHeader>
                     <AlertDialogFooter>

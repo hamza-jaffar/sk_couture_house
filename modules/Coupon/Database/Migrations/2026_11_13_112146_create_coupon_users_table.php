@@ -1,0 +1,32 @@
+<?php
+
+use Illuminate\Database\Migrations\Migration;
+use Illuminate\Database\Schema\Blueprint;
+use Illuminate\Support\Facades\Schema;
+
+return new class extends Migration
+{
+    public function up(): void
+    {
+        Schema::create('coupon_user', function (Blueprint $table) {
+            $table->id();
+
+            // Foreign keys linking coupons and users
+            $table->foreignId('coupon_id')->constrained()->cascadeOnDelete();
+            $table->foreignId('user_id')->constrained()->cascadeOnDelete();
+
+            // Tracks how many times this specific user has used this coupon
+            $table->unsignedInteger('times_used')->default(1);
+
+            $table->timestamps();
+
+            // Ensure a user has a unique row per coupon for easy incrementing
+            $table->unique(['coupon_id', 'user_id']);
+        });
+    }
+
+    public function down(): void
+    {
+        Schema::dropIfExists('coupon_user');
+    }
+};

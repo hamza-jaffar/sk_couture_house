@@ -10,6 +10,15 @@ Route::prefix('dashboard/product')->name('dashboard.product.')->middleware('auth
     Route::get('/create', [ProductController::class, 'create'])
         ->middleware('can:products.create')
         ->name('create');
+    Route::delete('/bulk', [ProductController::class, 'bulkDestroy'])
+        ->middleware('can:products.delete')
+        ->name('bulk-destroy');
+    Route::post('/bulk/restore', [ProductController::class, 'bulkRestore'])
+        ->middleware('can:products.delete')
+        ->name('bulk-restore');
+    Route::delete('/bulk/force-delete', [ProductController::class, 'bulkForceDelete'])
+        ->middleware('can:products.delete')
+        ->name('bulk-force-delete');
     Route::get('/{product}', [ProductController::class, 'show'])
         ->middleware('can:products.view')
         ->name('show');
