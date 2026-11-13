@@ -127,6 +127,16 @@ class UpdatePlatformSettingsRequest extends FormRequest
                 'variants.*.values' => ['required', 'array', 'min:1', 'max:100'],
                 'variants.*.values.*' => ['required', 'string', 'max:120', 'distinct:ignore_case'],
             ],
+            'seo' => [
+                'meta_title_template' => ['nullable', 'string', 'max:255'],
+                'meta_description' => ['nullable', 'string', 'max:500'],
+                'og_title' => ['nullable', 'string', 'max:255'],
+                'og_description' => ['nullable', 'string', 'max:500'],
+                'og_image_path' => ['nullable', 'string', 'max:1024', $this->galleryImagePath()],
+                'canonical_url' => ['nullable', 'url', 'max:2048'],
+                'robots' => ['nullable', 'string', 'max:100'],
+                'google_analytics_id' => ['nullable', 'string', 'max:50'],
+            ],
             default => [],
         };
     }

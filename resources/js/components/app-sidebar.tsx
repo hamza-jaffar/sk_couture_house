@@ -1,9 +1,9 @@
-import * as React from 'react';
+import * as React from "react";
 
-import { NavMain } from '@/components/nav-main';
-import { NavProjects } from '@/components/nav-projects';
-import { NavSecondary } from '@/components/nav-secondary';
-import { NavUser } from '@/components/nav-user';
+import { NavMain } from "@/components/nav-main";
+import { NavProjects } from "@/components/nav-projects";
+import { NavSecondary } from "@/components/nav-secondary";
+import { NavUser } from "@/components/nav-user";
 import {
     Sidebar,
     SidebarContent,
@@ -12,7 +12,7 @@ import {
     SidebarMenu,
     SidebarMenuButton,
     SidebarMenuItem,
-} from '@/components/ui/sidebar';
+} from "@/components/ui/sidebar";
 import {
     LifeBuoyIcon,
     SendIcon,
@@ -26,71 +26,72 @@ import {
     Shirt,
     Star,
     Tag,
-} from 'lucide-react';
+} from "lucide-react";
+import AppLogo from "./app-logo";
 
 const data = {
     navMain: [
         {
-            title: 'Dashboard',
-            url: '/dashboard',
+            title: "Dashboard",
+            url: "/dashboard",
             icon: <LayoutDashboard />,
         },
         {
-            title: 'Collections',
-            url: '/dashboard/collection',
+            title: "Collections",
+            url: "/dashboard/collection",
             icon: <Layers />,
         },
         {
-            title: 'Products',
-            url: '/dashboard/product',
+            title: "Products",
+            url: "/dashboard/product",
             icon: <Shirt />,
-            permission: 'products.view',
+            permission: "products.view",
         },
         {
-            title: 'Gallery',
-            url: '/dashboard/gallery',
-            icon: <Folder />,
-            permission: 'gallery.view',
-        },
-        {
-            title: 'Coupons',
-            url: '/dashboard/coupons',
+            title: "Coupons",
+            url: "/dashboard/coupons",
             icon: <Tag />,
-            permission: 'coupons.view',
+            permission: "coupons.view",
         },
         {
-            title: 'Reviews',
-            url: '/dashboard/reviews',
+            title: "Reviews",
+            url: "/dashboard/reviews",
             icon: <Star />,
-            permission: 'reviews.view',
+            permission: "reviews.view",
+        },
+        {
+            title: "Gallery",
+            url: "/dashboard/gallery",
+            icon: <Folder />,
+            permission: "gallery.view",
         },
     ],
     navSecondary: [
         {
-            title: 'Support',
-            url: '#',
+            title: "Support",
+            url: "#",
             icon: <LifeBuoyIcon />,
         },
         {
-            title: 'Feedback',
-            url: '#',
+            title: "Feedback",
+            url: "#",
             icon: <SendIcon />,
         },
     ],
     projects: [
         {
-            name: 'Design Engineering',
-            url: '#',
+            name: "Design Engineering",
+            url: "#",
             icon: <FrameIcon />,
         },
         {
-            name: 'Sales & Marketing',
-            url: '#',
+            name: "Sales & Marketing",
+            url: "#",
             icon: <PieChartIcon />,
         },
         {
-            name: 'Travel',
-            url: '#',
+            name: "Travel",
+            url: "#",
             icon: <MapIcon />,
         },
     ],
@@ -106,17 +107,7 @@ export function AppSidebar({ ...props }: React.ComponentProps<typeof Sidebar>) {
                 <SidebarMenu>
                     <SidebarMenuItem>
                         <SidebarMenuButton size="lg" render={<a href="#" />}>
-                            <div className="flex aspect-square size-8 items-center justify-center rounded-lg bg-sidebar-primary text-sidebar-primary-foreground">
-                                <TerminalIcon className="size-4" />
-                            </div>
-                            <div className="grid flex-1 text-left text-sm leading-tight">
-                                <span className="truncate font-medium">
-                                    Acme Inc
-                                </span>
-                                <span className="truncate text-xs">
-                                    Enterprise
-                                </span>
-                            </div>
+                            <AppLogo />
                         </SidebarMenuButton>
                     </SidebarMenuItem>
                 </SidebarMenu>

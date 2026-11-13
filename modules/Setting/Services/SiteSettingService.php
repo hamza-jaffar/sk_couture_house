@@ -23,6 +23,7 @@ class SiteSettingService
      *     contact: array<string, mixed>,
      *     social: array<string, mixed>,
      *     mail: array<string, mixed>,
+     *     seo: array<string, mixed>,
      *     variants: list<array{id: string, name: string, values: list<string>}>
      * }
      */
@@ -52,6 +53,10 @@ class SiteSettingService
         );
         $result['general']['favicon_url'] = FileHelper::url(
             $result['general']['favicon_path'],
+            'public',
+        );
+        $result['seo']['og_image_url'] = FileHelper::url(
+            $result['seo']['og_image_path'] ?? null,
             'public',
         );
         $result['mail']['has_password'] = filled($result['mail']['password'] ?? null);
@@ -204,6 +209,28 @@ class SiteSettingService
             ));
         }
 
+        if ($group === 'seo') {
+            $payload = array_replace(
+                array_intersect_key($existing, array_flip(array_keys($this->defaults()['seo']))),
+                Arr::only($data, [
+                    'meta_title_template',
+                    'meta_description',
+                    'og_title',
+                    'og_description',
+                    'canonical_url',
+                    'robots',
+                    'google_analytics_id',
+                    'og_image_path',
+                ]),
+            );
+
+            $payload['og_image_path'] = array_key_exists('og_image_path', $data)
+                ? $data['og_image_path']
+                : ($existing['og_image_path'] ?? null);
+
+            return $payload;
+        }
+
         return Arr::only($data, array_keys($this->defaults()[$group]));
     }
 
@@ -276,6 +303,16 @@ class SiteSettingService
                 'password' => null,
                 'from_address' => '',
                 'from_name' => '',
+            ],
+            'seo' => [
+                'meta_title_template' => '%s | %store_name%',
+                'meta_description' => '',
+                'og_title' => '',
+                'og_description' => '',
+                'og_image_path' => null,
+                'canonical_url' => '',
+                'robots' => 'index, follow',
+                'google_analytics_id' => '',
             ],
             'variants' => [],
         ];

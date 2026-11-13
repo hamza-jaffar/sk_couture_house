@@ -21,6 +21,7 @@ import { Form, Head } from '@inertiajs/react';
 import {
     ImagePlus,
     Mail,
+    Search,
     Share2,
     SlidersHorizontal,
     Store,
@@ -35,7 +36,7 @@ type Props = {
     selectedTab: SettingsGroup;
 };
 
-type SettingsGroup = 'general' | 'contact' | 'social' | 'mail' | 'variants';
+type SettingsGroup = 'general' | 'contact' | 'social' | 'mail' | 'variants' | 'seo';
 
 type FieldErrors = Record<string, string | undefined>;
 
@@ -44,6 +45,7 @@ const tabs: { id: SettingsGroup; label: string; icon: typeof Store }[] = [
     { id: 'contact', label: 'Contact', icon: SlidersHorizontal },
     { id: 'social', label: 'Social links', icon: Share2 },
     { id: 'mail', label: 'Mail', icon: Mail },
+    { id: 'seo', label: 'SEO', icon: Search },
     { id: 'variants', label: 'Variants', icon: Tags },
 ];
 
@@ -209,7 +211,7 @@ function FileSetting({
     onRemove,
 }: {
     id: string;
-    name: 'logo' | 'favicon';
+    name: 'logo' | 'favicon' | 'og_image';
     label: string;
     selected: SelectedAsset;
     error?: string;
@@ -303,9 +305,14 @@ export default function Settings({ settings, selectedTab }: Props) {
         url: settings.general.favicon_url,
         title: settings.general.favicon_path?.split('/').pop() ?? null,
     });
-    const [activePicker, setActivePicker] = useState<'logo' | 'favicon' | null>(
+    const [activePicker, setActivePicker] = useState<'logo' | 'favicon' | 'og_image' | null>(
         null,
     );
+    const [ogImage, setOgImage] = useState<SelectedAsset>({
+        path: settings.seo.og_image_path,
+        url: settings.seo.og_image_url,
+        title: settings.seo.og_image_path?.split('/').pop() ?? null,
+    });
 
     useEffect(() => {
         setVariants(settings.variants);
@@ -331,6 +338,11 @@ export default function Settings({ settings, selectedTab }: Props) {
             url: settings.general.favicon_url,
             title: settings.general.favicon_path?.split('/').pop() ?? null,
         });
+        setOgImage({
+            path: settings.seo.og_image_path,
+            url: settings.seo.og_image_url,
+            title: settings.seo.og_image_path?.split('/').pop() ?? null,
+        });
     }, [settings]);
 
     function selectGalleryImage(media: GalleryMedia) {
@@ -349,6 +361,8 @@ export default function Settings({ settings, selectedTab }: Props) {
             setLogo(selected);
         } else if (activePicker === 'favicon') {
             setFavicon(selected);
+        } else if (activePicker === 'og_image') {
+            setOgImage(selected);
         }
 
         setActivePicker(null);
@@ -764,6 +778,196 @@ export default function Settings({ settings, selectedTab }: Props) {
                                                 </label>
                                             ) : null}
                                         </div>
+                                    </div>
+                                </>
+                            )}
+                        </SettingsForm>
+                    </div>
+                ) : null}
+
+                {activeTab === 'seo' ? (
+                    <div className="grid gap-6">
+                        <div>
+                            <h2 className="text-lg font-semibold">
+                                SEO & metadata
+                            </h2>
+                            <p className="text-sm text-muted-foreground">
+                                Control how your store appears in search engines
+                                and when shared on social media.
+                            </p>
+                        </div>
+                        <SettingsForm group="seo">
+                            {(errors) => (
+                                <>
+                                    <div>
+                                        <h3 className="mb-3 text-sm font-semibold text-muted-foreground uppercase tracking-wide">
+                                            Default meta tags
+                                        </h3>
+                                        <div className="grid gap-4">
+                                            <TextField
+                                                id="seo-meta-title-template"
+                                                name="meta_title_template"
+                                                label="Title template"
+                                                value={settings.seo.meta_title_template}
+                                                placeholder="%s | %store_name%"
+                                                error={errors.meta_title_template}
+                                            />
+                                            <div className="grid gap-2">
+                                                <Label htmlFor="seo-meta-description">
+                                                    Meta description
+                                                </Label>
+                                                <textarea
+                                                    id="seo-meta-description"
+                                                    name="meta_description"
+                                                    rows={3}
+                                                    defaultValue={settings.seo.meta_description}
+                                                    maxLength={500}
+                                                    placeholder="A short description of your store shown in search results (up to 160 chars recommended)."
+                                                    className="w-full rounded-md border border-input bg-transparent px-3 py-2 text-sm shadow-xs outline-none placeholder:text-muted-foreground focus-visible:border-ring focus-visible:ring-3 focus-visible:ring-ring/50 disabled:opacity-50"
+                                                    aria-invalid={Boolean(errors.meta_description)}
+                                                />
+                                                {errors.meta_description && (
+                                                    <InputError message={String(errors.meta_description)} />
+                                                )}
+                                            </div>
+                                            <TextField
+                                                id="seo-canonical-url"
+                                                name="canonical_url"
+                                                label="Canonical URL"
+                                                type="url"
+                                                value={settings.seo.canonical_url}
+                                                placeholder="https://yourstore.com"
+                                                error={errors.canonical_url}
+                                            />
+                                            <div className="grid gap-2 sm:max-w-xs">
+                                                <Label htmlFor="seo-robots">
+                                                    Robots directive
+                                                </Label>
+                                                <select
+                                                    id="seo-robots"
+                                                    name="robots"
+                                                    defaultValue={settings.seo.robots}
+                                                    className="h-9 w-full rounded-md border border-input bg-transparent px-3 text-sm shadow-xs outline-none focus-visible:border-ring focus-visible:ring-3 focus-visible:ring-ring/50"
+                                                >
+                                                    <option value="index, follow">index, follow</option>
+                                                    <option value="noindex, follow">noindex, follow</option>
+                                                    <option value="index, nofollow">index, nofollow</option>
+                                                    <option value="noindex, nofollow">noindex, nofollow</option>
+                                                </select>
+                                                {errors.robots && (
+                                                    <InputError message={String(errors.robots)} />
+                                                )}
+                                            </div>
+                                        </div>
+                                    </div>
+
+                                    <div className="border-t pt-4">
+                                        <h3 className="mb-3 text-sm font-semibold text-muted-foreground uppercase tracking-wide">
+                                            Open Graph (social sharing)
+                                        </h3>
+                                        <div className="grid gap-4">
+                                            <div className="grid gap-4 sm:grid-cols-2">
+                                                <TextField
+                                                    id="seo-og-title"
+                                                    name="og_title"
+                                                    label="OG title"
+                                                    value={settings.seo.og_title}
+                                                    placeholder="Your store name or headline"
+                                                    error={errors.og_title}
+                                                />
+                                                <div className="grid gap-2">
+                                                    <Label htmlFor="seo-og-description">
+                                                        OG description
+                                                    </Label>
+                                                    <textarea
+                                                        id="seo-og-description"
+                                                        name="og_description"
+                                                        rows={3}
+                                                        defaultValue={settings.seo.og_description}
+                                                        maxLength={500}
+                                                        placeholder="Description shown when your site is shared on social media."
+                                                        className="w-full rounded-md border border-input bg-transparent px-3 py-2 text-sm shadow-xs outline-none placeholder:text-muted-foreground focus-visible:border-ring focus-visible:ring-3 focus-visible:ring-ring/50 disabled:opacity-50"
+                                                        aria-invalid={Boolean(errors.og_description)}
+                                                    />
+                                                    {errors.og_description && (
+                                                        <InputError message={String(errors.og_description)} />
+                                                    )}
+                                                </div>
+                                            </div>
+                                            <div className="grid gap-3 rounded-lg border p-4">
+                                                <input
+                                                    type="hidden"
+                                                    name="og_image_path"
+                                                    value={ogImage.path ?? ''}
+                                                />
+                                                <div className="flex items-center gap-4">
+                                                    {ogImage.url ? (
+                                                        <img
+                                                            src={ogImage.url}
+                                                            alt="OG image preview"
+                                                            className="size-14 rounded-md border bg-background object-contain p-1"
+                                                        />
+                                                    ) : (
+                                                        <div className="grid size-14 place-items-center rounded-md border bg-muted text-xs text-muted-foreground">
+                                                            None
+                                                        </div>
+                                                    )}
+                                                    <div className="grid gap-1">
+                                                        <p className="text-sm font-medium">OG image</p>
+                                                        <p className="text-xs text-muted-foreground">
+                                                            Recommended size: 1200×630 px.
+                                                        </p>
+                                                    </div>
+                                                </div>
+                                                {ogImage.title ? (
+                                                    <p className="truncate text-xs text-muted-foreground">
+                                                        {ogImage.title}
+                                                    </p>
+                                                ) : null}
+                                                <div className="flex flex-wrap gap-2">
+                                                    <Button
+                                                        type="button"
+                                                        variant="outline"
+                                                        disabled={!canUpdate}
+                                                        onClick={() => setActivePicker('og_image')}
+                                                    >
+                                                        <ImagePlus aria-hidden="true" />
+                                                        Choose from gallery
+                                                    </Button>
+                                                    {ogImage.path ? (
+                                                        <Button
+                                                            type="button"
+                                                            variant="ghost"
+                                                            disabled={!canUpdate}
+                                                            onClick={() =>
+                                                                setOgImage({ path: null, url: null, title: null })
+                                                            }
+                                                            aria-label="Remove OG image"
+                                                        >
+                                                            <X aria-hidden="true" />
+                                                            Remove
+                                                        </Button>
+                                                    ) : null}
+                                                </div>
+                                                {errors.og_image_path ? (
+                                                    <InputError message={String(errors.og_image_path)} />
+                                                ) : null}
+                                            </div>
+                                        </div>
+                                    </div>
+
+                                    <div className="border-t pt-4">
+                                        <h3 className="mb-3 text-sm font-semibold text-muted-foreground uppercase tracking-wide">
+                                            Analytics
+                                        </h3>
+                                        <TextField
+                                            id="seo-ga-id"
+                                            name="google_analytics_id"
+                                            label="Google Analytics ID"
+                                            value={settings.seo.google_analytics_id}
+                                            placeholder="G-XXXXXXXXXX"
+                                            error={errors.google_analytics_id}
+                                        />
                                     </div>
                                 </>
                             )}

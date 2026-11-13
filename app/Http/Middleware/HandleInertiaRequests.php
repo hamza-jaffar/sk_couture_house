@@ -3,6 +3,7 @@
 namespace App\Http\Middleware;
 
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\View;
 use Inertia\Middleware;
 use Modules\Category\Enum\OrderTypeEnum;
 use Modules\Setting\Services\SiteSettingService;
@@ -42,10 +43,15 @@ class HandleInertiaRequests extends Middleware
     public function share(Request $request): array
     {
         $user = $request->user();
+        $general = $this->settings->all()['general'];
+
+        // Share favicon URL and store name with the Blade root template
+        View::share('favicon_url', $general['favicon_url'] ?? null);
+        View::share('site_name', $general['name'] ?? config('app.name'));
 
         return [
             ...parent::share($request),
-            'name' => config('app.name'),
+            'name' => $general['name'] ?? config('app.name'),
             'auth' => [
                 'user' => $user,
                 'permissions' => $user?->getAllPermissions()

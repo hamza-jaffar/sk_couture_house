@@ -42,7 +42,24 @@ export type PlatformSettings = {
         from_name: string;
         has_password: boolean;
     };
+    seo: {
+        meta_title_template: string;
+        meta_description: string;
+        og_title: string;
+        og_description: string;
+        og_image_path: string | null;
+        og_image_url: string | null;
+        canonical_url: string;
+        robots: string;
+        google_analytics_id: string;
+    };
     variants: ProductVariant[];
+};
+
+export type ProductVariant = {
+    id?: string;
+    name: string;
+    values: string[];
 };
 
 export type ProductVariant = {

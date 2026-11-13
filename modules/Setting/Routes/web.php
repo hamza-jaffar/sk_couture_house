@@ -8,7 +8,7 @@ Route::middleware(['auth', 'can:settings.view'])
     ->group(function (): void {
         Route::get('/', [SettingController::class, 'index'])->name('index');
         Route::patch('/{group}', [SettingController::class, 'update'])
-            ->whereIn('group', ['general', 'contact', 'social', 'mail', 'variants'])
+            ->whereIn('group', ['general', 'contact', 'social', 'mail', 'variants', 'seo'])
             ->middleware('can:settings.update')
             ->name('update');
     });

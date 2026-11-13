@@ -5,9 +5,14 @@
     <meta charset="utf-8">
     <meta name="viewport" content="width=device-width, initial-scale=1">
 
-    <link rel="icon" href="/favicon.ico" sizes="any">
-    <link rel="icon" href="/favicon.svg" type="image/svg+xml">
-    <link rel="apple-touch-icon" href="/apple-touch-icon.png">
+    @if (!empty($favicon_url))
+        <link rel="icon" href="{{ $favicon_url }}" type="image/png">
+        <link rel="apple-touch-icon" href="{{ $favicon_url }}">
+    @else
+        <link rel="icon" href="/favicon.ico" sizes="any">
+        <link rel="icon" href="/favicon.svg" type="image/svg+xml">
+        <link rel="apple-touch-icon" href="/apple-touch-icon.png">
+    @endif
 
     {{-- Inline script to detect system dark mode preference and apply it immediately --}}
     <script>
@@ -40,7 +45,7 @@
     @viteReactRefresh
     @vite(['resources/css/app.css', 'resources/js/app.tsx', "resources/js/pages/{$page['component']}.tsx"])
     <x-inertia::head>
-        <title>{{ config('app.name', 'Laravel') }}</title>
+        <title>{{ $site_name ?? config('app.name', 'Laravel') }}</title>
     </x-inertia::head>
 </head>
 
