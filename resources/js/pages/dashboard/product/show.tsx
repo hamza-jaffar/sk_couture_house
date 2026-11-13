@@ -23,9 +23,9 @@ type Props = {
 };
 
 const STATUS_STYLES: Record<ProductRecord["status"], string> = {
-    published: "bg-green-500/15 text-green-600 dark:text-green-400",
-    draft: "bg-muted text-muted-foreground",
-    archived: "bg-orange-500/15 text-orange-600 dark:text-orange-400",
+    published: "bg-emerald-500/15 text-emerald-600 dark:text-emerald-400 border border-emerald-500/20",
+    draft: "bg-amber-500/15 text-amber-600 dark:text-amber-400 border border-amber-500/20",
+    archived: "bg-purple-500/15 text-purple-600 dark:text-purple-400 border border-purple-500/20",
 };
 
 export default function ShowProduct({ product }: Props) {

@@ -105,6 +105,53 @@ function ProductImageCell({ product }: { product: ProductRecord }) {
     );
 }
 
+function ProductStatusBadge({
+    status,
+    deletedAt,
+}: {
+    status: ProductRecord["status"];
+    deletedAt?: string | null;
+}) {
+    if (deletedAt) {
+        return (
+            <span className="inline-flex items-center gap-1.5 rounded-full border border-destructive/30 bg-destructive/15 px-2.5 py-0.5 text-xs font-medium text-destructive">
+                <span className="size-1.5 rounded-full bg-destructive animate-pulse" />
+                In trash
+            </span>
+        );
+    }
+
+    switch (status) {
+        case "published":
+            return (
+                <span className="inline-flex items-center gap-1.5 rounded-full border border-emerald-500/30 bg-emerald-500/15 px-2.5 py-0.5 text-xs font-medium text-emerald-600 dark:text-emerald-400">
+                    <span className="size-1.5 rounded-full bg-emerald-500" />
+                    Published
+                </span>
+            );
+        case "draft":
+            return (
+                <span className="inline-flex items-center gap-1.5 rounded-full border border-amber-500/30 bg-amber-500/15 px-2.5 py-0.5 text-xs font-medium text-amber-600 dark:text-amber-400">
+                    <span className="size-1.5 rounded-full bg-amber-500" />
+                    Draft
+                </span>
+            );
+        case "archived":
+            return (
+                <span className="inline-flex items-center gap-1.5 rounded-full border border-purple-500/30 bg-purple-500/15 px-2.5 py-0.5 text-xs font-medium text-purple-600 dark:text-purple-400">
+                    <span className="size-1.5 rounded-full bg-purple-500" />
+                    Archived
+                </span>
+            );
+        default:
+            return (
+                <span className="inline-flex items-center gap-1.5 rounded-full border border-border bg-muted px-2.5 py-0.5 text-xs font-medium text-muted-foreground capitalize">
+                    {status}
+                </span>
+            );
+    }
+}
+
 function CollectionFilter({
     value,
     categories,
@@ -334,16 +381,12 @@ function ProductTable({
                 header: ({ column }) => (
                     <DataTableColumnHeader column={column} title="Status" />
                 ),
-                cell: ({ row }) =>
-                    row.original.deleted_at ? (
-                        <span className="rounded-full bg-destructive/10 px-2.5 py-1 text-xs font-medium text-destructive">
-                            In trash
-                        </span>
-                    ) : (
-                        <span className="rounded-full bg-muted px-2.5 py-1 text-xs font-medium capitalize">
-                            {row.original.status}
-                        </span>
-                    ),
+                cell: ({ row }) => (
+                    <ProductStatusBadge
+                        status={row.original.status}
+                        deletedAt={row.original.deleted_at}
+                    />
+                ),
             },
             {
                 accessorKey: "created_at",
