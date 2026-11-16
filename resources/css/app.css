@@ -1,7 +1,57 @@
 @import 'tailwindcss';
 @import "tw-animate-css";
 @import "shadcn/tailwind.css";
-@import "@fontsource-variable/inter";
+
+/* Assistant font — referenced relative to project public/assets/font/ */
+@font-face {
+    font-family: 'Assistant';
+    src: url('../../public/assets/font/ExtraLight.ttf') format('truetype');
+    font-weight: 200;
+    font-style: normal;
+    font-display: swap;
+}
+@font-face {
+    font-family: 'Assistant';
+    src: url('../../public/assets/font/Light.ttf') format('truetype');
+    font-weight: 300;
+    font-style: normal;
+    font-display: swap;
+}
+@font-face {
+    font-family: 'Assistant';
+    src: url('../../public/assets/font/Regular.ttf') format('truetype');
+    font-weight: 400;
+    font-style: normal;
+    font-display: swap;
+}
+@font-face {
+    font-family: 'Assistant';
+    src: url('../../public/assets/font/Medium.ttf') format('truetype');
+    font-weight: 500;
+    font-style: normal;
+    font-display: swap;
+}
+@font-face {
+    font-family: 'Assistant';
+    src: url('../../public/assets/font/SemiBold.ttf') format('truetype');
+    font-weight: 600;
+    font-style: normal;
+    font-display: swap;
+}
+@font-face {
+    font-family: 'Assistant';
+    src: url('../../public/assets/font/Bold.ttf') format('truetype');
+    font-weight: 700;
+    font-style: normal;
+    font-display: swap;
+}
+@font-face {
+    font-family: 'Assistant';
+    src: url('../../public/assets/font/ExtraBold.ttf') format('truetype');
+    font-weight: 800;
+    font-style: normal;
+    font-display: swap;
+}
 
 @custom-variant dark (&:is(.dark *));
 
@@ -10,7 +60,7 @@
 
 @theme {
     --font-sans:
-        'Instrument Sans', ui-sans-serif, system-ui, sans-serif,
+        'Assistant', ui-sans-serif, system-ui, sans-serif,
         'Apple Color Emoji', 'Segoe UI Emoji', 'Segoe UI Symbol',
         'Noto Color Emoji';
 }
@@ -19,7 +69,7 @@
     --font-heading:
         var(--font-sans);
     --font-sans:
-        'Inter Variable', sans-serif;
+        'Assistant', sans-serif;
     --color-sidebar-ring:
         var(--sidebar-ring);
     --color-sidebar-border:
