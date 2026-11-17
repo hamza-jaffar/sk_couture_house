@@ -6,6 +6,7 @@ use Closure;
 use Illuminate\Http\Request;
 use Inertia\Inertia;
 use Modules\Category\Services\CategoryService;
+use Modules\Order\Services\CartService;
 use Modules\Setting\Services\SiteSettingService;
 use Symfony\Component\HttpFoundation\Response;
 
@@ -215,7 +216,7 @@ class FrontendMiddleware
      */
     protected function getCartCount(Request $request): int
     {
-        return (int) $request->session()->get('cart_count', 0);
+        return app(CartService::class)->cartCount();
     }
 
     /**

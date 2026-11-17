@@ -96,7 +96,7 @@ class ProductService
             $query = Product::query()
                 ->where('status', 'published')
                 ->whereIn('category_id', $categoryIds)
-                ->with(['category:id,name,slug']);
+                ->with(['category:id,name,slug,order_type']);
 
             // Availability filter
             if (($filters['availability'] ?? null) === 'in_stock') {
@@ -156,7 +156,11 @@ class ProductService
                 'category' => $product->category ? [
                     'name' => $product->category->name,
                     'slug' => $product->category->slug,
+                    'order_type' => $product->category->order_type instanceof OrderTypeEnum
+                        ? $product->category->order_type->value
+                        : (string) ($product->category->order_type ?? 'direct'),
                 ] : null,
+                'order_type' => $product->effective_order_type,
             ]);
         });
     }
@@ -173,7 +177,7 @@ class ProductService
                 ->where('slug', $slug)
                 ->where('status', 'published')
                 ->with([
-                    'category' => fn ($q) => $q->select(['id', 'name', 'slug', 'parent_id'])
+                    'category' => fn ($q) => $q->select(['id', 'name', 'slug', 'parent_id', 'order_type'])
                         ->with(['parent:id,name,slug']),
                     'variants' => fn ($q) => $q->orderBy('id'),
                 ])
@@ -216,11 +220,15 @@ class ProductService
                     'id' => (int) $product->category->id,
                     'name' => $product->category->name,
                     'slug' => $product->category->slug,
+                    'order_type' => $product->category->order_type instanceof OrderTypeEnum
+                        ? $product->category->order_type->value
+                        : (string) ($product->category->order_type ?? 'direct'),
                     'parent' => $product->category->parent ? [
                         'name' => $product->category->parent->name,
                         'slug' => $product->category->parent->slug,
                     ] : null,
                 ] : null,
+                'order_type' => $product->effective_order_type,
             ];
         });
     }

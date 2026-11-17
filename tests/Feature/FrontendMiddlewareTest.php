@@ -7,7 +7,7 @@ it('shares frontend data including nav_links, footer_links, announcement, and ca
 
     $response->assertOk();
     $response->assertInertia(fn (Assert $page) => $page
-        ->component('welcome')
+        ->component('frontend/welcome')
         ->has('nav_links')
         ->has('footer_links')
         ->has('announcement')

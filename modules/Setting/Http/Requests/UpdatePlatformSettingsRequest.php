@@ -94,6 +94,7 @@ class UpdatePlatformSettingsRequest extends FormRequest
                 'email' => ['nullable', 'email', 'max:255'],
                 'phone' => ['nullable', 'string', 'max:40'],
                 'alternate_phone' => ['nullable', 'string', 'max:40'],
+                'whatsapp_number' => ['nullable', 'string', 'max:40'],
                 'address' => ['nullable', 'string', 'max:255'],
                 'address_line_2' => ['nullable', 'string', 'max:255'],
                 'city' => ['nullable', 'string', 'max:120'],

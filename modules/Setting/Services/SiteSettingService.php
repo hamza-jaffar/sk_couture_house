@@ -255,7 +255,7 @@ class SiteSettingService
     /**
      * @return array{
      *     general: array{name: string, tagline: string, description: string, shipping_and_return: string, website_url: string, timezone: string, currency: string, currency_icon: string, logo_path: string|null, favicon_path: string|null},
-     *     contact: array{email: string, phone: string, alternate_phone: string, address: string, address_line_2: string, city: string, region: string, postal_code: string, country: string, business_hours: string},
+     *     contact: array{email: string, phone: string, alternate_phone: string, whatsapp_number: string, address: string, address_line_2: string, city: string, region: string, postal_code: string, country: string, business_hours: string},
      *     social: array{facebook: string, instagram: string, tiktok: string, youtube: string, pinterest: string, linkedin: string, x: string},
      *     mail: array{host: string, port: int, encryption: string, username: string, password: string|null, from_address: string, from_name: string},
      *     variants: list<array{id: string, name: string, values: list<string>}>
@@ -280,6 +280,7 @@ class SiteSettingService
                 'email' => '',
                 'phone' => '',
                 'alternate_phone' => '',
+                'whatsapp_number' => '',
                 'address' => '',
                 'address_line_2' => '',
                 'city' => '',

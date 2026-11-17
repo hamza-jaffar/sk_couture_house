@@ -17,6 +17,7 @@ export type PlatformSettings = {
         email: string;
         phone: string;
         alternate_phone: string;
+        whatsapp_number: string;
         address: string;
         address_line_2: string;
         city: string;
@@ -55,12 +56,6 @@ export type PlatformSettings = {
         google_analytics_id: string;
     };
     variants: ProductVariant[];
-};
-
-export type ProductVariant = {
-    id?: string;
-    name: string;
-    values: string[];
 };
 
 export type ProductVariant = {

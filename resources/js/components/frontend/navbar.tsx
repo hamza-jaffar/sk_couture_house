@@ -608,7 +608,7 @@ export default function Navbar() {
 
                         {/* Shopping Bag / Cart */}
                         <Link
-                            href="#cart"
+                            href="/cart"
                             aria-label="Shopping bag"
                             className="group relative flex size-8 items-center justify-center text-foreground/80 transition-colors hover:text-foreground sm:size-9"
                         >

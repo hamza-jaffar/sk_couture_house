@@ -24,6 +24,7 @@ import {
     Folder,
     Layers,
     Shirt,
+    ShoppingBag,
     Star,
     Tag,
 } from "lucide-react";
@@ -46,6 +47,12 @@ const data = {
             url: "/dashboard/product",
             icon: <Shirt />,
             permission: "products.view",
+        },
+        {
+            title: "Orders",
+            url: "/dashboard/orders",
+            icon: <ShoppingBag />,
+            permission: "orders.view",
         },
         {
             title: "Coupons",

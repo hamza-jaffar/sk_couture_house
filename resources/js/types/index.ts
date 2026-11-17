@@ -6,3 +6,4 @@ export type * from './products';
 export type * from './reviews';
 export type * from './roles';
 export type * from './settings';
+export type * from './orders';

@@ -1,11 +1,13 @@
 import Navbar from '@/components/frontend/navbar';
-import { Head, Link } from '@inertiajs/react';
+import { Head, Link, router } from '@inertiajs/react';
 import {
+    Check,
     ChevronDown,
     ChevronLeft,
     ChevronRight,
     ChevronUp,
     Heart,
+    MessageCircle,
     Minus,
     Plus,
     X,
@@ -18,6 +20,7 @@ interface CategoryInfo {
     id: number;
     name: string;
     slug: string;
+    order_type?: string;
     parent?: {
         name: string;
         slug: string;
@@ -51,6 +54,7 @@ interface ProductDetail {
     variant_options: Array<{ name: string; values: string[] }>;
     variants: ProductVariant[];
     category: CategoryInfo | null;
+    order_type?: string;
 }
 
 interface RecommendedProduct {
@@ -219,6 +223,36 @@ export default function ProductShow({
     }, [product.variant_options]);
 
     const [selectedSize, setSelectedSize] = useState<string>(sizeOptions[0] ?? 'XS');
+
+    // WhatsApp check
+    const isWhatsApp = product.order_type === 'whatsapp' || product.category?.order_type === 'whatsapp';
+    const [addingToBag, setAddingToBag] = useState(false);
+    const [justAdded, setJustAdded] = useState(false);
+
+    const handleAction = () => {
+        if (isWhatsApp) {
+            window.location.href = `/whatsapp/redirect/${product.slug}?size=${encodeURIComponent(selectedSize)}&qty=${quantity}`;
+            return;
+        }
+
+        setAddingToBag(true);
+        router.post(
+            '/cart/add',
+            {
+                product_id: product.id,
+                quantity,
+                selected_options: selectedSize ? { Size: selectedSize } : {},
+            },
+            {
+                preserveScroll: true,
+                onSuccess: () => {
+                    setJustAdded(true);
+                    setTimeout(() => setJustAdded(false), 2000);
+                },
+                onFinish: () => setAddingToBag(false),
+            }
+        );
+    };
 
     // Description expand toggle
     const [isExpanded, setIsExpanded] = useState(false);
@@ -462,16 +496,39 @@ export default function ProductShow({
                                     </div>
                                 </div>
 
-                                {/* ADD TO BAG Button */}
-                                <button
-                                    type="button"
-                                    onClick={() => {
-                                        alert(`Added ${quantity} item(s) to bag.`);
-                                    }}
-                                    className="h-12 flex-1 bg-[#3a3a3a] text-center text-xs font-bold uppercase tracking-widest text-white transition-colors hover:bg-black active:scale-[0.99] flex items-center justify-center"
-                                >
-                                    Add to bag
-                                </button>
+                                {/* Action Button (Add to bag or WhatsApp) */}
+                                {isWhatsApp ? (
+                                    <button
+                                        type="button"
+                                        onClick={handleAction}
+                                        className="h-12 flex-1 bg-emerald-700 text-center text-xs font-bold uppercase tracking-widest text-white transition-colors hover:bg-emerald-800 active:scale-[0.99] flex items-center justify-center gap-2"
+                                    >
+                                        <MessageCircle className="h-4 w-4" />
+                                        Order via WhatsApp
+                                    </button>
+                                ) : (
+                                    <button
+                                        type="button"
+                                        onClick={handleAction}
+                                        disabled={addingToBag}
+                                        className={`h-12 flex-1 text-center text-xs font-bold uppercase tracking-widest text-white transition-all active:scale-[0.99] flex items-center justify-center gap-2 ${
+                                            justAdded
+                                                ? 'bg-emerald-600'
+                                                : 'bg-[#3a3a3a] hover:bg-black'
+                                        }`}
+                                    >
+                                        {justAdded ? (
+                                            <>
+                                                <Check className="h-4 w-4 stroke-[3]" />
+                                                Added to Bag
+                                            </>
+                                        ) : addingToBag ? (
+                                            'Adding...'
+                                        ) : (
+                                            'Add to bag'
+                                        )}
+                                    </button>
+                                )}
                             </div>
 
                             {/* Accordions */}

@@ -4,6 +4,7 @@ use App\Providers\AppServiceProvider;
 use Modules\Category\Providers\CategoryServiceProvider;
 use Modules\Coupon\Providers\CouponServiceProvider;
 use Modules\Gallery\Providers\GalleryServiceProvider;
+use Modules\Order\Providers\OrderServiceProvider;
 use Modules\Product\Providers\ProductServiceProvider;
 use Modules\Review\Providers\ReviewServiceProvider;
 use Modules\Setting\Providers\SettingServiceProvider;
@@ -18,4 +19,5 @@ return [
     ProductServiceProvider::class,
     CouponServiceProvider::class,
     ReviewServiceProvider::class,
+    OrderServiceProvider::class,
 ];
