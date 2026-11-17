@@ -82,6 +82,7 @@ class UpdatePlatformSettingsRequest extends FormRequest
                 'name' => ['required', 'string', 'max:120'],
                 'tagline' => ['nullable', 'string', 'max:255'],
                 'description' => ['nullable', 'string', 'max:1000'],
+                'shipping_and_return' => ['nullable', 'string', 'max:10000'],
                 'website_url' => ['nullable', 'url', 'max:2048'],
                 'timezone' => ['required', 'timezone'],
                 'currency' => ['required', 'regex:/^[A-Z]{3}$/'],

@@ -1,6 +1,7 @@
 <?php
 
 use Illuminate\Support\Facades\Route;
+use Modules\Product\Http\Controller\FrontendProductController;
 use Modules\Product\Http\Controller\ProductController;
 
 Route::prefix('dashboard/product')->name('dashboard.product.')->middleware('auth')->group(function () {
@@ -42,4 +43,8 @@ Route::prefix('dashboard/product')->name('dashboard.product.')->middleware('auth
         ->withTrashed()
         ->middleware('can:products.delete')
         ->name('forceDelete');
+});
+
+Route::prefix('products')->name('products.')->middleware('frontend')->group(function () {
+    Route::get('/{slug}', [FrontendProductController::class, 'show'])->name('show');
 });

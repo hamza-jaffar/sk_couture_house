@@ -5,7 +5,7 @@ namespace App\Http\Middleware;
 use Closure;
 use Illuminate\Http\Request;
 use Inertia\Inertia;
-use Modules\Category\Models\Category;
+use Modules\Category\Services\CategoryService;
 use Modules\Setting\Services\SiteSettingService;
 use Symfony\Component\HttpFoundation\Response;
 
@@ -13,6 +13,7 @@ class FrontendMiddleware
 {
     public function __construct(
         protected SiteSettingService $settings,
+        protected CategoryService $categoryService,
     ) {}
 
     /**
@@ -35,129 +36,43 @@ class FrontendMiddleware
 
     /**
      * Build the multi-level navigation links.
-     * Combines dynamic active categories from the database with curated editorial links.
+     * Uses CategoryService to check cache first.
      *
      * @return array<int, array<string, mixed>>
      */
     protected function getNavLinks(): array
     {
-        $categoryNav = $this->getCategoriesTree();
+        $categoryNav = $this->categoryService->activeNavigationTree();
 
         if (! empty($categoryNav)) {
             return [
                 [
                     'label' => 'New Arrivals',
-                    'href' => '#',
+                    'href' => '/collections',
                     'children' => [
-                        ['label' => 'All New In', 'href' => '#'],
-                        ['label' => 'Latest Drop', 'href' => '#'],
-                        ['label' => 'Trending This Season', 'href' => '#'],
-                        ['label' => 'Capsule Edit', 'href' => '#'],
+                        ['label' => 'All New In', 'href' => '/collections'],
+                        ['label' => 'Latest Drop', 'href' => '/collections'],
+                        ['label' => 'Trending This Season', 'href' => '/collections'],
                     ],
                 ],
                 [
                     'label' => 'Best Sellers',
-                    'href' => '#',
+                    'href' => '/collections',
                     'children' => [
-                        ['label' => 'All Best Sellers', 'href' => '#'],
-                        ['label' => 'Most Coveted', 'href' => '#'],
-                        ['label' => 'Iconic Pieces', 'href' => '#'],
-                        ['label' => 'Curated Favorites', 'href' => '#'],
+                        ['label' => 'All Best Sellers', 'href' => '/collections'],
+                        ['label' => 'Iconic Pieces', 'href' => '/collections'],
+                        ['label' => 'Curated Favorites', 'href' => '/collections'],
                     ],
                 ],
                 ...$categoryNav,
                 [
-                    'label' => 'Brands',
-                    'href' => '#',
-                    'children' => [
-                        ['label' => 'All Designers', 'href' => '#'],
-                        [
-                            'label' => 'Haute Couture',
-                            'children' => [
-                                ['label' => 'Atelier SK', 'href' => '#'],
-                                ['label' => 'Maison Noir', 'href' => '#'],
-                                ['label' => 'L’Étoile Paris', 'href' => '#'],
-                            ],
-                        ],
-                        [
-                            'label' => 'Contemporary',
-                            'children' => [
-                                ['label' => 'Studio Minimal', 'href' => '#'],
-                                ['label' => 'Linen & Silk', 'href' => '#'],
-                            ],
-                        ],
-                        ['label' => 'Artisanal & Sustainable', 'href' => '#'],
-                    ],
-                ],
-                [
-                    'label' => 'Fragrances',
-                    'href' => '#',
-                    'children' => [
-                        ['label' => 'Discovery Collection', 'href' => '#'],
-                        [
-                            'label' => 'Eau de Parfum',
-                            'children' => [
-                                ['label' => 'Oud Mystique', 'href' => '#'],
-                                ['label' => 'Velvet Rose', 'href' => '#'],
-                                ['label' => 'Smoky Amber', 'href' => '#'],
-                            ],
-                        ],
-                        ['label' => 'Home Scents & Candles', 'href' => '#'],
-                        ['label' => 'Bespoke Gift Sets', 'href' => '#'],
-                    ],
+                    'label' => 'Collections',
+                    'href' => '/collections',
                 ],
             ];
         }
 
         return $this->getDefaultNavLinks();
-    }
-
-    /**
-     * Recursively fetch active categories as a nested tree.
-     *
-     * @return array<int, array<string, mixed>>
-     */
-    protected function getCategoriesTree(): array
-    {
-        try {
-            $categories = Category::query()
-                ->whereNull('parent_id')
-                ->where('is_active', true)
-                ->with([
-                    'children' => fn ($q) => $q->where('is_active', true)->with([
-                        'children' => fn ($sub) => $sub->where('is_active', true),
-                    ]),
-                ])
-                ->orderBy('name')
-                ->get();
-
-            return $categories->map(fn (Category $cat) => $this->formatCategoryNode($cat))->all();
-        } catch (\Throwable) {
-            return [];
-        }
-    }
-
-    /**
-     * Format a category node recursively for multi-level navigation.
-     *
-     * @return array<string, mixed>
-     */
-    protected function formatCategoryNode(Category $category): array
-    {
-        $node = [
-            'label' => $category->name,
-            'href' => '#',
-        ];
-
-        if ($category->relationLoaded('children') && $category->children->isNotEmpty()) {
-            $children = [
-                ['label' => 'All '.$category->name, 'href' => '#'],
-                ...$category->children->map(fn (Category $child) => $this->formatCategoryNode($child))->all(),
-            ];
-            $node['children'] = $children;
-        }
-
-        return $node;
     }
 
     /**

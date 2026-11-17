@@ -27,6 +27,8 @@ export type ProductRecord = {
     slug: string;
     short_description: string | null;
     description: string | null;
+    product_specifications: string | null;
+    care_instructions: string | null;
     price: string;
     sale_price: string | null;
     sale_start_at: string | null;

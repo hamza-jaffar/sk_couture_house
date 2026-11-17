@@ -54,6 +54,38 @@ class ProductListingCache
     }
 
     /**
+     * @param  Closure(): array<string, mixed>|null  $callback
+     * @return array<string, mixed>|null
+     */
+    public function rememberSingle(string $slug, Closure $callback): ?array
+    {
+        $version = Cache::get(self::VERSION_KEY, 1);
+        $key = 'product-single:'.$version.':'.$slug;
+
+        return Cache::remember(
+            $key,
+            now()->addMinutes(15),
+            $callback,
+        );
+    }
+
+    /**
+     * @param  Closure(): list<array<string, mixed>>  $callback
+     * @return list<array<string, mixed>>
+     */
+    public function rememberRecommendations(int $productId, Closure $callback): array
+    {
+        $version = Cache::get(self::VERSION_KEY, 1);
+        $key = 'product-recommendations:'.$version.':'.$productId;
+
+        return Cache::remember(
+            $key,
+            now()->addMinutes(15),
+            $callback,
+        );
+    }
+
+    /**
      * @param  Closure(): array{
      *     categories: list<array{id: int, name: string, slug: string}>,
      *     variant_presets: list<array{id: string, name: string, values: list<string>}>,

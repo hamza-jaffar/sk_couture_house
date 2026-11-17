@@ -79,6 +79,191 @@ class ProductService
     }
 
     /**
+     * Paginate products for frontend collection/product browsing with cache-first lookup.
+     *
+     * @param  list<int>  $categoryIds
+     * @param  array<string, mixed>  $filters
+     * @return LengthAwarePaginator<int, array<string, mixed>>
+     */
+    public function paginateFrontendProducts(array $categoryIds, array $filters): LengthAwarePaginator
+    {
+        $cachePayload = [
+            'frontend_category_ids' => $categoryIds,
+            'filters' => $filters,
+        ];
+
+        return $this->listingCache->remember($cachePayload, function () use ($categoryIds, $filters): LengthAwarePaginator {
+            $query = Product::query()
+                ->where('status', 'published')
+                ->whereIn('category_id', $categoryIds)
+                ->with(['category:id,name,slug']);
+
+            // Availability filter
+            if (($filters['availability'] ?? null) === 'in_stock') {
+                $query->where('stock', '>', 0);
+            } elseif (($filters['availability'] ?? null) === 'out_of_stock') {
+                $query->where('stock', '<=', 0);
+            }
+
+            // Product type filter
+            if (filled($filters['type'] ?? null) && $filters['type'] !== 'all') {
+                $query->where('type', $filters['type']);
+            }
+
+            // Price range filter
+            if (filled($filters['min_price'] ?? null)) {
+                $query->where('price', '>=', (float) $filters['min_price']);
+            }
+            if (filled($filters['max_price'] ?? null)) {
+                $query->where('price', '<=', (float) $filters['max_price']);
+            }
+
+            // Search filter
+            if (filled($filters['search'] ?? null)) {
+                $search = trim((string) $filters['search']);
+                $query->where(function (Builder $b) use ($search): void {
+                    $b->where('title', 'like', "%{$search}%")
+                        ->orWhere('sku', 'like', "%{$search}%");
+                });
+            }
+
+            // Sorting
+            $sort = $filters['sort'] ?? 'best_sellers';
+            match ($sort) {
+                'price_asc' => $query->orderBy('price', 'asc')->orderBy('id', 'asc'),
+                'price_desc' => $query->orderBy('price', 'desc')->orderBy('id', 'desc'),
+                'newest' => $query->orderBy('created_at', 'desc')->orderBy('id', 'desc'),
+                default => $query->orderBy('is_featured', 'desc')->orderBy('id', 'desc'),
+            };
+
+            $perPage = max(1, min(48, (int) ($filters['per_page'] ?? 12)));
+            $paginator = $query->paginate($perPage)->withQueryString();
+
+            return $paginator->through(fn (Product $product): array => [
+                'id' => (int) $product->id,
+                'title' => $product->title,
+                'slug' => $product->slug,
+                'price' => (float) $product->price,
+                'sale_price' => $product->sale_price !== null ? (float) $product->sale_price : null,
+                'stock' => (int) $product->stock,
+                'type' => $product->type,
+                'is_featured' => (bool) $product->is_featured,
+                'images' => array_map(
+                    fn (string $path): string => FileHelper::url($path, 'public'),
+                    $product->images ?? [],
+                ),
+                'brand' => $product->category?->name ?? 'House Collection',
+                'category' => $product->category ? [
+                    'name' => $product->category->name,
+                    'slug' => $product->category->slug,
+                ] : null,
+            ]);
+        });
+    }
+
+    /**
+     * Find an active published product for frontend display (cached first).
+     *
+     * @return array<string, mixed>|null
+     */
+    public function findFrontendProduct(string $slug): ?array
+    {
+        return $this->listingCache->rememberSingle($slug, function () use ($slug): ?array {
+            $product = Product::query()
+                ->where('slug', $slug)
+                ->where('status', 'published')
+                ->with([
+                    'category' => fn ($q) => $q->select(['id', 'name', 'slug', 'parent_id'])
+                        ->with(['parent:id,name,slug']),
+                    'variants' => fn ($q) => $q->orderBy('id'),
+                ])
+                ->first();
+
+            if (! $product) {
+                return null;
+            }
+
+            $images = array_map(
+                fn (string $path): string => FileHelper::url($path, 'public'),
+                $product->images ?? [],
+            );
+
+            return [
+                'id' => (int) $product->id,
+                'title' => $product->title,
+                'slug' => $product->slug,
+                'short_description' => $product->short_description,
+                'description' => $product->description,
+                'product_specifications' => $product->product_specifications,
+                'care_instructions' => $product->care_instructions,
+                'price' => (float) $product->price,
+                'sale_price' => $product->sale_price !== null ? (float) $product->sale_price : null,
+                'sku' => $product->sku,
+                'stock' => (int) $product->stock,
+                'type' => $product->type,
+                'images' => $images,
+                'variant_options' => $product->variant_options ?? [],
+                'variants' => $product->variants->map(fn ($v): array => [
+                    'id' => (int) $v->id,
+                    'sku' => $v->sku,
+                    'price' => (float) $v->price,
+                    'sale_price' => $v->sale_price !== null ? (float) $v->sale_price : null,
+                    'stock' => (int) $v->stock,
+                    'option_values' => $v->option_values,
+                    'image_url' => $v->image_path ? FileHelper::url($v->image_path, 'public') : null,
+                ])->all(),
+                'category' => $product->category ? [
+                    'id' => (int) $product->category->id,
+                    'name' => $product->category->name,
+                    'slug' => $product->category->slug,
+                    'parent' => $product->category->parent ? [
+                        'name' => $product->category->parent->name,
+                        'slug' => $product->category->parent->slug,
+                    ] : null,
+                ] : null,
+            ];
+        });
+    }
+
+    /**
+     * Get recommended products for the frontend product detail page (cached first).
+     *
+     * @return list<array<string, mixed>>
+     */
+    public function getRecommendedProducts(int $currentProductId, ?int $categoryId, int $limit = 8): array
+    {
+        return $this->listingCache->rememberRecommendations($currentProductId, function () use ($currentProductId, $categoryId, $limit): array {
+            $query = Product::query()
+                ->where('status', 'published')
+                ->where('id', '!=', $currentProductId)
+                ->with(['category:id,name,slug']);
+
+            if ($categoryId) {
+                $query->orderByRaw('CASE WHEN category_id = ? THEN 0 ELSE 1 END', [$categoryId]);
+            }
+
+            $query->orderBy('is_featured', 'desc')->orderBy('created_at', 'desc');
+
+            return $query->limit($limit)->get()->map(fn (Product $p): array => [
+                'id' => (int) $p->id,
+                'title' => $p->title,
+                'slug' => $p->slug,
+                'price' => (float) $p->price,
+                'sale_price' => $p->sale_price !== null ? (float) $p->sale_price : null,
+                'brand' => $p->category?->name ?? 'House Collection',
+                'images' => array_map(
+                    fn (string $path): string => FileHelper::url($path, 'public'),
+                    $p->images ?? [],
+                ),
+                'category' => $p->category ? [
+                    'name' => $p->category->name,
+                    'slug' => $p->category->slug,
+                ] : null,
+            ])->all();
+        });
+    }
+
+    /**
      * @return array{
      *     categories: list<array{id: int, name: string, slug: string, order_type: string}>,
      *     variant_presets: list<array{id: string, name: string, values: list<string>}>,
@@ -324,6 +509,8 @@ class ProductService
             'title',
             'short_description',
             'description',
+            'product_specifications',
+            'care_instructions',
             'price',
             'sale_price',
             'sale_start_at',

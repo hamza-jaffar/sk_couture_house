@@ -2,6 +2,7 @@
 
 use Illuminate\Support\Facades\Route;
 use Modules\Category\Http\Controllers\CategoryController;
+use Modules\Category\Http\Controllers\FrontendController;
 
 Route::prefix('dashboard/collection')->name('dashboard.collection.')->middleware('auth')->group(function () {
     Route::get('/', [CategoryController::class, 'index'])
@@ -33,4 +34,9 @@ Route::prefix('dashboard/collection')->name('dashboard.collection.')->middleware
         ->middleware('can:collections.delete')
         ->withTrashed()
         ->name('force-delete');
+});
+
+Route::prefix('collections')->name('collections.')->middleware('frontend')->group(function () {
+    Route::get('/', [FrontendController::class, 'index'])->name('index');
+    Route::get('/{slug}', [FrontendController::class, 'single'])->name('show');
 });

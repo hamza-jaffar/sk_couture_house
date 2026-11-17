@@ -15,7 +15,7 @@ use Modules\Category\Models\Category;
 use Modules\Product\Database\Factories\ProductFactory;
 
 #[UseFactory(ProductFactory::class)]
-#[Fillable('title', 'slug', 'short_description', 'description', 'price', 'sale_price', 'sale_start_at', 'sale_end_at', 'sku', 'stock', 'type', 'status', 'is_featured', 'category_id', 'metadata', 'images', 'variant_options', 'meta_title', 'meta_description', 'meta_keywords', 'canonical_url', 'og_title', 'og_description', 'og_image', 'robots_meta')]
+#[Fillable('title', 'slug', 'short_description', 'description', 'product_specifications', 'care_instructions', 'price', 'sale_price', 'sale_start_at', 'sale_end_at', 'sku', 'stock', 'type', 'status', 'is_featured', 'category_id', 'metadata', 'images', 'variant_options', 'meta_title', 'meta_description', 'meta_keywords', 'canonical_url', 'og_title', 'og_description', 'og_image', 'robots_meta')]
 class Product extends Model
 {
     use HasFactory, SoftDeletes;

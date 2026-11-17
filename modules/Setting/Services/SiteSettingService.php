@@ -149,6 +149,7 @@ class SiteSettingService
                     'name',
                     'tagline',
                     'description',
+                    'shipping_and_return',
                     'website_url',
                     'timezone',
                     'currency',
@@ -253,7 +254,7 @@ class SiteSettingService
 
     /**
      * @return array{
-     *     general: array{name: string, tagline: string, description: string, website_url: string, timezone: string, currency: string, currency_icon: string, logo_path: string|null, favicon_path: string|null},
+     *     general: array{name: string, tagline: string, description: string, shipping_and_return: string, website_url: string, timezone: string, currency: string, currency_icon: string, logo_path: string|null, favicon_path: string|null},
      *     contact: array{email: string, phone: string, alternate_phone: string, address: string, address_line_2: string, city: string, region: string, postal_code: string, country: string, business_hours: string},
      *     social: array{facebook: string, instagram: string, tiktok: string, youtube: string, pinterest: string, linkedin: string, x: string},
      *     mail: array{host: string, port: int, encryption: string, username: string, password: string|null, from_address: string, from_name: string},
@@ -267,6 +268,7 @@ class SiteSettingService
                 'name' => config('app.name', 'Store'),
                 'tagline' => '',
                 'description' => '',
+                'shipping_and_return' => '',
                 'website_url' => '',
                 'timezone' => config('app.timezone', 'UTC'),
                 'currency' => 'USD',

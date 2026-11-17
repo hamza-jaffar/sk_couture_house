@@ -58,6 +58,137 @@ class CategoryService
     }
 
     /**
+     * Retrieve active category tree for navigation (cached first).
+     *
+     * @return array<int, array<string, mixed>>
+     */
+    public function activeNavigationTree(): array
+    {
+        return $this->listingCache->rememberTree(function (): array {
+            $categories = Category::query()
+                ->whereNull('parent_id')
+                ->where('is_active', true)
+                ->with([
+                    'children' => fn ($q) => $q->where('is_active', true)->with([
+                        'children' => fn ($sub) => $sub->where('is_active', true),
+                    ]),
+                ])
+                ->orderBy('name')
+                ->get();
+
+            return $categories->map(fn (Category $cat) => $this->formatCategoryTree($cat))->all();
+        });
+    }
+
+    /**
+     * Retrieve active collections list with item count for frontend collections page (cached first).
+     *
+     * @return array<int, array<string, mixed>>
+     */
+    public function getActiveCollections(): array
+    {
+        return $this->listingCache->rememberCollections(function (): array {
+            $categories = Category::query()
+                ->where('is_active', true)
+                ->whereNull('parent_id')
+                ->withCount([
+                    'products' => fn ($q) => $q->where('status', 'published'),
+                ])
+                ->orderBy('name')
+                ->get();
+
+            return $categories->map(fn (Category $category): array => [
+                'id' => (int) $category->id,
+                'name' => $category->name,
+                'slug' => $category->slug,
+                'description' => $category->description,
+                'image_url' => $category->image_path !== null
+                    ? Storage::disk('public')->url($category->image_path)
+                    : null,
+                'banner_url' => $category->banner_path !== null
+                    ? Storage::disk('public')->url($category->banner_path)
+                    : null,
+                'items_count' => (int) $category->products_count,
+            ])->all();
+        });
+    }
+
+    /**
+     * Find an active collection/category by slug (cached first).
+     *
+     * @return array<string, mixed>|null
+     */
+    public function findActiveBySlug(string $slug): ?array
+    {
+        return $this->listingCache->rememberCategoryBySlug($slug, function () use ($slug): ?array {
+            $category = Category::query()
+                ->where('slug', $slug)
+                ->where('is_active', true)
+                ->with([
+                    'parent' => fn ($q) => $q->select(['id', 'name', 'slug', 'parent_id']),
+                    'children' => fn ($q) => $q->where('is_active', true)->select(['id', 'name', 'slug', 'parent_id']),
+                ])
+                ->first();
+
+            if (! $category) {
+                return null;
+            }
+
+            // Gather category and all direct child category IDs
+            $categoryIds = [$category->id];
+            foreach ($category->children as $child) {
+                $categoryIds[] = $child->id;
+            }
+
+            return [
+                'id' => (int) $category->id,
+                'name' => $category->name,
+                'slug' => $category->slug,
+                'description' => $category->description,
+                'image_url' => $category->image_path !== null
+                    ? Storage::disk('public')->url($category->image_path)
+                    : null,
+                'banner_url' => $category->banner_path !== null
+                    ? Storage::disk('public')->url($category->banner_path)
+                    : null,
+                'category_ids' => $categoryIds,
+                'parent' => $category->parent ? [
+                    'name' => $category->parent->name,
+                    'slug' => $category->parent->slug,
+                ] : null,
+                'children' => $category->children->map(fn ($c) => [
+                    'id' => (int) $c->id,
+                    'name' => $c->name,
+                    'slug' => $c->slug,
+                ])->all(),
+            ];
+        });
+    }
+
+    /**
+     * Recursively format a category node into nav link hierarchy.
+     *
+     * @return array<string, mixed>
+     */
+    private function formatCategoryTree(Category $category): array
+    {
+        $node = [
+            'label' => $category->name,
+            'href' => '/collections/'.$category->slug,
+        ];
+
+        if ($category->relationLoaded('children') && $category->children->isNotEmpty()) {
+            $children = [
+                ['label' => 'All '.$category->name, 'href' => '/collections/'.$category->slug],
+                ...$category->children->map(fn (Category $child) => $this->formatCategoryTree($child))->all(),
+            ];
+            $node['children'] = $children;
+        }
+
+        return $node;
+    }
+
+    /**
      * @param  array{
      *     parent_id: int|null,
      *     name: string,

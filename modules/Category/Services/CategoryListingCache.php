@@ -68,6 +68,51 @@ class CategoryListingCache
         );
     }
 
+    /**
+     * @param  Closure(): array<int, array<string, mixed>>  $callback
+     * @return array<int, array<string, mixed>>
+     */
+    public function rememberTree(Closure $callback): array
+    {
+        $version = Cache::get(self::VERSION_KEY, 1);
+
+        return Cache::remember(
+            'category-tree:'.$version,
+            now()->addMinutes(30),
+            $callback,
+        );
+    }
+
+    /**
+     * @param  Closure(): array<int, array<string, mixed>>  $callback
+     * @return array<int, array<string, mixed>>
+     */
+    public function rememberCollections(Closure $callback): array
+    {
+        $version = Cache::get(self::VERSION_KEY, 1);
+
+        return Cache::remember(
+            'category-collections:'.$version,
+            now()->addMinutes(30),
+            $callback,
+        );
+    }
+
+    /**
+     * @param  Closure(): array<string, mixed>|null  $callback
+     * @return array<string, mixed>|null
+     */
+    public function rememberCategoryBySlug(string $slug, Closure $callback): ?array
+    {
+        $version = Cache::get(self::VERSION_KEY, 1);
+
+        return Cache::remember(
+            'category-detail:'.$version.':'.$slug,
+            now()->addMinutes(30),
+            $callback,
+        );
+    }
+
     public function invalidateAfterCommit(): void
     {
         DB::afterCommit(function (): void {

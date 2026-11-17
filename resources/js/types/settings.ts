@@ -3,6 +3,7 @@ export type PlatformSettings = {
         name: string;
         tagline: string;
         description: string;
+        shipping_and_return: string;
         website_url: string;
         timezone: string;
         currency: string;

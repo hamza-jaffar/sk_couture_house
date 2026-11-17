@@ -57,6 +57,8 @@ class ProductDataRequest extends FormRequest
             'slug' => ['nullable', 'string', 'max:255'],
             'short_description' => ['nullable', 'string', 'max:1000'],
             'description' => ['nullable', 'string', 'max:50000'],
+            'product_specifications' => ['nullable', 'string', 'max:50000'],
+            'care_instructions' => ['nullable', 'string', 'max:50000'],
             'price' => ['required', 'numeric', 'min:0', 'max:99999999.99'],
             'sale_price' => ['nullable', 'numeric', 'min:0', 'max:99999999.99'],
             'sale_start_at' => ['nullable', 'date'],

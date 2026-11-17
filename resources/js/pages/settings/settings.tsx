@@ -494,6 +494,15 @@ export default function Settings({ settings, selectedTab }: Props) {
                                         rows={3}
                                         error={errors.description}
                                     />
+                                    <TextareaField
+                                        id="store-shipping-return"
+                                        name="shipping_and_return"
+                                        label="Shipping & Return"
+                                        value={settings.general.shipping_and_return}
+                                        placeholder="Enter default shipping, delivery timelines, and return policy details shown on product pages..."
+                                        rows={4}
+                                        error={errors.shipping_and_return}
+                                    />
                                     <div className="grid gap-4 sm:grid-cols-2">
                                         <FileSetting
                                             id="store-logo"

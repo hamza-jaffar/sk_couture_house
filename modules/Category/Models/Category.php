@@ -11,6 +11,7 @@ use Illuminate\Database\Eloquent\Relations\HasMany;
 use Illuminate\Database\Eloquent\SoftDeletes;
 use Modules\Category\Database\Factories\CategoryFactory;
 use Modules\Category\Enum\OrderTypeEnum;
+use Modules\Product\Models\Product;
 
 #[UseFactory(CategoryFactory::class)]
 #[Fillable(
@@ -53,5 +54,10 @@ class Category extends Model
     public function children(): HasMany
     {
         return $this->hasMany(Category::class, 'parent_id');
+    }
+
+    public function products(): HasMany
+    {
+        return $this->hasMany(Product::class);
     }
 }

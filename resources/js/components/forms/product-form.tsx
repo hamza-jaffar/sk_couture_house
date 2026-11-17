@@ -64,6 +64,8 @@ type ProductFormData = {
     slug: string;
     short_description: string;
     description: string;
+    product_specifications: string;
+    care_instructions: string;
     price: string;
     sale_price: string;
     sale_start_at: string;
@@ -194,6 +196,8 @@ function initialFormData(product: ProductRecord | null): ProductFormData {
         slug: product?.slug ?? "",
         short_description: product?.short_description ?? "",
         description: product?.description ?? "",
+        product_specifications: product?.product_specifications ?? "",
+        care_instructions: product?.care_instructions ?? "",
         price: product?.price ?? "",
         sale_price: product?.sale_price ?? "",
         sale_start_at: product?.sale_start_at?.slice(0, 10) ?? "",
@@ -1433,6 +1437,52 @@ export default function ProductForm({ product, options }: Props) {
                         </FieldDescription>
                         {form.errors.description && (
                             <InputError message={form.errors.description} />
+                        )}
+                    </div>
+                    <div className="grid gap-2">
+                        <Label htmlFor="product-specifications">Product Specifications</Label>
+                        <textarea
+                            id="product-specifications"
+                            name="product_specifications"
+                            value={form.data.product_specifications}
+                            onChange={(event) =>
+                                form.setData(
+                                    "product_specifications",
+                                    event.currentTarget.value,
+                                )
+                            }
+                            rows={4}
+                            placeholder="e.g. Fabric: Pure Raw Silk, Technique: Hand Embellishment, Fit: Relaxed Fit..."
+                            className="w-full rounded-lg border border-input bg-transparent px-3 py-2 text-sm outline-none focus-visible:ring-3 focus-visible:ring-ring/50"
+                        />
+                        <FieldDescription>
+                            Key technical details, materials, and cut of the garment.
+                        </FieldDescription>
+                        {form.errors.product_specifications && (
+                            <InputError message={form.errors.product_specifications} />
+                        )}
+                    </div>
+                    <div className="grid gap-2">
+                        <Label htmlFor="product-care-instructions">Care Instructions</Label>
+                        <textarea
+                            id="product-care-instructions"
+                            name="care_instructions"
+                            value={form.data.care_instructions}
+                            onChange={(event) =>
+                                form.setData(
+                                    "care_instructions",
+                                    event.currentTarget.value,
+                                )
+                            }
+                            rows={3}
+                            placeholder="e.g. Dry clean only. Do not bleach. Steam iron with low heat..."
+                            className="w-full rounded-lg border border-input bg-transparent px-3 py-2 text-sm outline-none focus-visible:ring-3 focus-visible:ring-ring/50"
+                        />
+                        <FieldDescription>
+                            Cleaning and maintenance instructions for the customer.
+                        </FieldDescription>
+                        {form.errors.care_instructions && (
+                            <InputError message={form.errors.care_instructions} />
                         )}
                     </div>
                     <div className="grid gap-2">
