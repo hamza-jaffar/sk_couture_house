@@ -6,6 +6,7 @@ use Illuminate\Contracts\Pagination\LengthAwarePaginator;
 use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Validation\ValidationException;
+use Modules\Review\Enum\ReviewStatusEnum;
 use Modules\Review\Models\Review;
 
 class ReviewService
@@ -247,5 +248,76 @@ class ReviewService
                 'ids' => __('One or more selected reviews are no longer available. Refresh and try again.'),
             ]);
         }
+    }
+
+    /**
+     * Submit a new customer review for moderation.
+     *
+     * @param  array<string, mixed>  $data
+     */
+    public function submitReview(array $data): Review
+    {
+        $this->listingCache->invalidateAfterCommit();
+
+        return Review::create([
+            'product_id' => $data['product_id'],
+            'user_id' => $data['user_id'] ?? null,
+            'customer_id' => $data['customer_id'] ?? null,
+            'author_name' => trim((string) $data['author_name']),
+            'author_email' => trim((string) $data['author_email']),
+            'rating' => (int) $data['rating'],
+            'title' => trim((string) $data['title']),
+            'comment' => trim((string) $data['comment']),
+            'status' => ReviewStatusEnum::Approved,
+        ]);
+    }
+
+    /**
+     * Get approved reviews summary and ratings distribution for a product.
+     *
+     * @return array<string, mixed>
+     */
+    public function getProductReviewsSummary(int $productId): array
+    {
+        $approvedReviews = Review::query()
+            ->where('product_id', $productId)
+            ->where('status', ReviewStatusEnum::Approved->value)
+            ->latest('created_at')
+            ->get();
+
+        $total = $approvedReviews->count();
+        $average = $total > 0 ? round((float) $approvedReviews->avg('rating'), 1) : 0.0;
+
+        $ratingCounts = [5 => 0, 4 => 0, 3 => 0, 2 => 0, 1 => 0];
+        foreach ($approvedReviews as $r) {
+            $star = (int) $r->rating;
+            if (isset($ratingCounts[$star])) {
+                $ratingCounts[$star]++;
+            }
+        }
+
+        $ratingPercentages = [];
+        foreach ($ratingCounts as $star => $count) {
+            $ratingPercentages[$star] = $total > 0 ? (int) round(($count / $total) * 100) : 0;
+        }
+
+        $items = $approvedReviews->map(fn (Review $r): array => [
+            'id' => $r->id,
+            'author_name' => $r->author_name,
+            'rating' => (int) $r->rating,
+            'title' => $r->title,
+            'comment' => $r->comment,
+            'admin_response' => $r->admin_response,
+            'created_at' => $r->created_at->toISOString(),
+            'created_at_human' => $r->created_at->diffForHumans(),
+        ])->all();
+
+        return [
+            'total_reviews' => $total,
+            'average_rating' => $average,
+            'rating_counts' => $ratingCounts,
+            'rating_percentages' => $ratingPercentages,
+            'items' => $items,
+        ];
     }
 }

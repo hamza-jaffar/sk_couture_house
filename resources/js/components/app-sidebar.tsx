@@ -28,6 +28,8 @@ import {
     Star,
     Tag,
     Users,
+    BarChart2,
+    FileText,
 } from "lucide-react";
 import AppLogo from "./app-logo";
 
@@ -66,6 +68,18 @@ const data = {
             url: "/dashboard/customers",
             icon: <Users />,
             permission: "customers.view",
+        },
+        {
+            title: "Reports",
+            url: "/dashboard/reports",
+            icon: <BarChart2 />,
+            permission: "analytics.view",
+        },
+        {
+            title: "Pages",
+            url: "/dashboard/pages",
+            icon: <FileText />,
+            permission: "pages.view",
         },
         {
             title: "Reviews",

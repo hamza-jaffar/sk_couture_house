@@ -1,6 +1,7 @@
 <?php
 
 use Illuminate\Support\Facades\Route;
+use Modules\Review\Http\Controllers\FrontendReviewController;
 use Modules\Review\Http\Controllers\ReviewController;
 
 Route::prefix('dashboard/reviews')->name('dashboard.reviews.')->middleware('auth')->group(function () {
@@ -38,4 +39,10 @@ Route::prefix('dashboard/reviews')->name('dashboard.reviews.')->middleware('auth
         ->withTrashed()
         ->middleware('can:reviews.delete')
         ->name('force-delete');
+});
+
+// Storefront review submission
+Route::middleware('frontend')->group(function (): void {
+    Route::post('/products/{slug}/reviews', [FrontendReviewController::class, 'store'])
+        ->name('products.reviews.store');
 });

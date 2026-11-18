@@ -57,20 +57,21 @@ class FrontendMiddleware
                         ['label' => 'Trending This Season', 'href' => '/collections'],
                     ],
                 ],
-                [
-                    'label' => 'Best Sellers',
-                    'href' => '/collections',
-                    'children' => [
-                        ['label' => 'All Best Sellers', 'href' => '/collections'],
-                        ['label' => 'Iconic Pieces', 'href' => '/collections'],
-                        ['label' => 'Curated Favorites', 'href' => '/collections'],
-                    ],
-                ],
-                ...$categoryNav,
+                // [
+                //     'label' => 'Best Sellers',
+                //     'href' => '/collections',
+                //     'children' => [
+                //         ['label' => 'All Best Sellers', 'href' => '/collections'],
+                //         ['label' => 'Iconic Pieces', 'href' => '/collections'],
+                //         ['label' => 'Curated Favorites', 'href' => '/collections'],
+                //     ],
+                // ],
                 [
                     'label' => 'Collections',
                     'href' => '/collections',
                 ],
+                ...$categoryNav,
+
             ];
         }
 

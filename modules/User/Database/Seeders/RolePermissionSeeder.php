@@ -73,6 +73,12 @@ class RolePermissionSeeder extends Seeder
             'analytics.view',
             'reports.export',
 
+            // --- PAGES & CMS ---
+            'pages.view',
+            'pages.create',
+            'pages.update',
+            'pages.delete',
+
             // --- STORE SETTINGS & CONFIGURATION ---
             'settings.view',
             'settings.update',

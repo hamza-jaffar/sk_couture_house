@@ -1,5 +1,6 @@
 import Navbar from '@/components/frontend/navbar';
-import { Head, Link, router } from '@inertiajs/react';
+import ProductReviews, { type ProductReviewsData } from '@/components/frontend/product-reviews';
+import { Deferred, Head, Link, router } from '@inertiajs/react';
 import {
     Check,
     ChevronDown,
@@ -10,6 +11,7 @@ import {
     MessageCircle,
     Minus,
     Plus,
+    Star,
     X,
 } from 'lucide-react';
 import { useMemo, useState } from 'react';
@@ -72,6 +74,7 @@ interface Props {
     product: ProductDetail;
     recommended: RecommendedProduct[];
     shipping_and_return?: string;
+    reviews_data?: ProductReviewsData;
 }
 
 // ─── Currency Formatter ───────────────────────────────────────────────────────
@@ -204,6 +207,7 @@ export default function ProductShow({
     product,
     recommended = [],
     shipping_and_return = '',
+    reviews_data,
 }: Props) {
     // Product Images
     const rawImages = product.images ?? [];
@@ -402,6 +406,24 @@ export default function ProductShow({
                                 </div>
                             </div>
 
+                            {/* Review Score Badge */}
+                            {reviews_data && reviews_data.total_reviews > 0 && (
+                                <a
+                                    href="#reviews"
+                                    className="mt-1.5 flex items-center gap-1.5 text-xs text-neutral-600 hover:text-neutral-900 transition-colors"
+                                >
+                                    <div className="flex items-center text-amber-400">
+                                        <Star className="size-3.5 fill-amber-400" />
+                                    </div>
+                                    <span className="font-semibold">
+                                        {reviews_data.average_rating.toFixed(1)}
+                                    </span>
+                                    <span className="text-neutral-400">
+                                        ({reviews_data.total_reviews} reviews)
+                                    </span>
+                                </a>
+                            )}
+
                             {/* Description text with Read More */}
                             <div className="mt-5 text-[13px] leading-relaxed text-neutral-600">
                                 <div className={!isExpanded ? 'line-clamp-3' : undefined}>
@@ -587,6 +609,23 @@ export default function ProductShow({
                                 </AccordionItem>
                             </div>
                         </div>
+                    </div>
+
+                    {/* ─── Customer Reviews Section ───────────────────────────── */}
+                    <div id="reviews">
+                        <Deferred
+                            data="reviews_data"
+                            fallback={
+                                <div className="mt-16 border-t border-neutral-200 pt-12 text-center text-sm text-neutral-400">
+                                    Loading reviews...
+                                </div>
+                            }
+                        >
+                            <ProductReviews
+                                productSlug={product.slug}
+                                reviewsData={reviews_data}
+                            />
+                        </Deferred>
                     </div>
 
                     {/* ─── Bottom Section: Product Recommendations ───────────────── */}
