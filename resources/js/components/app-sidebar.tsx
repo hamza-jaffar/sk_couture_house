@@ -27,6 +27,7 @@ import {
     ShoppingBag,
     Star,
     Tag,
+    Users,
 } from "lucide-react";
 import AppLogo from "./app-logo";
 
@@ -61,6 +62,12 @@ const data = {
             permission: "coupons.view",
         },
         {
+            title: "Customers",
+            url: "/dashboard/customers",
+            icon: <Users />,
+            permission: "customers.view",
+        },
+        {
             title: "Reviews",
             url: "/dashboard/reviews",
             icon: <Star />,
@@ -73,35 +80,35 @@ const data = {
             permission: "gallery.view",
         },
     ],
-    navSecondary: [
-        {
-            title: "Support",
-            url: "#",
-            icon: <LifeBuoyIcon />,
-        },
-        {
-            title: "Feedback",
-            url: "#",
-            icon: <SendIcon />,
-        },
-    ],
-    projects: [
-        {
-            name: "Design Engineering",
-            url: "#",
-            icon: <FrameIcon />,
-        },
-        {
-            name: "Sales & Marketing",
-            url: "#",
-            icon: <PieChartIcon />,
-        },
-        {
-            name: "Travel",
-            url: "#",
-            icon: <MapIcon />,
-        },
-    ],
+    // navSecondary: [
+    //     {
+    //         title: "Support",
+    //         url: "#",
+    //         icon: <LifeBuoyIcon />,
+    //     },
+    //     {
+    //         title: "Feedback",
+    //         url: "#",
+    //         icon: <SendIcon />,
+    //     },
+    // ],
+    // projects: [
+    //     {
+    //         name: "Design Engineering",
+    //         url: "#",
+    //         icon: <FrameIcon />,
+    //     },
+    //     {
+    //         name: "Sales & Marketing",
+    //         url: "#",
+    //         icon: <PieChartIcon />,
+    //     },
+    //     {
+    //         name: "Travel",
+    //         url: "#",
+    //         icon: <MapIcon />,
+    //     },
+    // ],
 };
 
 export function AppSidebar({ ...props }: React.ComponentProps<typeof Sidebar>) {
@@ -121,8 +128,8 @@ export function AppSidebar({ ...props }: React.ComponentProps<typeof Sidebar>) {
             </SidebarHeader>
             <SidebarContent>
                 <NavMain items={data.navMain} />
-                <NavProjects projects={data.projects} />
-                <NavSecondary items={data.navSecondary} className="mt-auto" />
+                {/* <NavProjects projects={data.projects} />
+                <NavSecondary items={data.navSecondary} className="mt-auto" /> */}
             </SidebarContent>
             <SidebarFooter>
                 <NavUser />

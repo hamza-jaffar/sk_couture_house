@@ -25,6 +25,10 @@ return Application::configure(basePath: dirname(__DIR__))
         $middleware->alias([
             'frontend' => FrontendMiddleware::class,
         ]);
+        $middleware->redirectGuestsTo(fn (Request $request) => $request->is('customer/*')
+            ? route('customer.login')
+            : route('login')
+        );
     })
     ->withExceptions(function (Exceptions $exceptions): void {
         $exceptions->shouldRenderJsonWhen(

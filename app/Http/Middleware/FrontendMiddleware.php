@@ -30,6 +30,7 @@ class FrontendMiddleware
             'announcement' => fn () => $this->getAnnouncement(),
             'cart_count' => fn () => $this->getCartCount($request),
             'wishlist_count' => fn () => $this->getWishlistCount($request),
+            'customer' => fn () => $this->getCustomer($request),
         ]);
 
         return $next($request);
@@ -225,5 +226,27 @@ class FrontendMiddleware
     protected function getWishlistCount(Request $request): int
     {
         return (int) $request->session()->get('wishlist_count', 0);
+    }
+
+    /**
+     * Authenticated customer snapshot for storefront.
+     *
+     * @return array<string, mixed>|null
+     */
+    protected function getCustomer(Request $request): ?array
+    {
+        $customer = $request->user('customer');
+
+        if (! $customer) {
+            return null;
+        }
+
+        return [
+            'id' => (int) $customer->id,
+            'name' => $customer->name,
+            'email' => $customer->email,
+            'phone' => $customer->phone,
+            'shipping_address' => $customer->shipping_address,
+        ];
     }
 }

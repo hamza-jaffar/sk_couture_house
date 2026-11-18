@@ -3,7 +3,9 @@
 namespace Modules\Order\Http\Controllers;
 
 use App\Helpers\FileHelper;
+use Illuminate\Http\JsonResponse;
 use Illuminate\Http\RedirectResponse;
+use Illuminate\Http\Request;
 use Inertia\Inertia;
 use Inertia\Response;
 use Modules\Category\Enum\OrderTypeEnum;
@@ -29,11 +31,15 @@ class CartController
     public function index(): Response
     {
         $platformSettings = $this->settings->all();
+        $appliedCoupon = $this->cartService->getAppliedCoupon();
 
         return Inertia::render('frontend/cart/index', [
             'cart' => array_values($this->cartService->getCart()),
             'cart_total' => $this->cartService->cartTotal(),
             'cart_count' => $this->cartService->cartCount(),
+            'cart_discount' => $this->cartService->cartDiscount(),
+            'cart_final_total' => $this->cartService->cartFinalTotal(),
+            'applied_coupon' => $appliedCoupon,
             'currency_icon' => $platformSettings['general']['currency_icon'] ?? 'Rs.',
             'currency' => $platformSettings['general']['currency'] ?? 'PKR',
         ]);
@@ -130,5 +136,56 @@ class CartController
         $this->cartService->clearCart();
 
         return redirect()->back()->with('success', 'Cart cleared.');
+    }
+
+    /**
+     * Apply a coupon code to the cart.
+     */
+    public function applyCoupon(Request $request): JsonResponse|RedirectResponse
+    {
+        $validated = $request->validate([
+            'code' => ['required', 'string', 'max:50'],
+            'email' => ['nullable', 'string', 'max:255'],
+        ]);
+
+        $customer = $request->user('customer');
+        $email = $validated['email'] ?? $customer?->email;
+        $userId = $request->user('web')?->id;
+
+        $coupon = $this->cartService->applyCoupon(
+            (string) $validated['code'],
+            $customer?->id,
+            $email,
+            $userId,
+        );
+
+        if ($request->wantsJson()) {
+            return response()->json([
+                'applied_coupon' => $coupon,
+                'cart_discount' => $this->cartService->cartDiscount(),
+                'cart_final_total' => $this->cartService->cartFinalTotal(),
+                'message' => "Promo code '{$coupon['code']}' applied successfully.",
+            ]);
+        }
+
+        return redirect()->back()->with('success', "Promo code '{$coupon['code']}' applied successfully.");
+    }
+
+    /**
+     * Remove applied coupon from the cart.
+     */
+    public function removeCoupon(): JsonResponse|RedirectResponse
+    {
+        $this->cartService->removeCoupon();
+
+        if (request()->wantsJson()) {
+            return response()->json([
+                'applied_coupon' => null,
+                'cart_discount' => 0,
+                'cart_final_total' => $this->cartService->cartTotal(),
+            ]);
+        }
+
+        return redirect()->back()->with('success', 'Coupon removed.');
     }
 }

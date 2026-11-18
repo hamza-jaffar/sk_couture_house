@@ -1,13 +1,34 @@
 import Navbar from '@/components/frontend/navbar';
 import type { CartItem } from '@/types/orders';
-import { Head, Link, useForm } from '@inertiajs/react';
-import { CheckCircle2, Lock, ShieldCheck, Truck } from 'lucide-react';
-import type { FormEventHandler } from 'react';
+import { Head, Link, router, useForm } from '@inertiajs/react';
+import { AlertCircle, CheckCircle2, Lock, ShieldCheck, Tag, Truck, X } from 'lucide-react';
+import { type FormEventHandler, useState } from 'react';
 
 interface Props {
     cart: CartItem[];
     cart_total: number;
     cart_count: number;
+    cart_discount: number;
+    cart_final_total: number;
+    applied_coupon?: {
+        id: number;
+        code: string;
+        discount_type: string;
+        discount_value: number;
+        discount_amount: number;
+    } | null;
+    prefill?: {
+        name: string;
+        email: string;
+        phone: string;
+        shipping_address: {
+            line1: string;
+            city: string;
+            region: string;
+            postal_code: string;
+            country: string;
+        };
+    } | null;
     currency_icon: string;
     currency: string;
     user?: {
@@ -19,29 +40,81 @@ interface Props {
 export default function CheckoutIndex({
     cart,
     cart_total,
+    cart_discount,
+    cart_final_total,
+    applied_coupon,
+    prefill,
     currency_icon = 'Rs.',
     user,
 }: Props) {
     const { data, setData, post, processing, errors } = useForm({
-        customer_name: user?.name ?? '',
-        customer_email: user?.email ?? '',
-        customer_phone: '',
+        customer_name: prefill?.name ?? user?.name ?? '',
+        customer_email: prefill?.email ?? user?.email ?? '',
+        customer_phone: prefill?.phone ?? '',
         shipping_address: {
-            line1: '',
-            city: '',
-            region: '',
-            postal_code: '',
-            country: 'Pakistan',
+            line1: prefill?.shipping_address?.line1 ?? '',
+            city: prefill?.shipping_address?.city ?? '',
+            region: prefill?.shipping_address?.region ?? '',
+            postal_code: prefill?.shipping_address?.postal_code ?? '',
+            country: prefill?.shipping_address?.country ?? 'Pakistan',
         },
         payment_method: 'cash_on_delivery',
         notes: '',
     });
+
+    const [couponCode, setCouponCode] = useState('');
+    const [applyingCoupon, setApplyingCoupon] = useState(false);
+    const [couponError, setCouponError] = useState<string | null>(null);
+    const [couponSuccess, setCouponSuccess] = useState<string | null>(null);
 
     const formatPrice = (amount: number) => {
         return `${currency_icon}${amount.toLocaleString('en-PK', {
             minimumFractionDigits: 0,
             maximumFractionDigits: 2,
         })}`;
+    };
+
+    const handleApplyCoupon = () => {
+        if (!couponCode.trim()) {
+            setCouponError('Please enter a promo code.');
+            return;
+        }
+        setCouponError(null);
+        setCouponSuccess(null);
+        setApplyingCoupon(true);
+        router.post(
+            '/cart/coupon',
+            {
+                code: couponCode.trim(),
+                email: data.customer_email || undefined,
+            },
+            {
+                preserveScroll: true,
+                preserveState: true,
+                onSuccess: () => {
+                    setCouponSuccess('Promo code applied successfully!');
+                    setCouponError(null);
+                    setCouponCode('');
+                },
+                onError: (errs: any) => {
+                    const msg = errs.code || errs.coupon || Object.values(errs)[0] || 'Unable to apply promo code.';
+                    setCouponError(typeof msg === 'string' ? msg : 'Unable to apply promo code.');
+                    setCouponSuccess(null);
+                },
+                onFinish: () => {
+                    setApplyingCoupon(false);
+                },
+            }
+        );
+    };
+
+    const handleRemoveCoupon = () => {
+        setCouponError(null);
+        setCouponSuccess(null);
+        router.delete('/cart/coupon/remove', {
+            preserveScroll: true,
+            preserveState: true,
+        });
     };
 
     const submit: FormEventHandler = (e) => {
@@ -379,7 +452,7 @@ export default function CheckoutIndex({
                                     className="flex w-full items-center justify-center gap-2 bg-neutral-900 py-4 text-xs font-bold tracking-widest text-white uppercase hover:bg-black transition-colors disabled:opacity-50"
                                 >
                                     <Lock className="size-4" />
-                                    {processing ? 'Placing Order...' : `Place Order — ${formatPrice(cart_total)}`}
+                                    {processing ? 'Placing Order...' : `Place Order — ${formatPrice(cart_final_total)}`}
                                 </button>
                                 <p className="mt-3 text-center text-xs text-neutral-500">
                                     By placing your order, you agree to our Terms of Service & Privacy Policy.
@@ -439,6 +512,91 @@ export default function CheckoutIndex({
                                 ))}
                             </div>
 
+                            {/* Promo Code Section */}
+                            <div className="mt-5 border-t border-neutral-200 pt-4">
+                                <p className="mb-2.5 text-xs font-semibold uppercase tracking-wider text-neutral-700">
+                                    Promo Code
+                                </p>
+
+                                {applied_coupon ? (
+                                    /* Applied coupon tag */
+                                    <div className="flex items-center justify-between gap-2 border border-emerald-200 bg-emerald-50 px-3 py-2">
+                                        <div className="flex items-center gap-2">
+                                            <Tag className="size-3.5 shrink-0 text-emerald-600" />
+                                            <span className="text-xs font-bold tracking-wider text-emerald-700 uppercase">
+                                                {applied_coupon.code}
+                                            </span>
+                                            <span className="text-xs text-emerald-600">
+                                                −{formatPrice(cart_discount)}
+                                            </span>
+                                        </div>
+                                        <button
+                                            type="button"
+                                            onClick={handleRemoveCoupon}
+                                            className="shrink-0 text-emerald-500 hover:text-rose-600 transition-colors"
+                                            aria-label="Remove coupon"
+                                        >
+                                            <X className="size-3.5" />
+                                        </button>
+                                    </div>
+                                ) : (
+                                    /* Coupon input with validation feedback */
+                                    <div className="space-y-2">
+                                        <div className="flex gap-2">
+                                            <input
+                                                type="text"
+                                                value={couponCode}
+                                                onChange={(e) => {
+                                                    setCouponCode(e.target.value.toUpperCase());
+                                                    if (couponError) setCouponError(null);
+                                                }}
+                                                onKeyDown={(e) => {
+                                                    if (e.key === 'Enter') {
+                                                        e.preventDefault();
+                                                        handleApplyCoupon();
+                                                    }
+                                                }}
+                                                placeholder="ENTER PROMO CODE"
+                                                className={`flex-1 border px-3 py-2 text-xs uppercase tracking-wider text-neutral-900 placeholder-neutral-400 focus:outline-none ${
+                                                    couponError
+                                                        ? 'border-rose-400 focus:border-rose-600'
+                                                        : 'border-neutral-300 focus:border-neutral-900'
+                                                }`}
+                                            />
+                                            <button
+                                                type="button"
+                                                onClick={handleApplyCoupon}
+                                                disabled={applyingCoupon || !couponCode.trim()}
+                                                className="shrink-0 bg-neutral-900 px-4 py-2 text-xs font-bold tracking-widest text-white uppercase hover:bg-black transition-colors disabled:opacity-50"
+                                            >
+                                                {applyingCoupon ? '...' : 'Apply'}
+                                            </button>
+                                        </div>
+
+                                        {couponError && (
+                                            <p className="flex items-start gap-1.5 text-xs text-rose-600">
+                                                <AlertCircle className="size-3.5 shrink-0 mt-0.5" />
+                                                <span>{couponError}</span>
+                                            </p>
+                                        )}
+                                        {couponSuccess && (
+                                            <p className="flex items-center gap-1.5 text-xs text-emerald-600">
+                                                <CheckCircle2 className="size-3.5 shrink-0" />
+                                                <span>{couponSuccess}</span>
+                                            </p>
+                                        )}
+                                    </div>
+                                )}
+
+                                {/* Error from checkout submission if coupon was invalidated */}
+                                {errors.coupon && (
+                                    <p className="mt-2 flex items-start gap-1.5 border border-rose-200 bg-rose-50 p-2 text-xs text-rose-700">
+                                        <AlertCircle className="size-3.5 shrink-0 mt-0.5" />
+                                        <span>{errors.coupon}</span>
+                                    </p>
+                                )}
+                            </div>
+
                             {/* Totals */}
                             <div className="mt-6 border-t border-neutral-200 pt-4 space-y-2 text-sm">
                                 <div className="flex justify-between text-neutral-600">
@@ -447,6 +605,17 @@ export default function CheckoutIndex({
                                         {formatPrice(cart_total)}
                                     </span>
                                 </div>
+                                {applied_coupon && cart_discount > 0 && (
+                                    <div className="flex justify-between text-rose-600">
+                                        <span className="flex items-center gap-1.5">
+                                            Discount
+                                            <span className="inline-block rounded bg-rose-50 border border-rose-200 px-1.5 py-0.5 text-[10px] font-bold tracking-widest uppercase text-rose-600">
+                                                {applied_coupon.code}
+                                            </span>
+                                        </span>
+                                        <span className="font-semibold">−{formatPrice(cart_discount)}</span>
+                                    </div>
+                                )}
                                 <div className="flex justify-between text-neutral-600">
                                     <span>Delivery Charges</span>
                                     <span className="font-semibold text-emerald-600 uppercase text-xs">
@@ -455,7 +624,7 @@ export default function CheckoutIndex({
                                 </div>
                                 <div className="border-t border-neutral-200 pt-3 flex justify-between text-base font-bold text-neutral-900">
                                     <span>Total Due</span>
-                                    <span>{formatPrice(cart_total)}</span>
+                                    <span>{formatPrice(cart_final_total)}</span>
                                 </div>
                             </div>
 

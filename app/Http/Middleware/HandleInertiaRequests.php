@@ -42,7 +42,7 @@ class HandleInertiaRequests extends Middleware
      */
     public function share(Request $request): array
     {
-        $user = $request->user();
+        $user = $request->user('web');
         $general = $this->settings->all()['general'];
 
         // Share favicon URL and store name with the Blade root template
@@ -54,15 +54,21 @@ class HandleInertiaRequests extends Middleware
             'name' => $general['name'] ?? config('app.name'),
             'auth' => [
                 'user' => $user,
-                'permissions' => $user?->getAllPermissions()
-                    ->pluck('name')
-                    ->sort()
-                    ->values()
-                    ->all() ?? [],
+                'permissions' => ($user && method_exists($user, 'getAllPermissions'))
+                    ? $user->getAllPermissions()
+                        ->pluck('name')
+                        ->sort()
+                        ->values()
+                        ->all()
+                    : [],
             ],
             'settings' => $this->settings->all(),
             'orderTypeOptions' => OrderTypeEnum::options(),
             'sidebarOpen' => ! $request->hasCookie('sidebar_state') || $request->cookie('sidebar_state') === 'true',
+            'flash' => [
+                'success' => fn () => $request->session()->get('success'),
+                'error' => fn () => $request->session()->get('error'),
+            ],
         ];
     }
 }

@@ -534,7 +534,7 @@ function SearchOverlay({
 // ─── Main Premium Navbar Component ───────────────────────────────────────────
 
 export default function Navbar() {
-    const { settings, auth, nav_links, cart_count } = usePage<any>().props;
+    const { settings, auth, nav_links, cart_count, customer } = usePage<any>().props;
     const navItems: NavItem[] = (nav_links as NavItem[] | undefined) ?? NAV_ITEMS;
     const cartBadge = typeof cart_count === 'number' ? cart_count : 0;
     const [mobileOpen, setMobileOpen] = useState(false);
@@ -597,9 +597,9 @@ export default function Navbar() {
 
                         {/* Account (hidden on smallest screens to prevent header cramming, available in mobile menu) */}
                         <Link
-                            href={auth?.user ? '/dashboard' : '/login'}
+                            href={auth?.user ? '/dashboard' : customer ? '/customer/account' : '/customer/login'}
                             aria-label={
-                                auth?.user ? 'Account dashboard' : 'Sign in'
+                                auth?.user ? 'Account dashboard' : customer ? 'My Account' : 'Sign in'
                             }
                             className="group hidden size-8 items-center justify-center text-foreground/80 transition-colors hover:text-foreground sm:flex sm:size-9"
                         >
@@ -705,12 +705,12 @@ export default function Navbar() {
                     {/* Drawer Footer */}
                     <div className="shrink-0 border-t border-border/60 bg-muted/20 px-5 py-4">
                         <Link
-                            href={auth?.user ? '/dashboard' : '/login'}
+                            href={auth?.user ? '/dashboard' : customer ? '/customer/account' : '/customer/login'}
                             onClick={closeMobile}
                             className="flex w-full items-center justify-center gap-2 border border-foreground bg-foreground px-4 py-2.5 text-xs font-semibold tracking-widest text-background uppercase transition-opacity hover:opacity-90"
                         >
                             <User className="size-4" />
-                            {auth?.user ? 'Client Account' : 'Sign In'}
+                            {auth?.user ? 'Dashboard' : customer ? 'My Account' : 'Sign In'}
                         </Link>
 
                         <div className="mt-3 flex items-center justify-center gap-4 text-[11px] tracking-wider text-muted-foreground uppercase">

@@ -46,6 +46,11 @@ class RolePermissionSeeder extends Seeder
             'orders.fulfill',
             'orders.refund',
 
+            // --- CUSTOMERS ---
+            'customers.view',
+            'customers.update',
+            'customers.delete',
+
             // --- GALLERY ---
             'gallery.view',
             'gallery.upload',

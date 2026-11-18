@@ -14,6 +14,8 @@ Route::middleware('frontend')->group(function (): void {
         Route::patch('/{key}', [CartController::class, 'update'])->name('update');
         Route::delete('/{key}', [CartController::class, 'remove'])->name('remove');
         Route::delete('/', [CartController::class, 'clear'])->name('clear');
+        Route::post('/coupon', [CartController::class, 'applyCoupon'])->name('coupon.apply');
+        Route::delete('/coupon/remove', [CartController::class, 'removeCoupon'])->name('coupon.remove');
     });
 
     Route::prefix('checkout')->name('checkout.')->group(function (): void {

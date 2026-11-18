@@ -6,6 +6,7 @@ use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
 use Inertia\Inertia;
 use Inertia\Response;
+use Modules\Customer\Models\Customer;
 use Modules\Order\Http\Requests\CheckoutRequest;
 use Modules\Order\Models\Order;
 use Modules\Order\Services\CartService;
@@ -33,13 +34,26 @@ class CheckoutController
 
         $platformSettings = $this->settings->all();
 
+        /** @var Customer|null $customer */
+        $customer = $request->user('customer');
+        $appliedCoupon = $this->cartService->getAppliedCoupon();
+
         return Inertia::render('frontend/checkout/index', [
             'cart' => array_values($cart),
             'cart_total' => $this->cartService->cartTotal(),
             'cart_count' => $this->cartService->cartCount(),
+            'cart_discount' => $this->cartService->cartDiscount(),
+            'cart_final_total' => $this->cartService->cartFinalTotal(),
+            'applied_coupon' => $appliedCoupon,
             'currency_icon' => $platformSettings['general']['currency_icon'] ?? 'Rs.',
             'currency' => $platformSettings['general']['currency'] ?? 'PKR',
-            'user' => $request->user(),
+            'user' => $request->user('web'),
+            'prefill' => $customer ? [
+                'name' => $customer->name,
+                'email' => $customer->email,
+                'phone' => $customer->phone,
+                'shipping_address' => $customer->shipping_address,
+            ] : null,
         ]);
     }
 
@@ -54,10 +68,16 @@ class CheckoutController
             return redirect()->route('cart.index')->with('error', 'Your shopping bag is empty.');
         }
 
+        /** @var Customer|null $customer */
+        $customer = $request->user('customer');
+        $appliedCoupon = $this->cartService->getAppliedCoupon();
+
         $order = $this->orderService->createOrder(
             $request->validated(),
             $cart,
-            $request->user()?->id,
+            $request->user('web')?->id,
+            $customer?->id,
+            $appliedCoupon,
         );
 
         $this->cartService->clearCart();

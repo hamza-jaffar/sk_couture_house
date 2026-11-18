@@ -9,6 +9,7 @@ use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Database\Eloquent\Relations\HasMany;
 use Illuminate\Database\Eloquent\SoftDeletes;
+use Modules\Customer\Models\Customer;
 use Modules\Order\Database\Factories\OrderFactory;
 use Modules\Order\Enum\OrderStatusEnum;
 use Modules\User\Models\User;
@@ -29,8 +30,11 @@ use Modules\User\Models\User;
     'currency_icon',
     'payment_status',
     'payment_method',
+    'coupon_code',
+    'discount_amount',
     'metadata',
     'user_id',
+    'customer_id',
 ])]
 class Order extends Model
 {
@@ -43,6 +47,7 @@ class Order extends Model
             'metadata' => 'array',
             'subtotal' => 'decimal:2',
             'total' => 'decimal:2',
+            'discount_amount' => 'decimal:2',
             'status' => OrderStatusEnum::class,
         ];
     }
@@ -60,6 +65,11 @@ class Order extends Model
     public function user(): BelongsTo
     {
         return $this->belongsTo(User::class);
+    }
+
+    public function customer(): BelongsTo
+    {
+        return $this->belongsTo(Customer::class);
     }
 
     public function isDirect(): bool

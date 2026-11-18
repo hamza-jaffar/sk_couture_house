@@ -6,7 +6,10 @@ use Illuminate\Contracts\Pagination\LengthAwarePaginator;
 use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Str;
+use Illuminate\Validation\ValidationException;
 use InvalidArgumentException;
+use Modules\Coupon\Models\Coupon;
+use Modules\Coupon\Services\CouponListingCache;
 use Modules\Order\Enum\OrderStatusEnum;
 use Modules\Order\Jobs\SendOrderConfirmationEmail;
 use Modules\Order\Models\Order;
@@ -18,6 +21,7 @@ class OrderService
     public function __construct(
         protected SiteSettingService $settings,
         protected OrderListingCache $listingCache,
+        protected CouponListingCache $couponListingCache,
     ) {}
 
     /**
@@ -25,8 +29,9 @@ class OrderService
      *
      * @param  array<string, mixed>  $data
      * @param  array<string, array<string, mixed>>  $cartItems
+     * @param  array<string, mixed>|null  $appliedCoupon
      */
-    public function createOrder(array $data, array $cartItems, ?int $userId = null): Order
+    public function createOrder(array $data, array $cartItems, ?int $userId = null, ?int $customerId = null, ?array $appliedCoupon = null): Order
     {
         if (empty($cartItems)) {
             throw new InvalidArgumentException('Cannot place an order with an empty cart.');
@@ -36,12 +41,93 @@ class OrderService
         $currency = $platformSettings['general']['currency'] ?? 'PKR';
         $currencyIcon = $platformSettings['general']['currency_icon'] ?? 'Rs.';
 
-        return DB::transaction(function () use ($data, $cartItems, $userId, $currency, $currencyIcon): Order {
+        return DB::transaction(function () use ($data, $cartItems, $userId, $customerId, $appliedCoupon, $currency, $currencyIcon): Order {
             $subtotal = 0.0;
             foreach ($cartItems as $item) {
                 $subtotal += ((float) $item['unit_price'] * (int) $item['quantity']);
             }
-            $total = round($subtotal, 2);
+            $subtotal = round($subtotal, 2);
+
+            // Calculate and strictly verify discount from coupon
+            $discountAmount = 0.0;
+            $couponCode = null;
+            if ($appliedCoupon && ! empty($appliedCoupon['code'])) {
+                $couponCode = strtoupper(trim((string) $appliedCoupon['code']));
+
+                /** @var Coupon|null $coupon */
+                $coupon = Coupon::query()->where('code', $couponCode)->first();
+
+                if (! $coupon || ! $coupon->is_active) {
+                    throw ValidationException::withMessages([
+                        'coupon' => 'The applied promo code is invalid or no longer active.',
+                    ]);
+                }
+
+                $now = now();
+                if ($coupon->starts_at && $now->lt($coupon->starts_at)) {
+                    throw ValidationException::withMessages([
+                        'coupon' => 'The applied promo code has not started yet.',
+                    ]);
+                }
+
+                if ($coupon->expires_at && $now->gt($coupon->expires_at)) {
+                    throw ValidationException::withMessages([
+                        'coupon' => 'The applied promo code has expired.',
+                    ]);
+                }
+
+                if ($coupon->usage_limit !== null && $coupon->times_used >= $coupon->usage_limit) {
+                    throw ValidationException::withMessages([
+                        'coupon' => 'The applied promo code has reached its maximum total usage limit.',
+                    ]);
+                }
+
+                if ($coupon->min_spend !== null && $subtotal < (float) $coupon->min_spend) {
+                    throw ValidationException::withMessages([
+                        'coupon' => 'The order does not meet the minimum spend requirement of Rs. '.number_format((float) $coupon->min_spend, 2).' for promo code '.$coupon->code.'.',
+                    ]);
+                }
+
+                // Strictly enforce per-user usage limit
+                if ($coupon->usage_limit_per_user !== null) {
+                    $customerEmail = trim((string) ($data['customer_email'] ?? ''));
+                    $userUsageCount = Order::query()
+                        ->where('coupon_code', $coupon->code)
+                        ->where('status', '!=', OrderStatusEnum::CANCELLED->value)
+                        ->where(function (Builder $query) use ($customerId, $customerEmail, $userId): void {
+                            $hasCondition = false;
+                            if ($customerId) {
+                                $query->orWhere('customer_id', $customerId);
+                                $hasCondition = true;
+                            }
+                            if ($customerEmail) {
+                                $query->orWhere('customer_email', $customerEmail);
+                                $hasCondition = true;
+                            }
+                            if ($userId) {
+                                $query->orWhere('user_id', $userId);
+                                $hasCondition = true;
+                            }
+                            if (! $hasCondition) {
+                                $query->whereRaw('1 = 0');
+                            }
+                        })
+                        ->count();
+
+                    if ($userUsageCount >= (int) $coupon->usage_limit_per_user) {
+                        $limit = (int) $coupon->usage_limit_per_user;
+                        $times = $limit === 1 ? 'once' : "{$limit} times";
+                        throw ValidationException::withMessages([
+                            'coupon' => "This promo code can only be used {$times} per customer, and you have already redeemed it.",
+                        ]);
+                    }
+                }
+
+                $discountAmount = (float) ($appliedCoupon['discount_amount'] ?? 0.0);
+                $discountAmount = min($subtotal, max(0.0, $discountAmount));
+            }
+
+            $total = round($subtotal - $discountAmount, 2);
 
             $orderNumber = $this->generateOrderNumber();
 
@@ -60,7 +146,9 @@ class OrderService
                     'country' => trim((string) ($data['shipping_address']['country'] ?? 'Pakistan')),
                 ],
                 'notes' => trim((string) ($data['notes'] ?? '')),
-                'subtotal' => $total,
+                'subtotal' => $subtotal,
+                'discount_amount' => $discountAmount,
+                'coupon_code' => $couponCode,
                 'total' => $total,
                 'currency' => $currency,
                 'currency_icon' => $currencyIcon,
@@ -68,6 +156,7 @@ class OrderService
                 'payment_method' => $data['payment_method'] ?? 'cash_on_delivery',
                 'metadata' => $data['metadata'] ?? null,
                 'user_id' => $userId,
+                'customer_id' => $customerId,
             ]);
 
             foreach ($cartItems as $item) {
@@ -87,6 +176,15 @@ class OrderService
                     'total_price' => $itemTotal,
                     'image_url' => $item['image_url'] ?? null,
                 ]);
+            }
+
+            // Increment coupon usage count
+            if ($couponCode) {
+                Coupon::query()
+                    ->where('code', $couponCode)
+                    ->increment('times_used');
+
+                $this->couponListingCache->invalidateAfterCommit();
             }
 
             $this->listingCache->invalidateAfterCommit();
@@ -197,9 +295,12 @@ class OrderService
             'customer_name' => $order->customer_name,
             'customer_email' => $order->customer_email,
             'customer_phone' => $order->customer_phone,
+            'customer_id' => $order->customer_id,
             'shipping_address' => $order->shipping_address,
             'notes' => $order->notes,
             'subtotal' => (float) $order->subtotal,
+            'discount_amount' => (float) ($order->discount_amount ?? 0),
+            'coupon_code' => $order->coupon_code,
             'total' => (float) $order->total,
             'currency' => $order->currency,
             'currency_icon' => $order->currency_icon,
