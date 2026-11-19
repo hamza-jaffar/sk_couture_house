@@ -1,6 +1,8 @@
 import Navbar from '@/components/frontend/navbar';
+import SeoHead from '@/components/frontend/seo-head';
+import type { PlatformSettings } from '@/types';
 import type { CartItem } from '@/types/orders';
-import { Head, Link, router } from '@inertiajs/react';
+import { Link, router, usePage } from '@inertiajs/react';
 import {
     AlertCircle,
     ArrowRight,
@@ -44,6 +46,9 @@ export default function CartIndex({
     cart_final_total,
     applied_coupon,
 }: Props) {
+    const { settings } = usePage<{ settings?: PlatformSettings }>().props;
+    const title = settings?.seo?.cart_title || 'Shopping Bag';
+    const description = settings?.seo?.cart_description;
     const [updatingKey, setUpdatingKey] = useState<string | null>(null);
     const [couponCode, setCouponCode] = useState('');
     const [applyingCoupon, setApplyingCoupon] = useState(false);
@@ -131,7 +136,11 @@ export default function CartIndex({
 
     return (
         <div className="min-h-screen bg-white text-neutral-900">
-            <Head title="Shopping Bag" />
+            <SeoHead
+                title={title}
+                description={description}
+                robots="noindex, follow"
+            />
             <Navbar />
 
             <main className="mx-auto max-w-7xl px-4 py-8 sm:px-6 lg:px-8">

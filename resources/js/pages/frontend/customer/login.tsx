@@ -15,9 +15,7 @@ export default function CustomerLogin({ errors = {} }: Props) {
     const handleSubmit = (e: React.FormEvent) => {
         e.preventDefault();
         post('/customer/login');
-    };
-
-    return (
+    };    return (
         <div className="min-h-screen bg-white text-neutral-900">
             <Head title="Customer Login" />
             <Navbar />
@@ -119,7 +117,7 @@ export default function CustomerLogin({ errors = {} }: Props) {
                         <p className="text-xs text-neutral-500">
                             Don't have an account?{' '}
                             <Link
-                                href="/customer/register"
+                                href="/register"
                                 className="font-semibold text-neutral-900 underline hover:text-black"
                             >
                                 Create Account
@@ -128,10 +126,10 @@ export default function CustomerLogin({ errors = {} }: Props) {
                         <p className="text-[11px] text-neutral-400">
                             Staff login at{' '}
                             <Link
-                                href="/login"
+                                href="/login?for=staff"
                                 className="underline hover:text-neutral-700"
                             >
-                                /login
+                                /login?for=staff
                             </Link>
                         </p>
                     </div>

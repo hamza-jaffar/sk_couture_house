@@ -4,6 +4,16 @@ import {
     type DataTableColumnDef,
 } from '@/components/data-table';
 import Heading from '@/components/heading';
+import {
+    AlertDialog,
+    AlertDialogAction,
+    AlertDialogCancel,
+    AlertDialogContent,
+    AlertDialogDescription,
+    AlertDialogFooter,
+    AlertDialogHeader,
+    AlertDialogTitle,
+} from '@/components/ui/alert-dialog';
 import { Button } from '@/components/ui/button';
 import {
     DropdownMenu,
@@ -68,6 +78,8 @@ export default function PagesIndex({ pages, filters }: Props) {
     const can = useCan();
     const [search, setSearch] = useState(filters.search ?? '');
     const [isLoading, setIsLoading] = useState(false);
+    const [pageToDelete, setPageToDelete] = useState<PageRow | null>(null);
+    const [isDeleting, setIsDeleting] = useState(false);
 
     const visitPages = useCallback(
         (newFilters: Partial<PageFilters>, resetPage = true) => {
@@ -103,12 +115,17 @@ export default function PagesIndex({ pages, filters }: Props) {
         return () => window.clearTimeout(timeout);
     }, [filters.search, search, visitPages]);
 
-    const handleDelete = (page: PageRow) => {
-        if (!window.confirm(`Delete page "${page.title}"? This cannot be undone.`)) return;
+    const handleConfirmDelete = () => {
+        if (!pageToDelete) return;
+        setIsDeleting(true);
 
-        router.delete(`/dashboard/pages/${page.id}`, {
+        router.delete(`/dashboard/pages/${pageToDelete.slug}`, {
             preserveScroll: true,
             only: ['pages', 'filters'],
+            onFinish: () => {
+                setIsDeleting(false);
+                setPageToDelete(null);
+            },
         });
     };
 
@@ -192,7 +209,7 @@ export default function PagesIndex({ pages, filters }: Props) {
                                     {can('pages.update') && (
                                         <DropdownMenuItem
                                             onClick={() =>
-                                                router.visit(`/dashboard/pages/${page.id}/edit`)
+                                                router.visit(`/dashboard/pages/${page.slug}/edit`)
                                             }
                                         >
                                             <Edit className="mr-2 size-4" />
@@ -203,7 +220,7 @@ export default function PagesIndex({ pages, filters }: Props) {
                                         <>
                                             <DropdownMenuSeparator />
                                             <DropdownMenuItem
-                                                onClick={() => handleDelete(page)}
+                                                onClick={() => setPageToDelete(page)}
                                                 className="text-destructive focus:text-destructive"
                                             >
                                                 <Trash2 className="mr-2 size-4" />
@@ -303,7 +320,7 @@ export default function PagesIndex({ pages, filters }: Props) {
                             <Select
                                 items={statusItems}
                                 value={filters.status ?? 'all'}
-                                onValueChange={(val) => visitPages({ status: val })}
+                                onValueChange={(val) => visitPages({ status: val ?? undefined })}
                             >
                                 <SelectTrigger className="h-9 min-w-36">
                                     <SelectValue placeholder="All Statuses" />
@@ -320,7 +337,7 @@ export default function PagesIndex({ pages, filters }: Props) {
                             <Select
                                 items={typeItems}
                                 value={filters.type ?? 'all'}
-                                onValueChange={(val) => visitPages({ type: val })}
+                                onValueChange={(val) => visitPages({ type: val ?? undefined })}
                             >
                                 <SelectTrigger className="h-9 min-w-36">
                                     <SelectValue placeholder="All Pages" />
@@ -352,6 +369,36 @@ export default function PagesIndex({ pages, filters }: Props) {
                     )}
                 />
             </Deferred>
+
+            {/* Confirmation Dialog for Page Deletion */}
+            <AlertDialog
+                open={pageToDelete !== null}
+                onOpenChange={(open) => {
+                    if (!open && !isDeleting) {
+                        setPageToDelete(null);
+                    }
+                }}
+            >
+                <AlertDialogContent>
+                    <AlertDialogHeader>
+                        <AlertDialogTitle>Delete Page?</AlertDialogTitle>
+                        <AlertDialogDescription>
+                            Are you sure you want to delete &ldquo;{pageToDelete?.title}&rdquo;?
+                            This action will remove the page and cannot be undone.
+                        </AlertDialogDescription>
+                    </AlertDialogHeader>
+                    <AlertDialogFooter>
+                        <AlertDialogCancel disabled={isDeleting}>Cancel</AlertDialogCancel>
+                        <AlertDialogAction
+                            variant="destructive"
+                            disabled={isDeleting}
+                            onClick={handleConfirmDelete}
+                        >
+                            {isDeleting ? 'Deleting...' : 'Delete Page'}
+                        </AlertDialogAction>
+                    </AlertDialogFooter>
+                </AlertDialogContent>
+            </AlertDialog>
         </div>
     );
 }

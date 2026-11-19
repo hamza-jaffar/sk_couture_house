@@ -38,4 +38,9 @@ class Page extends Model
     {
         return (bool) $this->is_system;
     }
+
+    public function getRouteKeyName(): string
+    {
+        return 'slug';
+    }
 }

@@ -211,18 +211,10 @@ class SiteSettingService
         }
 
         if ($group === 'seo') {
+            $allowedKeys = array_keys($this->defaults()['seo']);
             $payload = array_replace(
-                array_intersect_key($existing, array_flip(array_keys($this->defaults()['seo']))),
-                Arr::only($data, [
-                    'meta_title_template',
-                    'meta_description',
-                    'og_title',
-                    'og_description',
-                    'canonical_url',
-                    'robots',
-                    'google_analytics_id',
-                    'og_image_path',
-                ]),
+                array_intersect_key($existing, array_flip($allowedKeys)),
+                Arr::only($data, $allowedKeys),
             );
 
             $payload['og_image_path'] = array_key_exists('og_image_path', $data)
@@ -310,12 +302,23 @@ class SiteSettingService
             'seo' => [
                 'meta_title_template' => '%s | %store_name%',
                 'meta_description' => '',
+                'meta_keywords' => '',
                 'og_title' => '',
                 'og_description' => '',
                 'og_image_path' => null,
                 'canonical_url' => '',
                 'robots' => 'index, follow',
                 'google_analytics_id' => '',
+                'home_title' => '',
+                'home_description' => '',
+                'home_keywords' => '',
+                'collections_title' => '',
+                'collections_description' => '',
+                'collections_keywords' => '',
+                'cart_title' => '',
+                'cart_description' => '',
+                'checkout_title' => '',
+                'checkout_description' => '',
             ],
             'variants' => [],
         ];

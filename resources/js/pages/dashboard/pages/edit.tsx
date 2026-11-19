@@ -37,7 +37,7 @@ export default function EditPage({ page }: Props) {
 
             <PageForm
                 page={page}
-                action={`/dashboard/pages/${page.id}`}
+                action={`/dashboard/pages/${page.slug}`}
                 method="patch"
             />
         </div>

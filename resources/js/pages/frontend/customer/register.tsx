@@ -16,7 +16,7 @@ export default function CustomerRegister({ errors = {} }: Props) {
 
     const handleSubmit = (e: React.FormEvent) => {
         e.preventDefault();
-        post('/customer/register');
+        post('/register');
     };
 
     return (
@@ -175,7 +175,7 @@ export default function CustomerRegister({ errors = {} }: Props) {
                         <p className="text-xs text-neutral-500">
                             Already have an account?{' '}
                             <Link
-                                href="/customer/login"
+                                href="/login"
                                 className="font-semibold text-neutral-900 underline hover:text-black"
                             >
                                 Sign In

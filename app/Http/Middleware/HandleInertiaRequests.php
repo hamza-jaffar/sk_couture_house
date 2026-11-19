@@ -43,11 +43,14 @@ class HandleInertiaRequests extends Middleware
     public function share(Request $request): array
     {
         $user = $request->user('web');
-        $general = $this->settings->all()['general'];
+        $settingsAll = $this->settings->all();
+        $general = $settingsAll['general'];
+        $seo = $settingsAll['seo'] ?? [];
 
-        // Share favicon URL and store name with the Blade root template
+        // Share favicon URL, store name, and Google Analytics ID with the Blade root template
         View::share('favicon_url', $general['favicon_url'] ?? null);
         View::share('site_name', $general['name'] ?? config('app.name'));
+        View::share('google_analytics_id', ! empty($seo['google_analytics_id']) ? $seo['google_analytics_id'] : null);
 
         return [
             ...parent::share($request),

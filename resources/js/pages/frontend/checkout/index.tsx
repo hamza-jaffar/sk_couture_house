@@ -1,6 +1,8 @@
 import Navbar from '@/components/frontend/navbar';
+import SeoHead from '@/components/frontend/seo-head';
+import type { PlatformSettings } from '@/types';
 import type { CartItem } from '@/types/orders';
-import { Head, Link, router, useForm } from '@inertiajs/react';
+import { Link, router, useForm, usePage } from '@inertiajs/react';
 import { AlertCircle, CheckCircle2, Lock, ShieldCheck, Tag, Truck, X } from 'lucide-react';
 import { type FormEventHandler, useState } from 'react';
 
@@ -47,6 +49,10 @@ export default function CheckoutIndex({
     currency_icon = 'Rs.',
     user,
 }: Props) {
+    const { settings } = usePage<{ settings?: PlatformSettings }>().props;
+    const seoTitle = settings?.seo?.checkout_title || 'Checkout';
+    const seoDescription = settings?.seo?.checkout_description;
+
     const { data, setData, post, processing, errors } = useForm({
         customer_name: prefill?.name ?? user?.name ?? '',
         customer_email: prefill?.email ?? user?.email ?? '',
@@ -124,7 +130,7 @@ export default function CheckoutIndex({
 
     return (
         <div className="min-h-screen bg-neutral-50/50 text-neutral-900">
-            <Head title="Checkout" />
+            <SeoHead title={seoTitle} description={seoDescription} robots="noindex, follow" />
             <Navbar />
 
             <main className="mx-auto max-w-7xl px-4 py-8 sm:px-6 lg:px-8">

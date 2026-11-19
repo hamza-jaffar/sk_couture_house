@@ -109,6 +109,12 @@ export function LoginForm({
                     </Form>
                 </CardContent>
             </Card>
+            <div className="text-center text-xs text-muted-foreground">
+                Looking for customer sign in?{" "}
+                <Link href="/login" className="font-medium underline hover:text-foreground">
+                    Customer Sign In
+                </Link>
+            </div>
         </div>
     );
 }

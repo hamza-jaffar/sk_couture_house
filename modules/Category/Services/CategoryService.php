@@ -145,6 +145,9 @@ class CategoryService
                 'name' => $category->name,
                 'slug' => $category->slug,
                 'description' => $category->description,
+                'meta_title' => $category->meta_title,
+                'meta_description' => $category->meta_description,
+                'meta_keywords' => $category->meta_keywords,
                 'image_url' => $category->image_path !== null
                     ? Storage::disk('public')->url($category->image_path)
                     : null,

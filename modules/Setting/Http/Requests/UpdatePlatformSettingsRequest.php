@@ -132,12 +132,27 @@ class UpdatePlatformSettingsRequest extends FormRequest
             'seo' => [
                 'meta_title_template' => ['nullable', 'string', 'max:255'],
                 'meta_description' => ['nullable', 'string', 'max:500'],
+                'meta_keywords' => ['nullable', 'string', 'max:500'],
                 'og_title' => ['nullable', 'string', 'max:255'],
                 'og_description' => ['nullable', 'string', 'max:500'],
                 'og_image_path' => ['nullable', 'string', 'max:1024', $this->galleryImagePath()],
                 'canonical_url' => ['nullable', 'url', 'max:2048'],
                 'robots' => ['nullable', 'string', 'max:100'],
                 'google_analytics_id' => ['nullable', 'string', 'max:50'],
+
+                'home_title' => ['nullable', 'string', 'max:255'],
+                'home_description' => ['nullable', 'string', 'max:500'],
+                'home_keywords' => ['nullable', 'string', 'max:500'],
+
+                'collections_title' => ['nullable', 'string', 'max:255'],
+                'collections_description' => ['nullable', 'string', 'max:500'],
+                'collections_keywords' => ['nullable', 'string', 'max:500'],
+
+                'cart_title' => ['nullable', 'string', 'max:255'],
+                'cart_description' => ['nullable', 'string', 'max:500'],
+
+                'checkout_title' => ['nullable', 'string', 'max:255'],
+                'checkout_description' => ['nullable', 'string', 'max:500'],
             ],
             default => [],
         };

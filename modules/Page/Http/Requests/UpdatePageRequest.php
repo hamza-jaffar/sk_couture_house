@@ -13,16 +13,42 @@ class UpdatePageRequest extends FormRequest
         return $this->user()?->can('pages.update') ?? false;
     }
 
+    protected function resolvePage(): ?Page
+    {
+        $page = $this->route('page');
+        if ($page instanceof Page) {
+            return $page;
+        }
+
+        if (is_string($page) || is_numeric($page)) {
+            return Page::where('slug', $page)->first() ?? Page::find($page);
+        }
+
+        return null;
+    }
+
+    protected function prepareForValidation(): void
+    {
+        $page = $this->resolvePage();
+
+        if ($page?->is_system) {
+            $this->merge([
+                'title' => $this->filled('title') ? $this->input('title') : $page->title,
+                'slug' => $page->slug,
+            ]);
+        }
+    }
+
     /**
      * @return array<string, mixed>
      */
     public function rules(): array
     {
-        /** @var Page|null $page */
-        $page = $this->route('page');
+        $page = $this->resolvePage();
+        $isSystem = (bool) $page?->is_system;
 
         return [
-            'title' => ['required', 'string', 'min:3', 'max:255'],
+            'title' => $isSystem ? ['nullable', 'string', 'max:255'] : ['required', 'string', 'min:3', 'max:255'],
             'slug' => [
                 'nullable',
                 'string',

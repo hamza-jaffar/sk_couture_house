@@ -6,13 +6,16 @@ use Modules\Customer\Http\Controllers\CustomerAuthController;
 use Modules\Customer\Http\Controllers\CustomerController;
 
 Route::middleware('frontend')->group(function (): void {
-    // Guest Customer Authentication
-    Route::prefix('customer')->name('customer.')->group(function (): void {
-        Route::get('/login', [CustomerAuthController::class, 'showLogin'])->name('login');
-        Route::post('/login', [CustomerAuthController::class, 'login'])->name('login.post');
-        Route::get('/register', [CustomerAuthController::class, 'showRegister'])->name('register');
-        Route::post('/register', [CustomerAuthController::class, 'register'])->name('register.post');
-    });
+    // Customer login POST — form action stays at /customer/login
+    Route::post('/customer/login', [CustomerAuthController::class, 'login'])->name('customer.login.post');
+
+    // Backward compatibility redirects
+    Route::get('/customer/login', fn () => redirect()->to('/login'))->name('customer.login');
+    Route::get('/customer/register', fn () => redirect()->to('/register'));
+
+    // Customer register — moved from /customer/register to /register
+    Route::get('/register', [CustomerAuthController::class, 'showRegister'])->name('customer.register');
+    Route::post('/register', [CustomerAuthController::class, 'register'])->name('customer.register.post');
 
     // Authenticated Customer Account Area
     Route::prefix('customer')->name('customer.')->middleware('auth:customer')->group(function (): void {

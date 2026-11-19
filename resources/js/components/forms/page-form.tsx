@@ -1,3 +1,4 @@
+import ContentEditor from '@/components/forms/content-editor';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Input } from '@/components/ui/input';
@@ -5,7 +6,7 @@ import InputError from '@/components/ui/input-error';
 import { Label } from '@/components/ui/label';
 import { Form } from '@inertiajs/react';
 import { Lock, Save, Shield } from 'lucide-react';
-import { useState } from 'react';
+import { useEffect, useState } from 'react';
 
 export type PageData = {
     id?: number;
@@ -35,13 +36,27 @@ export default function PageForm({ page, action, method = 'post' }: Props) {
 
     const [title, setTitle] = useState(page?.title ?? '');
     const [slug, setSlug] = useState(page?.slug ?? '');
-    const [content, setContent] = useState(page?.content ?? '<p>Write your page content here...</p>');
+    const [content, setContent] = useState(page?.content ?? (isEdit ? '' : '<p>Write your page content here...</p>'));
     const [isActive, setIsActive] = useState(page?.is_active ?? true);
     const [metaTitle, setMetaTitle] = useState(page?.meta_title ?? '');
     const [metaDescription, setMetaDescription] = useState(page?.meta_description ?? '');
     const [metaKeywords, setMetaKeywords] = useState(page?.meta_keywords ?? '');
     const [canonicalUrl, setCanonicalUrl] = useState(page?.canonical_url ?? '');
     const [ogImage, setOgImage] = useState(page?.og_image ?? '');
+
+    useEffect(() => {
+        if (page) {
+            setTitle(page.title ?? '');
+            setSlug(page.slug ?? '');
+            setContent(page.content ?? '');
+            setIsActive(page.is_active ?? true);
+            setMetaTitle(page.meta_title ?? '');
+            setMetaDescription(page.meta_description ?? '');
+            setMetaKeywords(page.meta_keywords ?? '');
+            setCanonicalUrl(page.canonical_url ?? '');
+            setOgImage(page.og_image ?? '');
+        }
+    }, [page]);
 
     const handleTitleChange = (val: string) => {
         setTitle(val);
@@ -83,12 +98,14 @@ export default function PageForm({ page, action, method = 'post' }: Props) {
                                     <Label htmlFor="title">
                                         Page Title <span className="text-destructive">*</span>
                                     </Label>
+                                    {isSystem && <input type="hidden" name="title" value={title} />}
                                     <Input
                                         id="title"
-                                        name="title"
+                                        name={isSystem ? undefined : 'title'}
                                         value={title}
                                         onChange={(e) => handleTitleChange(e.target.value)}
-                                        disabled={isSystem}
+                                        readOnly={isSystem}
+                                        className={isSystem ? 'bg-muted cursor-not-allowed opacity-80' : ''}
                                         placeholder="e.g. Terms & Conditions"
                                         autoFocus={!isEdit}
                                     />
@@ -103,17 +120,20 @@ export default function PageForm({ page, action, method = 'post' }: Props) {
                                 {/* Slug */}
                                 <div className="space-y-1.5">
                                     <Label htmlFor="slug">URL Slug</Label>
+                                    {isSystem && <input type="hidden" name="slug" value={slug} />}
                                     <div className="flex items-center rounded-md border overflow-hidden">
                                         <span className="border-r bg-muted px-3 py-2 text-xs text-muted-foreground">
                                             /page/
                                         </span>
                                         <Input
                                             id="slug"
-                                            name="slug"
+                                            name={isSystem ? undefined : 'slug'}
                                             value={slug}
                                             onChange={(e) => setSlug(e.target.value)}
-                                            disabled={isSystem}
-                                            className="border-0 rounded-none focus-visible:ring-0"
+                                            readOnly={isSystem}
+                                            className={`border-0 rounded-none focus-visible:ring-0 ${
+                                                isSystem ? 'bg-muted cursor-not-allowed opacity-80' : ''
+                                            }`}
                                             placeholder="terms-and-conditions"
                                         />
                                     </div>
@@ -125,25 +145,12 @@ export default function PageForm({ page, action, method = 'post' }: Props) {
                                     )}
                                 </div>
 
-                                {/* Content */}
-                                <div className="space-y-1.5">
-                                    <Label htmlFor="content">
-                                        Content <span className="text-destructive">*</span>
-                                    </Label>
-                                    <textarea
-                                        id="content"
-                                        name="content"
-                                        value={content}
-                                        onChange={(e) => setContent(e.target.value)}
-                                        rows={16}
-                                        className="w-full rounded-md border bg-background px-3 py-2 text-sm font-mono focus:outline-none focus:ring-2 focus:ring-ring"
-                                        placeholder="<h2>Enter page content...</h2>"
-                                    />
-                                    <InputError message={errors.content} />
-                                    <p className="text-xs text-muted-foreground">
-                                        HTML markup is supported for rich formatting (headings, paragraphs, lists).
-                                    </p>
-                                </div>
+                                {/* Content with Visual (Jodit) & Code (Monaco) Editor */}
+                                <ContentEditor
+                                    value={content}
+                                    onChange={setContent}
+                                    error={errors.content}
+                                />
                             </CardContent>
                         </Card>
 

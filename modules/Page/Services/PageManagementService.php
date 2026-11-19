@@ -142,6 +142,7 @@ class PageManagementService
             'id' => (int) $page->id,
             'title' => $page->title,
             'slug' => $page->slug,
+            'content' => $page->content,
             'is_system' => (bool) $page->is_system,
             'is_active' => (bool) $page->is_active,
             'meta_title' => $page->meta_title,

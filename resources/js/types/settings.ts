@@ -47,6 +47,7 @@ export type PlatformSettings = {
     seo: {
         meta_title_template: string;
         meta_description: string;
+        meta_keywords?: string;
         og_title: string;
         og_description: string;
         og_image_path: string | null;
@@ -54,6 +55,16 @@ export type PlatformSettings = {
         canonical_url: string;
         robots: string;
         google_analytics_id: string;
+        home_title?: string;
+        home_description?: string;
+        home_keywords?: string;
+        collections_title?: string;
+        collections_description?: string;
+        collections_keywords?: string;
+        cart_title?: string;
+        cart_description?: string;
+        checkout_title?: string;
+        checkout_description?: string;
     };
     variants: ProductVariant[];
 };

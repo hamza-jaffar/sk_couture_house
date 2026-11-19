@@ -56,7 +56,7 @@ class PageController
     {
         $page = $this->pageService->create($request->validated());
 
-        return redirect()->route('dashboard.pages.edit', $page)
+        return redirect()->route('dashboard.pages.edit', ['page' => $page->slug])
             ->with('success', "Page \"{$page->title}\" created successfully.");
     }
 
@@ -77,7 +77,7 @@ class PageController
     {
         $this->pageService->update($page, $request->validated());
 
-        return redirect()->route('dashboard.pages.edit', $page)
+        return redirect()->route('dashboard.pages.edit', ['page' => $page->slug])
             ->with('success', "Page \"{$page->title}\" updated successfully.");
     }
 

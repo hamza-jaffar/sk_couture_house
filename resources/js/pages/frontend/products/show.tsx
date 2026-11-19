@@ -1,6 +1,7 @@
 import Navbar from '@/components/frontend/navbar';
 import ProductReviews, { type ProductReviewsData } from '@/components/frontend/product-reviews';
-import { Deferred, Head, Link, router } from '@inertiajs/react';
+import SeoHead from '@/components/frontend/seo-head';
+import { Deferred, Link, router } from '@inertiajs/react';
 import {
     Check,
     ChevronDown,
@@ -57,6 +58,14 @@ interface ProductDetail {
     variants: ProductVariant[];
     category: CategoryInfo | null;
     order_type?: string;
+    meta_title?: string | null;
+    meta_description?: string | null;
+    meta_keywords?: string | null;
+    canonical_url?: string | null;
+    og_title?: string | null;
+    og_description?: string | null;
+    og_image?: string | null;
+    robots_meta?: string | null;
 }
 
 interface RecommendedProduct {
@@ -286,9 +295,35 @@ export default function ProductShow({
     const collectionName = product.category?.name ?? 'Collection';
     const collectionSlug = product.category?.slug;
 
+    const productSchema = {
+        '@context': 'https://schema.org/',
+        '@type': 'Product',
+        name: product.title,
+        image: product.images,
+        description: product.short_description || product.description,
+        sku: product.sku || undefined,
+        offers: {
+            '@type': 'Offer',
+            priceCurrency: 'PKR',
+            price: product.sale_price ?? product.price,
+            availability: product.stock > 0 ? 'https://schema.org/InStock' : 'https://schema.org/OutOfStock',
+        },
+    };
+
     return (
         <>
-            <Head title={`${product.title} — SK Couture`} />
+            <SeoHead
+                title={product.meta_title || product.title}
+                description={product.meta_description || product.short_description || product.description}
+                keywords={product.meta_keywords}
+                canonical={product.canonical_url}
+                robots={product.robots_meta}
+                ogTitle={product.og_title || product.meta_title || product.title}
+                ogDescription={product.og_description || product.meta_description || product.short_description}
+                ogImage={product.og_image || product.images?.[0]}
+                ogType="product"
+                jsonLd={productSchema}
+            />
             <div className="min-h-screen overflow-x-hidden bg-white text-neutral-900">
                 <Navbar />
 

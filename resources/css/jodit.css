@@ -115,6 +115,43 @@
     padding: 0.75rem 1rem !important;
 }
 
+/* Links inside editor — use foreground with underline, not browser blue */
+.jodit-wysiwyg a {
+    color: var(--foreground) !important;
+    text-decoration: underline !important;
+    text-underline-offset: 2px !important;
+}
+
+/* Source-view area inside Jodit (when toggling to HTML source mode) */
+.jodit-source__mirror,
+.jodit-source .CodeMirror,
+.jodit-source .CodeMirror-scroll {
+    background-color: var(--background) !important;
+    color: var(--foreground) !important;
+    font-size: 0.8125rem !important;
+}
+
+/* Jodit dark-mode internal variable overrides */
+.jodit-container.jodit_theme_dark,
+.jodit_theme_dark .jodit-toolbar__box,
+.jodit_theme_dark .jodit-workplace,
+.jodit_theme_dark .jodit-wysiwyg,
+.jodit_theme_dark .jodit-status-bar {
+    background-color: var(--background) !important;
+    color: var(--foreground) !important;
+    border-color: var(--border) !important;
+}
+
+.jodit_theme_dark .jodit-toolbar__box:not(:empty) {
+    background-color: var(--card) !important;
+}
+
+.jodit_theme_dark .jodit-toolbar-button svg,
+.jodit_theme_dark .jodit-ui-button svg,
+.jodit_theme_dark .jodit-icon {
+    fill: var(--foreground) !important;
+}
+
 .jodit-placeholder {
     color: var(--muted-foreground) !important;
     font-family: inherit !important;

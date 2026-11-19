@@ -16,12 +16,12 @@ Route::middleware(['auth'])->prefix('dashboard')->group(function (): void {
     });
 
     Route::middleware(['can:pages.update'])->group(function (): void {
-        Route::get('/pages/{page}/edit', [PageController::class, 'edit'])->name('dashboard.pages.edit');
-        Route::patch('/pages/{page}', [PageController::class, 'update'])->name('dashboard.pages.update');
+        Route::get('/pages/{page:slug}/edit', [PageController::class, 'edit'])->name('dashboard.pages.edit');
+        Route::patch('/pages/{page:slug}', [PageController::class, 'update'])->name('dashboard.pages.update');
     });
 
     Route::middleware(['can:pages.delete'])->group(function (): void {
-        Route::delete('/pages/{page}', [PageController::class, 'destroy'])->name('dashboard.pages.destroy');
+        Route::delete('/pages/{page:slug}', [PageController::class, 'destroy'])->name('dashboard.pages.destroy');
     });
 });
 

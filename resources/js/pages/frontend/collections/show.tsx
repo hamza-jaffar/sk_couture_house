@@ -1,5 +1,6 @@
 import Navbar from '@/components/frontend/navbar';
-import { Deferred, Head, InfiniteScroll, Link, router } from '@inertiajs/react';
+import SeoHead from '@/components/frontend/seo-head';
+import { Deferred, InfiniteScroll, Link, router } from '@inertiajs/react';
 import { ChevronDown, Minus, Plus } from 'lucide-react';
 import { useCallback, useState } from 'react';
 
@@ -15,6 +16,9 @@ interface Collection {
     name: string;
     slug: string;
     description: string | null;
+    meta_title?: string | null;
+    meta_description?: string | null;
+    meta_keywords?: string | null;
     image_url: string | null;
     banner_url: string | null;
     parent: CategoryParent | null;
@@ -493,7 +497,13 @@ export default function CollectionsShow({ collection, products, filters }: Props
 
     return (
         <>
-            <Head title={collection.name} />
+            <SeoHead
+                title={collection.meta_title || collection.name}
+                description={collection.meta_description || collection.description}
+                keywords={collection.meta_keywords}
+                ogImage={collection.banner_url || collection.image_url}
+                ogType="website"
+            />
 
             {/*
               Dual-thumb range slider thumb styles — cannot be expressed via

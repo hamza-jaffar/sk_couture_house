@@ -9,9 +9,31 @@ use Modules\User\Http\Requests\LoginRequest;
 
 class LoginController
 {
-    public function index()
+    /**
+     * Unified login page.
+     *
+     * - GET /login             → customer login UI
+     * - GET /login?for=staff   → staff login UI
+     * - GET /login?for="staff" → staff login UI
+     */
+    public function index(Request $request)
     {
-        return inertia('auth/login');
+        $for = trim((string) $request->query('for'), '"\'');
+
+        if ($for === 'staff') {
+            if (Auth::guard('web')->check()) {
+                return redirect()->intended('dashboard');
+            }
+
+            return inertia('auth/login');
+        }
+
+        // Redirect already-authenticated customers to their account
+        if ($request->user('customer')) {
+            return redirect()->route('customer.account');
+        }
+
+        return inertia('frontend/customer/login');
     }
 
     public function login(LoginRequest $request)

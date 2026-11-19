@@ -229,6 +229,14 @@ class ProductService
                     ] : null,
                 ] : null,
                 'order_type' => $product->effective_order_type,
+                'meta_title' => $product->meta_title,
+                'meta_description' => $product->meta_description,
+                'meta_keywords' => $product->meta_keywords,
+                'canonical_url' => $product->canonical_url,
+                'og_title' => $product->og_title,
+                'og_description' => $product->og_description,
+                'og_image' => $product->og_image ? FileHelper::url($product->og_image, 'public') : ($images[0] ?? null),
+                'robots_meta' => $product->robots_meta ?? 'index, follow',
             ];
         });
     }

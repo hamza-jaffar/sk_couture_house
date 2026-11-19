@@ -597,7 +597,7 @@ export default function Navbar() {
 
                         {/* Account (hidden on smallest screens to prevent header cramming, available in mobile menu) */}
                         <Link
-                            href={auth?.user ? '/dashboard' : customer ? '/customer/account' : '/customer/login'}
+                            href={auth?.user ? '/dashboard' : customer ? '/customer/account' : '/login'}
                             aria-label={
                                 auth?.user ? 'Account dashboard' : customer ? 'My Account' : 'Sign in'
                             }
@@ -614,25 +614,25 @@ export default function Navbar() {
                         >
                             <ShoppingBag className="size-4.5 transition-transform duration-200 group-hover:scale-110" />
                             {/* Refined luxury badge */}
-                            <span className="absolute -top-0.5 -right-0.5 flex size-3.5 items-center justify-center bg-foreground text-[8px] font-bold text-background sm:size-4 sm:text-[9px]">
+                            <span className="absolute -top-0.5 -right-0.5 flex size-3.5 items-center justify-center rounded-full bg-foreground text-[8px] font-bold text-background sm:size-4 sm:text-[9px]">
                                 {cartBadge}
                             </span>
                         </Link>
 
                         {/* Subtle Vertical Divider from Reference UI */}
-                        <div
+                        {/* <div
                             className="mx-1 hidden h-4 w-px bg-border/80 sm:block sm:mx-1.5"
                             aria-hidden="true"
-                        />
+                        /> */}
 
                         {/* Send / Contact Plane */}
-                        <Link
+                        {/* <Link
                             href="#contact"
                             aria-label="Contact Concierge"
                             className="group hidden size-8 items-center justify-center text-foreground/80 transition-colors hover:text-foreground sm:flex sm:size-9"
                         >
                             <Send className="size-4.5 transition-transform duration-200 group-hover:scale-110" />
-                        </Link>
+                        </Link> */}
 
                         {/* Mobile Hamburger Toggle */}
                         <button
@@ -705,7 +705,7 @@ export default function Navbar() {
                     {/* Drawer Footer */}
                     <div className="shrink-0 border-t border-border/60 bg-muted/20 px-5 py-4">
                         <Link
-                            href={auth?.user ? '/dashboard' : customer ? '/customer/account' : '/customer/login'}
+                            href={auth?.user ? '/dashboard' : customer ? '/customer/account' : '/login'}
                             onClick={closeMobile}
                             className="flex w-full items-center justify-center gap-2 border border-foreground bg-foreground px-4 py-2.5 text-xs font-semibold tracking-widest text-background uppercase transition-opacity hover:opacity-90"
                         >

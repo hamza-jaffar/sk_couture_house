@@ -170,9 +170,10 @@ type SelectFieldProps = {
     label: string;
     value: string;
     options: SearchableOption[];
+    error?: string;
 };
 
-function SelectField({ id, name, label, value, options }: SelectFieldProps) {
+function SelectField({ id, name, label, value, options, error }: SelectFieldProps) {
     return (
         <div className="grid gap-2">
             <Label htmlFor={id}>{label}</Label>
@@ -190,6 +191,7 @@ function SelectField({ id, name, label, value, options }: SelectFieldProps) {
                     ))}
                 </SelectContent>
             </Select>
+            {error && <InputError message={error} />}
         </div>
     );
 }
@@ -840,6 +842,14 @@ export default function Settings({ settings, selectedTab }: Props) {
                                                 )}
                                             </div>
                                             <TextField
+                                                id="seo-meta-keywords"
+                                                name="meta_keywords"
+                                                label="Default meta keywords"
+                                                value={settings.seo.meta_keywords ?? ''}
+                                                placeholder="haute couture, designer fashion, bespoke atelier"
+                                                error={errors.meta_keywords}
+                                            />
+                                            <TextField
                                                 id="seo-canonical-url"
                                                 name="canonical_url"
                                                 label="Canonical URL"
@@ -849,23 +859,159 @@ export default function Settings({ settings, selectedTab }: Props) {
                                                 error={errors.canonical_url}
                                             />
                                             <div className="grid gap-2 sm:max-w-xs">
-                                                <Label htmlFor="seo-robots">
-                                                    Robots directive
-                                                </Label>
-                                                <select
+                                                <SelectField
                                                     id="seo-robots"
                                                     name="robots"
-                                                    defaultValue={settings.seo.robots}
-                                                    className="h-9 w-full rounded-md border border-input bg-transparent px-3 text-sm shadow-xs outline-none focus-visible:border-ring focus-visible:ring-3 focus-visible:ring-ring/50"
-                                                >
-                                                    <option value="index, follow">index, follow</option>
-                                                    <option value="noindex, follow">noindex, follow</option>
-                                                    <option value="index, nofollow">index, nofollow</option>
-                                                    <option value="noindex, nofollow">noindex, nofollow</option>
-                                                </select>
-                                                {errors.robots && (
-                                                    <InputError message={String(errors.robots)} />
+                                                    label="Robots directive"
+                                                    value={settings.seo.robots || 'index, follow'}
+                                                    options={[
+                                                        { value: 'index, follow', label: 'index, follow' },
+                                                        { value: 'noindex, follow', label: 'noindex, follow' },
+                                                        { value: 'index, nofollow', label: 'index, nofollow' },
+                                                        { value: 'noindex, nofollow', label: 'noindex, nofollow' },
+                                                    ]}
+                                                    error={errors.robots}
+                                                />
+                                            </div>
+                                        </div>
+                                    </div>
+
+                                    {/* Home Page SEO */}
+                                    <div className="border-t pt-4">
+                                        <h3 className="mb-1 text-sm font-semibold text-muted-foreground uppercase tracking-wide">
+                                            Home Page SEO
+                                        </h3>
+                                        <p className="mb-3 text-xs text-muted-foreground">
+                                            Custom SEO metadata for your storefront homepage (<code>/</code>).
+                                        </p>
+                                        <div className="grid gap-4">
+                                            <TextField
+                                                id="seo-home-title"
+                                                name="home_title"
+                                                label="Home meta title"
+                                                value={settings.seo.home_title ?? ''}
+                                                placeholder="SK Couture House | Haute Couture & Bespoke Luxury Fashion"
+                                                error={errors.home_title}
+                                            />
+                                            <div className="grid gap-2">
+                                                <Label htmlFor="seo-home-description">
+                                                    Home meta description
+                                                </Label>
+                                                <textarea
+                                                    id="seo-home-description"
+                                                    name="home_description"
+                                                    rows={3}
+                                                    defaultValue={settings.seo.home_description ?? ''}
+                                                    maxLength={500}
+                                                    placeholder="A short description of your home page shown in search results."
+                                                    className="w-full rounded-md border border-input bg-transparent px-3 py-2 text-sm shadow-xs outline-none placeholder:text-muted-foreground focus-visible:border-ring focus-visible:ring-3 focus-visible:ring-ring/50 disabled:opacity-50"
+                                                    aria-invalid={Boolean(errors.home_description)}
+                                                />
+                                                {errors.home_description && (
+                                                    <InputError message={String(errors.home_description)} />
                                                 )}
+                                            </div>
+                                            <TextField
+                                                id="seo-home-keywords"
+                                                name="home_keywords"
+                                                label="Home meta keywords"
+                                                value={settings.seo.home_keywords ?? ''}
+                                                placeholder="haute couture, evening gowns, bridal, bespoke"
+                                                error={errors.home_keywords}
+                                            />
+                                        </div>
+                                    </div>
+
+                                    {/* All Collections Page SEO */}
+                                    <div className="border-t pt-4">
+                                        <h3 className="mb-1 text-sm font-semibold text-muted-foreground uppercase tracking-wide">
+                                            All Collections Page SEO
+                                        </h3>
+                                        <p className="mb-3 text-xs text-muted-foreground">
+                                            Custom SEO metadata for the catalogue overview page (<code>/collections</code>). Individual collections have their own SEO.
+                                        </p>
+                                        <div className="grid gap-4">
+                                            <TextField
+                                                id="seo-collections-title"
+                                                name="collections_title"
+                                                label="Collections meta title"
+                                                value={settings.seo.collections_title ?? ''}
+                                                placeholder="Designer Collections | SK Couture House"
+                                                error={errors.collections_title}
+                                            />
+                                            <div className="grid gap-2">
+                                                <Label htmlFor="seo-collections-description">
+                                                    Collections meta description
+                                                </Label>
+                                                <textarea
+                                                    id="seo-collections-description"
+                                                    name="collections_description"
+                                                    rows={3}
+                                                    defaultValue={settings.seo.collections_description ?? ''}
+                                                    maxLength={500}
+                                                    placeholder="Explore our curated seasonal edits and signature luxury collections."
+                                                    className="w-full rounded-md border border-input bg-transparent px-3 py-2 text-sm shadow-xs outline-none placeholder:text-muted-foreground focus-visible:border-ring focus-visible:ring-3 focus-visible:ring-ring/50 disabled:opacity-50"
+                                                    aria-invalid={Boolean(errors.collections_description)}
+                                                />
+                                                {errors.collections_description && (
+                                                    <InputError message={String(errors.collections_description)} />
+                                                )}
+                                            </div>
+                                            <TextField
+                                                id="seo-collections-keywords"
+                                                name="collections_keywords"
+                                                label="Collections meta keywords"
+                                                value={settings.seo.collections_keywords ?? ''}
+                                                placeholder="collections, pret, bridal couture, designer edits"
+                                                error={errors.collections_keywords}
+                                            />
+                                        </div>
+                                    </div>
+
+                                    {/* Cart & Checkout Pages SEO */}
+                                    <div className="border-t pt-4">
+                                        <h3 className="mb-1 text-sm font-semibold text-muted-foreground uppercase tracking-wide">
+                                            Cart & Checkout Pages SEO
+                                        </h3>
+                                        <p className="mb-3 text-xs text-muted-foreground">
+                                            Custom titles and descriptions for transactional pages.
+                                        </p>
+                                        <div className="grid gap-4 sm:grid-cols-2">
+                                            <div className="grid gap-4">
+                                                <TextField
+                                                    id="seo-cart-title"
+                                                    name="cart_title"
+                                                    label="Cart page title"
+                                                    value={settings.seo.cart_title ?? ''}
+                                                    placeholder="Shopping Bag | SK Couture House"
+                                                    error={errors.cart_title}
+                                                />
+                                                <TextField
+                                                    id="seo-cart-description"
+                                                    name="cart_description"
+                                                    label="Cart meta description"
+                                                    value={settings.seo.cart_description ?? ''}
+                                                    placeholder="Review your selected couture pieces."
+                                                    error={errors.cart_description}
+                                                />
+                                            </div>
+                                            <div className="grid gap-4">
+                                                <TextField
+                                                    id="seo-checkout-title"
+                                                    name="checkout_title"
+                                                    label="Checkout page title"
+                                                    value={settings.seo.checkout_title ?? ''}
+                                                    placeholder="Secure Checkout | SK Couture House"
+                                                    error={errors.checkout_title}
+                                                />
+                                                <TextField
+                                                    id="seo-checkout-description"
+                                                    name="checkout_description"
+                                                    label="Checkout meta description"
+                                                    value={settings.seo.checkout_description ?? ''}
+                                                    placeholder="Complete your order securely."
+                                                    error={errors.checkout_description}
+                                                />
                                             </div>
                                         </div>
                                     </div>

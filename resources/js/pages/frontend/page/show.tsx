@@ -1,4 +1,4 @@
-import { Head } from '@inertiajs/react';
+import SeoHead from '@/components/frontend/seo-head';
 
 type PageData = {
     id: number;
@@ -20,25 +20,14 @@ type Props = {
 export default function FrontendPageShow({ page }: Props) {
     return (
         <>
-            <Head>
-                <title>{page.meta_title ?? page.title}</title>
-                {page.meta_description && (
-                    <meta name="description" content={page.meta_description} />
-                )}
-                {page.meta_keywords && (
-                    <meta name="keywords" content={page.meta_keywords} />
-                )}
-                {page.canonical_url && (
-                    <link rel="canonical" href={page.canonical_url} />
-                )}
-                {page.og_image && (
-                    <meta property="og:image" content={page.og_image} />
-                )}
-                <meta property="og:title" content={page.meta_title ?? page.title} />
-                {page.meta_description && (
-                    <meta property="og:description" content={page.meta_description} />
-                )}
-            </Head>
+            <SeoHead
+                title={page.meta_title || page.title}
+                description={page.meta_description}
+                keywords={page.meta_keywords}
+                canonical={page.canonical_url}
+                ogImage={page.og_image}
+                ogType="article"
+            />
 
             <div className="min-h-screen bg-background">
                 <main className="mx-auto max-w-3xl px-4 py-16 sm:px-6 lg:px-8">

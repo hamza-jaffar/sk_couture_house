@@ -1,5 +1,7 @@
 import Navbar from '@/components/frontend/navbar';
-import { Deferred, Head, Link } from '@inertiajs/react';
+import SeoHead from '@/components/frontend/seo-head';
+import type { PlatformSettings } from '@/types';
+import { Deferred, Link, usePage } from '@inertiajs/react';
 
 // ─── Types ───────────────────────────────────────────────────────────────────
 
@@ -84,9 +86,19 @@ function CollectionsGrid({ collections }: { collections: Collection[] }) {
 // ─── Page ─────────────────────────────────────────────────────────────────────
 
 export default function CollectionsIndex({ collections }: Props) {
+    const { settings } = usePage<{ settings?: PlatformSettings }>().props;
+    const title = settings?.seo?.collections_title || 'Collections';
+    const description = settings?.seo?.collections_description;
+    const keywords = settings?.seo?.collections_keywords;
+
     return (
         <>
-            <Head title="Collections" />
+            <SeoHead
+                title={title}
+                description={description}
+                keywords={keywords}
+                ogType="website"
+            />
             <div className="min-h-screen overflow-x-hidden bg-white">
                 <Navbar />
                 <main className="mx-auto max-w-screen-xl px-4 py-10 sm:px-6 lg:px-8">

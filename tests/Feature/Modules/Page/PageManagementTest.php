@@ -51,7 +51,7 @@ test('system page slug cannot be modified on update', function (): void {
     $privacyPage = Page::query()->where('slug', 'privacy-policy')->firstOrFail();
 
     $response = $this->actingAs($this->admin, 'web')
-        ->patch("/dashboard/pages/{$privacyPage->id}", [
+        ->patch("/dashboard/pages/{$privacyPage->slug}", [
             'title' => 'Privacy Policy Updated',
             'slug' => 'attempted-slug-change',
             'content' => '<h2>Updated Privacy Content</h2>',
@@ -69,7 +69,7 @@ test('system pages cannot be deleted', function (): void {
     $privacyPage = Page::query()->where('slug', 'privacy-policy')->firstOrFail();
 
     $response = $this->actingAs($this->admin, 'web')
-        ->delete("/dashboard/pages/{$privacyPage->id}");
+        ->delete("/dashboard/pages/{$privacyPage->slug}");
 
     $response->assertForbidden();
     expect($privacyPage->fresh()->trashed())->toBeFalse();
@@ -82,7 +82,7 @@ test('custom pages can be deleted', function (): void {
     ]);
 
     $response = $this->actingAs($this->admin, 'web')
-        ->delete("/dashboard/pages/{$customPage->id}");
+        ->delete("/dashboard/pages/{$customPage->slug}");
 
     $response->assertRedirect();
     expect($customPage->fresh()->trashed())->toBeTrue();

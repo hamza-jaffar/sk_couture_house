@@ -19,6 +19,8 @@ class CustomerAuthController
 
     /**
      * Show customer login page.
+     * Note: This method is no longer mapped to GET /login directly.
+     * The unified /login page is handled by the staff LoginController.
      */
     public function showLogin(Request $request): Response|RedirectResponse
     {

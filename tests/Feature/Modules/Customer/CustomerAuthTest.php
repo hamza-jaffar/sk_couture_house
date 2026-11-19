@@ -164,5 +164,31 @@ test('customer can logout', function (): void {
 test('guest is redirected to customer login when visiting customer protected pages', function (): void {
     $response = $this->get(route('customer.account'));
 
-    $response->assertRedirect(route('customer.login'));
+    $response->assertRedirect(route('login'));
+});
+
+test('login url displays customer login by default', function (): void {
+    $response = $this->get('/login');
+
+    $response->assertOk();
+    $response->assertInertia(fn ($page) => $page->component('frontend/customer/login'));
+});
+
+test('login url with for=staff displays staff login', function (): void {
+    $response = $this->get('/login?for=staff');
+
+    $response->assertOk();
+    $response->assertInertia(fn ($page) => $page->component('auth/login'));
+});
+
+test('login url with for="staff" displays staff login', function (): void {
+    $response = $this->get('/login?for="staff"');
+
+    $response->assertOk();
+    $response->assertInertia(fn ($page) => $page->component('auth/login'));
+});
+
+test('legacy customer login and register urls redirect to unified urls', function (): void {
+    $this->get('/customer/login')->assertRedirect('/login');
+    $this->get('/customer/register')->assertRedirect('/register');
 });
