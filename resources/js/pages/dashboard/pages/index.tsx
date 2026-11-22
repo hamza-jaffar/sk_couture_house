@@ -31,7 +31,7 @@ import {
 } from '@/components/ui/select';
 import { Skeleton } from '@/components/ui/skeleton';
 import { useCan } from '@/hooks/use-can';
-import { Deferred, Head, Link, router } from '@inertiajs/react';
+import { Head, Link, router } from '@inertiajs/react';
 import type { PaginationState, SortingState } from '@tanstack/table-core';
 import { Edit, Eye, Globe, Lock, MoreHorizontal, Plus, Trash2 } from 'lucide-react';
 import { useCallback, useEffect, useMemo, useState } from 'react';
@@ -279,10 +279,9 @@ export default function PagesIndex({ pages, filters }: Props) {
                 )}
             </div>
 
-            <Deferred data="pages" fallback={<SkeletonRows />}>
-                <DataTable
-                    columns={columns}
-                    data={pages?.data ?? []}
+            <DataTable
+                columns={columns}
+                data={pages?.data ?? []}
                     getRowId={(page) => String(page.id)}
                     selectionResetKey={JSON.stringify(filters)}
                     manualFiltering
@@ -368,7 +367,6 @@ export default function PagesIndex({ pages, filters }: Props) {
                         </div>
                     )}
                 />
-            </Deferred>
 
             {/* Confirmation Dialog for Page Deletion */}
             <AlertDialog
@@ -399,27 +397,6 @@ export default function PagesIndex({ pages, filters }: Props) {
                     </AlertDialogFooter>
                 </AlertDialogContent>
             </AlertDialog>
-        </div>
-    );
-}
-
-function SkeletonRows() {
-    return (
-        <div className="space-y-3">
-            <div className="flex items-center gap-2">
-                <Skeleton className="h-9 w-64" />
-                <Skeleton className="h-9 w-36" />
-                <Skeleton className="h-9 w-36" />
-            </div>
-            <div className="rounded-md border">
-                {Array.from({ length: 8 }).map((_, i) => (
-                    <div key={i} className="flex items-center gap-4 border-b px-4 py-3 last:border-0">
-                        <Skeleton className="h-4 w-56" />
-                        <Skeleton className="h-4 w-20" />
-                        <Skeleton className="h-4 w-28 ml-auto" />
-                    </div>
-                ))}
-            </div>
         </div>
     );
 }

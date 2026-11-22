@@ -67,6 +67,32 @@ export type PlatformSettings = {
         checkout_description?: string;
     };
     variants: ProductVariant[];
+    storefront: {
+        hero_badge?: string;
+        featured_badge?: string;
+        featured_title?: string;
+        featured_subtitle?: string;
+        collections_title?: string;
+        collections_subtitle?: string;
+        new_arrivals_title?: string;
+        new_arrivals_subtitle?: string;
+        promise_1_icon?: string;
+        promise_1_title?: string;
+        promise_1_desc?: string;
+        promise_2_icon?: string;
+        promise_2_title?: string;
+        promise_2_desc?: string;
+        promise_3_icon?: string;
+        promise_3_title?: string;
+        promise_3_desc?: string;
+        promise_4_icon?: string;
+        promise_4_title?: string;
+        promise_4_desc?: string;
+        newsletter_title?: string;
+        newsletter_desc?: string;
+        footer_about?: string;
+        footer_copyright?: string;
+    };
 };
 
 export type ProductVariant = {

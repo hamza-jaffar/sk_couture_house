@@ -282,30 +282,20 @@ function ProductTable({
         () => [
             {
                 id: "select",
-                header: ({ table }) => {
-                    const rows = table.getRowModel().rows;
-                    const selectedCount = rows.filter((row) =>
-                        row.getIsSelected(),
-                    ).length;
-
-                    return (
-                        <Checkbox
-                            aria-label="Select all products on this page"
-                            disabled={!can("products.delete")}
-                            checked={
-                                rows.length > 0 && selectedCount === rows.length
-                            }
-                            indeterminate={
-                                selectedCount > 0 && selectedCount < rows.length
-                            }
-                            onCheckedChange={(checked) =>
-                                rows.forEach((row) =>
-                                    row.toggleSelected(checked === true),
-                                )
-                            }
-                        />
-                    );
-                },
+                header: ({ table }) => (
+                    <Checkbox
+                        aria-label="Select all products on this page"
+                        disabled={!can("products.delete")}
+                        checked={table.getIsAllRowsSelected()}
+                        indeterminate={
+                            table.getIsSomeRowsSelected() &&
+                            !table.getIsAllRowsSelected()
+                        }
+                        onCheckedChange={(checked) =>
+                            table.toggleAllRowsSelected(checked === true)
+                        }
+                    />
+                ),
                 cell: ({ row }) => (
                     <Checkbox
                         aria-label={`Select ${row.original.title}`}
@@ -848,7 +838,7 @@ export default function ProductIndex({
     }
 
     return (
-        <div className="flex flex-col gap-6 p-6">
+        <div className="flex flex-col p-6">
             <Head title="Products" />
             <header className="flex flex-wrap items-start justify-between gap-4">
                 <Heading

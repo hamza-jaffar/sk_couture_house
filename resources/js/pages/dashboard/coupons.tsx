@@ -306,22 +306,20 @@ export default function Coupons({ coupons, discountTypeOptions, filters }: Props
         () => [
             {
                 id: 'select',
-                header: ({ table }) => {
-                    const rows = table.getRowModel().rows;
-                    const selectedCount = rows.filter((row) => row.getIsSelected()).length;
-
-                    return (
-                        <Checkbox
-                            aria-label="Select all coupons on this page"
-                            disabled={!can('coupons.delete')}
-                            checked={rows.length > 0 && selectedCount === rows.length}
-                            indeterminate={selectedCount > 0 && selectedCount < rows.length}
-                            onCheckedChange={(checked) =>
-                                rows.forEach((row) => row.toggleSelected(checked === true))
-                            }
-                        />
-                    );
-                },
+                header: ({ table }) => (
+                    <Checkbox
+                        aria-label="Select all coupons on this page"
+                        disabled={!can('coupons.delete')}
+                        checked={table.getIsAllRowsSelected()}
+                        indeterminate={
+                            table.getIsSomeRowsSelected() &&
+                            !table.getIsAllRowsSelected()
+                        }
+                        onCheckedChange={(checked) =>
+                            table.toggleAllRowsSelected(checked === true)
+                        }
+                    />
+                ),
                 cell: ({ row }) => (
                     <Checkbox
                         aria-label={`Select coupon ${row.original.code}`}

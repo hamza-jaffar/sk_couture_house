@@ -30,6 +30,8 @@ import {
     Users,
     BarChart2,
     FileText,
+    SlidersHorizontal,
+    Mail,
 } from "lucide-react";
 import AppLogo from "./app-logo";
 
@@ -82,10 +84,22 @@ const data = {
             permission: "pages.view",
         },
         {
+            title: "Banners",
+            url: "/dashboard/banners",
+            icon: <SlidersHorizontal />,
+            permission: "banners.view",
+        },
+        {
             title: "Reviews",
             url: "/dashboard/reviews",
             icon: <Star />,
             permission: "reviews.view",
+        },
+        {
+            title: "Subscribers",
+            url: "/dashboard/subscribers",
+            icon: <Mail />,
+            permission: "newsletter.view",
         },
         {
             title: "Gallery",

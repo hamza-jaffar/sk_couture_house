@@ -20,6 +20,7 @@ import type { GalleryMedia, PlatformSettings, ProductVariant } from '@/types';
 import { Form, Head } from '@inertiajs/react';
 import {
     ImagePlus,
+    LayoutTemplate,
     Mail,
     Search,
     Share2,
@@ -36,12 +37,13 @@ type Props = {
     selectedTab: SettingsGroup;
 };
 
-type SettingsGroup = 'general' | 'contact' | 'social' | 'mail' | 'variants' | 'seo';
+type SettingsGroup = 'general' | 'contact' | 'social' | 'mail' | 'variants' | 'seo' | 'storefront';
 
 type FieldErrors = Record<string, string | undefined>;
 
 const tabs: { id: SettingsGroup; label: string; icon: typeof Store }[] = [
     { id: 'general', label: 'General', icon: Store },
+    { id: 'storefront', label: 'Storefront', icon: LayoutTemplate },
     { id: 'contact', label: 'Contact', icon: SlidersHorizontal },
     { id: 'social', label: 'Social links', icon: Share2 },
     { id: 'mail', label: 'Mail', icon: Mail },
@@ -541,6 +543,220 @@ export default function Settings({ settings, selectedTab }: Props) {
                                                     title: null,
                                                 })
                                             }
+                                        />
+                                    </div>
+                                </>
+                            )}
+                        </SettingsForm>
+                    </div>
+                ) : null}
+
+                {activeTab === 'storefront' ? (
+                    <div className="grid gap-6">
+                        <div>
+                            <h2 className="text-lg font-semibold">
+                                Storefront Content & Copy
+                            </h2>
+                            <p className="text-sm text-muted-foreground">
+                                Customize all section titles, subtitles, value promises, and footer copy displayed on your store.
+                            </p>
+                        </div>
+                        <SettingsForm group="storefront">
+                            {(errors) => (
+                                <>
+                                    <div className="space-y-4">
+                                        <h3 className="text-sm font-semibold tracking-wide text-foreground uppercase">
+                                            Home Sections & Badges
+                                        </h3>
+                                        <div className="grid gap-4 sm:grid-cols-2">
+                                            <TextField
+                                                id="sf-hero-badge"
+                                                name="hero_badge"
+                                                label="Hero subtitle / badge"
+                                                value={settings.storefront?.hero_badge ?? 'New Collection'}
+                                                error={errors.hero_badge}
+                                            />
+                                            <TextField
+                                                id="sf-featured-badge"
+                                                name="featured_badge"
+                                                label="Featured section badge"
+                                                value={settings.storefront?.featured_badge ?? 'Featured Pieces'}
+                                                error={errors.featured_badge}
+                                            />
+                                            <TextField
+                                                id="sf-featured-title"
+                                                name="featured_title"
+                                                label="Featured section title"
+                                                value={settings.storefront?.featured_title ?? 'Featured Pieces'}
+                                                error={errors.featured_title}
+                                            />
+                                            <TextField
+                                                id="sf-featured-subtitle"
+                                                name="featured_subtitle"
+                                                label="Featured section subtitle"
+                                                value={settings.storefront?.featured_subtitle ?? 'Handpicked styles from our latest arrivals'}
+                                                error={errors.featured_subtitle}
+                                            />
+                                            <TextField
+                                                id="sf-collections-title"
+                                                name="collections_title"
+                                                label="Collections section title"
+                                                value={settings.storefront?.collections_title ?? 'Shop by Collection'}
+                                                error={errors.collections_title}
+                                            />
+                                            <TextField
+                                                id="sf-collections-subtitle"
+                                                name="collections_subtitle"
+                                                label="Collections section subtitle"
+                                                value={settings.storefront?.collections_subtitle ?? 'Browse our curated categories'}
+                                                error={errors.collections_subtitle}
+                                            />
+                                            <TextField
+                                                id="sf-new-arrivals-title"
+                                                name="new_arrivals_title"
+                                                label="New arrivals section title"
+                                                value={settings.storefront?.new_arrivals_title ?? 'New Arrivals'}
+                                                error={errors.new_arrivals_title}
+                                            />
+                                            <TextField
+                                                id="sf-new-arrivals-subtitle"
+                                                name="new_arrivals_subtitle"
+                                                label="New arrivals section subtitle"
+                                                value={settings.storefront?.new_arrivals_subtitle ?? 'The freshest additions to our studio'}
+                                                error={errors.new_arrivals_subtitle}
+                                            />
+                                        </div>
+                                    </div>
+
+                                    <div className="space-y-4 pt-4 border-t">
+                                        <h3 className="text-sm font-semibold tracking-wide text-foreground uppercase">
+                                            Value Promises / Badges
+                                        </h3>
+                                        <div className="grid gap-4 sm:grid-cols-3">
+                                            <TextField
+                                                id="sf-p1-icon"
+                                                name="promise_1_icon"
+                                                label="Promise 1 Icon"
+                                                value={settings.storefront?.promise_1_icon ?? '🚚'}
+                                                error={errors.promise_1_icon}
+                                            />
+                                            <TextField
+                                                id="sf-p1-title"
+                                                name="promise_1_title"
+                                                label="Promise 1 Title"
+                                                value={settings.storefront?.promise_1_title ?? 'Nationwide Delivery'}
+                                                error={errors.promise_1_title}
+                                            />
+                                            <TextField
+                                                id="sf-p1-desc"
+                                                name="promise_1_desc"
+                                                label="Promise 1 Description"
+                                                value={settings.storefront?.promise_1_desc ?? 'Fast & reliable shipping across Pakistan'}
+                                                error={errors.promise_1_desc}
+                                            />
+
+                                            <TextField
+                                                id="sf-p2-icon"
+                                                name="promise_2_icon"
+                                                label="Promise 2 Icon"
+                                                value={settings.storefront?.promise_2_icon ?? '✂️'}
+                                                error={errors.promise_2_icon}
+                                            />
+                                            <TextField
+                                                id="sf-p2-title"
+                                                name="promise_2_title"
+                                                label="Promise 2 Title"
+                                                value={settings.storefront?.promise_2_title ?? 'Premium Fabric'}
+                                                error={errors.promise_2_title}
+                                            />
+                                            <TextField
+                                                id="sf-p2-desc"
+                                                name="promise_2_desc"
+                                                label="Promise 2 Description"
+                                                value={settings.storefront?.promise_2_desc ?? 'Carefully sourced quality materials'}
+                                                error={errors.promise_2_desc}
+                                            />
+
+                                            <TextField
+                                                id="sf-p3-icon"
+                                                name="promise_3_icon"
+                                                label="Promise 3 Icon"
+                                                value={settings.storefront?.promise_3_icon ?? '🔄'}
+                                                error={errors.promise_3_icon}
+                                            />
+                                            <TextField
+                                                id="sf-p3-title"
+                                                name="promise_3_title"
+                                                label="Promise 3 Title"
+                                                value={settings.storefront?.promise_3_title ?? 'Easy Returns'}
+                                                error={errors.promise_3_title}
+                                            />
+                                            <TextField
+                                                id="sf-p3-desc"
+                                                name="promise_3_desc"
+                                                label="Promise 3 Description"
+                                                value={settings.storefront?.promise_3_desc ?? 'Hassle-free returns within 7 days'}
+                                                error={errors.promise_3_desc}
+                                            />
+
+                                            <TextField
+                                                id="sf-p4-icon"
+                                                name="promise_4_icon"
+                                                label="Promise 4 Icon"
+                                                value={settings.storefront?.promise_4_icon ?? '💬'}
+                                                error={errors.promise_4_icon}
+                                            />
+                                            <TextField
+                                                id="sf-p4-title"
+                                                name="promise_4_title"
+                                                label="Promise 4 Title"
+                                                value={settings.storefront?.promise_4_title ?? 'Customer Support'}
+                                                error={errors.promise_4_title}
+                                            />
+                                            <TextField
+                                                id="sf-p4-desc"
+                                                name="promise_4_desc"
+                                                label="Promise 4 Description"
+                                                value={settings.storefront?.promise_4_desc ?? "We're available to help you"}
+                                                error={errors.promise_4_desc}
+                                            />
+                                        </div>
+                                    </div>
+
+                                    <div className="space-y-4 pt-4 border-t">
+                                        <h3 className="text-sm font-semibold tracking-wide text-foreground uppercase">
+                                            Newsletter & Footer
+                                        </h3>
+                                        <div className="grid gap-4 sm:grid-cols-2">
+                                            <TextField
+                                                id="sf-newsletter-title"
+                                                name="newsletter_title"
+                                                label="Newsletter block title"
+                                                value={settings.storefront?.newsletter_title ?? 'Join the SK Atelier Club'}
+                                                error={errors.newsletter_title}
+                                            />
+                                            <TextField
+                                                id="sf-newsletter-desc"
+                                                name="newsletter_desc"
+                                                label="Newsletter block description"
+                                                value={settings.storefront?.newsletter_desc ?? 'Subscribe for private preview access, bespoke styling notes, and seasonal releases.'}
+                                                error={errors.newsletter_desc}
+                                            />
+                                        </div>
+                                        <TextareaField
+                                            id="sf-footer-about"
+                                            name="footer_about"
+                                            label="Footer about statement"
+                                            value={settings.storefront?.footer_about ?? 'Curated haute couture and ready-to-wear pieces, handcrafted with passion and timeless refinement.'}
+                                            rows={3}
+                                            error={errors.footer_about}
+                                        />
+                                        <TextField
+                                            id="sf-footer-copyright"
+                                            name="footer_copyright"
+                                            label="Custom copyright text (leave empty for default)"
+                                            value={settings.storefront?.footer_copyright ?? ''}
+                                            error={errors.footer_copyright}
                                         />
                                     </div>
                                 </>

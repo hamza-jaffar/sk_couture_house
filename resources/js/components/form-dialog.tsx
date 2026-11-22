@@ -12,6 +12,10 @@ type Props = {
     children?: React.ReactNode;
     processing: boolean;
     submitDisabled?: boolean;
+    submitLabel?: string;
+    cancelLabel?: string;
+    formId?: string;
+    hideFooter?: boolean;
 };
 
 const FormDialog = ({
@@ -23,6 +27,10 @@ const FormDialog = ({
     children,
     processing,
     submitDisabled = false,
+    submitLabel = 'Submit',
+    cancelLabel = 'Close',
+    formId,
+    hideFooter = false,
 }: Props) => {
     if (!open) return null;
 
@@ -62,28 +70,31 @@ const FormDialog = ({
                     {children}
                 </div>
 
-                <div className="flex shrink-0 items-center justify-end gap-2 border-t px-4 py-3">
-                    <Button
-                        type="button"
-                        onClick={() => onOpenChange(false)}
-                        variant="outline"
-                        disabled={processing}
-                    >
-                        Close
-                    </Button>
-                    <Button
-                        type="submit"
-                        disabled={processing || submitDisabled}
-                    >
-                        {processing ? (
-                            <>
-                                <Spinner /> Submitting...
-                            </>
-                        ) : (
-                            'Submit'
-                        )}
-                    </Button>
-                </div>
+                {!hideFooter && (
+                    <div className="flex shrink-0 items-center justify-end gap-2 border-t px-4 py-3">
+                        <Button
+                            type="button"
+                            onClick={() => onOpenChange(false)}
+                            variant="outline"
+                            disabled={processing}
+                        >
+                            {cancelLabel}
+                        </Button>
+                        <Button
+                            type="submit"
+                            form={formId}
+                            disabled={processing || submitDisabled}
+                        >
+                            {processing ? (
+                                <>
+                                    <Spinner /> Submitting...
+                                </>
+                            ) : (
+                                submitLabel
+                            )}
+                        </Button>
+                    </div>
+                )}
             </div>
         </div>
     );

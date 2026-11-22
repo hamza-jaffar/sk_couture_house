@@ -15,7 +15,7 @@ class SettingController
 
     public function index(Request $request): Response
     {
-        $validTabs = ['general', 'contact', 'social', 'mail', 'variants', 'seo'];
+        $validTabs = ['general', 'contact', 'social', 'mail', 'variants', 'seo', 'storefront'];
         $selectedTab = $request->query('selected_tag', 'general');
 
         return Inertia::render('settings/settings', [

@@ -22,7 +22,7 @@ import {
 import { Skeleton } from '@/components/ui/skeleton';
 import { useCan } from '@/hooks/use-can';
 import type { CustomerFilters, CustomerRow, PaginatedCustomers } from '@/types/customers';
-import { Deferred, Head, router } from '@inertiajs/react';
+import { Head, router } from '@inertiajs/react';
 import type { PaginationState, SortingState } from '@tanstack/table-core';
 import { Eye, MoreHorizontal, ToggleLeft, ToggleRight } from 'lucide-react';
 import { useCallback, useEffect, useMemo, useState } from 'react';
@@ -250,8 +250,7 @@ export default function CustomerIndex({ customers, filters }: Props) {
                 />
             </div>
 
-            <Deferred data="customers" fallback={<SkeletonRows />}>
-                <DataTable
+            <DataTable
                     columns={columns}
                     data={customers?.data ?? []}
                     getRowId={(customer) => String(customer.id)}
@@ -327,32 +326,6 @@ export default function CustomerIndex({ customers, filters }: Props) {
                         </div>
                     )}
                 />
-            </Deferred>
-        </div>
-    );
-}
-
-function SkeletonRows() {
-    return (
-        <div className="space-y-3">
-            <div className="flex items-center gap-2">
-                <Skeleton className="h-9 w-64" />
-                <Skeleton className="h-9 w-36" />
-            </div>
-            <div className="rounded-md border">
-                {Array.from({ length: 8 }).map((_, i) => (
-                    <div
-                        key={i}
-                        className="flex items-center gap-4 border-b px-4 py-3 last:border-0"
-                    >
-                        <Skeleton className="h-4 w-40" />
-                        <Skeleton className="h-4 w-20" />
-                        <Skeleton className="h-4 w-10" />
-                        <Skeleton className="h-4 w-24" />
-                        <Skeleton className="h-4 w-28 ml-auto" />
-                    </div>
-                ))}
-            </div>
         </div>
     );
 }

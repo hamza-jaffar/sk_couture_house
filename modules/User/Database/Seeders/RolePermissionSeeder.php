@@ -79,6 +79,17 @@ class RolePermissionSeeder extends Seeder
             'pages.update',
             'pages.delete',
 
+            // --- BANNERS & SLIDERS ---
+            'banners.view',
+            'banners.create',
+            'banners.update',
+            'banners.delete',
+
+            // --- NEWSLETTER & SUBSCRIBERS ---
+            'newsletter.view',
+            'newsletter.delete',
+            'newsletter.export',
+
             // --- STORE SETTINGS & CONFIGURATION ---
             'settings.view',
             'settings.update',

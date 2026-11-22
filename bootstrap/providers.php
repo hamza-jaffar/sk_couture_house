@@ -1,10 +1,12 @@
 <?php
 
 use App\Providers\AppServiceProvider;
+use Modules\Banner\Providers\BannerServiceProvider;
 use Modules\Category\Providers\CategoryServiceProvider;
 use Modules\Coupon\Providers\CouponServiceProvider;
 use Modules\Customer\Providers\CustomerServiceProvider;
 use Modules\Gallery\Providers\GalleryServiceProvider;
+use Modules\Newsletter\Providers\NewsletterServiceProvider;
 use Modules\Order\Providers\OrderServiceProvider;
 use Modules\Page\Providers\PageServiceProvider;
 use Modules\Product\Providers\ProductServiceProvider;
@@ -26,4 +28,6 @@ return [
     CustomerServiceProvider::class,
     ReportServiceProvider::class,
     PageServiceProvider::class,
+    BannerServiceProvider::class,
+    NewsletterServiceProvider::class,
 ];

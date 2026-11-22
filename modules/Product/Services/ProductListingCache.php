@@ -111,6 +111,38 @@ class ProductListingCache
         );
     }
 
+    /**
+     * @param  Closure(): list<array<string, mixed>>  $callback
+     * @return list<array<string, mixed>>
+     */
+    public function rememberFeatured(Closure $callback): array
+    {
+        $version = Cache::get(self::VERSION_KEY, 1);
+
+        /** @var list<array<string, mixed>> */
+        return Cache::remember(
+            'product-featured:'.$version,
+            now()->addMinutes(15),
+            $callback,
+        );
+    }
+
+    /**
+     * @param  Closure(): list<array<string, mixed>>  $callback
+     * @return list<array<string, mixed>>
+     */
+    public function rememberNewArrivals(Closure $callback): array
+    {
+        $version = Cache::get(self::VERSION_KEY, 1);
+
+        /** @var list<array<string, mixed>> */
+        return Cache::remember(
+            'product-new-arrivals:'.$version,
+            now()->addMinutes(15),
+            $callback,
+        );
+    }
+
     public function invalidateAfterCommit(): void
     {
         DB::afterCommit(function (): void {

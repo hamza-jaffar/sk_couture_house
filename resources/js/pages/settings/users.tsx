@@ -310,9 +310,13 @@ export default function Users({ users, filters, roles, isAdmin }: Props) {
                                 selectedCount < selectableRows.length
                             }
                             onCheckedChange={(checked) => {
-                                selectableRows.forEach((row) =>
-                                    row.toggleSelected(checked === true),
-                                );
+                                const nextSelection: Record<string, boolean> = {};
+                                if (checked === true) {
+                                    selectableRows.forEach((row) => {
+                                        nextSelection[row.id] = true;
+                                    });
+                                }
+                                table.setRowSelection(nextSelection);
                             }}
                         />
                     );
