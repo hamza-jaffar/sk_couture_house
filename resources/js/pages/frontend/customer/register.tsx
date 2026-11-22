@@ -1,4 +1,3 @@
-import Navbar from '@/components/frontend/navbar';
 import { Head, Link, useForm } from '@inertiajs/react';
 
 interface Props {
@@ -22,7 +21,6 @@ export default function CustomerRegister({ errors = {} }: Props) {
     return (
         <div className="min-h-screen bg-white text-neutral-900">
             <Head title="Create Account" />
-            <Navbar />
 
             <main className="mx-auto max-w-7xl px-4 py-12 sm:px-6 lg:px-8">
                 {/* Breadcrumbs */}

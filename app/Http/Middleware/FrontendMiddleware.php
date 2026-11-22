@@ -176,16 +176,6 @@ class FrontendMiddleware
                     ['label' => 'Frequently Asked Questions', 'href' => '#faq'],
                 ],
             ],
-            'about' => [
-                'title' => 'The House',
-                'links' => [
-                    ['label' => 'Our Heritage', 'href' => '#heritage'],
-                    ['label' => 'Ateliers & Boutiques', 'href' => '#stores'],
-                    ['label' => 'Sustainable Craftsmanship', 'href' => '#sustainability'],
-                    ['label' => 'Press & Editorial', 'href' => '#press'],
-                    ['label' => 'Careers', 'href' => '#careers'],
-                ],
-            ],
             'legal' => [
                 'title' => 'Legal & Privacy',
                 'links' => [

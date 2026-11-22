@@ -1,5 +1,5 @@
-import Navbar from '@/components/frontend/navbar';
 import SeoHead from '@/components/frontend/seo-head';
+import LucideIcon from '@/components/ui/lucide-icon';
 import type { PlatformSettings } from '@/types';
 import { Deferred, Link, useForm, usePage } from '@inertiajs/react';
 import { toast } from 'sonner';
@@ -473,22 +473,22 @@ export default function Welcome({
 
     // Value Promises
     const promise1 = {
-        icon: sf.promise_1_icon || '🚚',
+        icon: sf.promise_1_icon || 'Truck',
         title: sf.promise_1_title || 'Nationwide Delivery',
         desc: sf.promise_1_desc || 'Fast & reliable shipping across Pakistan',
     };
     const promise2 = {
-        icon: sf.promise_2_icon || '✂️',
+        icon: sf.promise_2_icon || 'Scissors',
         title: sf.promise_2_title || 'Premium Fabric',
         desc: sf.promise_2_desc || 'Carefully sourced quality materials',
     };
     const promise3 = {
-        icon: sf.promise_3_icon || '🔄',
+        icon: sf.promise_3_icon || 'RotateCcw',
         title: sf.promise_3_title || 'Easy Returns',
         desc: sf.promise_3_desc || 'Hassle-free returns within 7 days',
     };
     const promise4 = {
-        icon: sf.promise_4_icon || '💬',
+        icon: sf.promise_4_icon || 'MessageCircle',
         title: sf.promise_4_title || 'Customer Support',
         desc: sf.promise_4_desc || "We're available to help you",
     };
@@ -498,12 +498,7 @@ export default function Welcome({
     const newsletterDesc =
         sf.newsletter_desc ||
         'Subscribe for private preview access, bespoke styling notes, and seasonal releases.';
-    const footerAbout =
-        sf.footer_about ||
-        tagline ||
-        'Curated haute couture and ready-to-wear pieces, handcrafted with passion and timeless refinement.';
-    const footerCopyright =
-        sf.footer_copyright || `© ${new Date().getFullYear()} ${storeName}. All rights reserved.`;
+
 
     // Newsletter Form
     const {
@@ -549,7 +544,6 @@ export default function Welcome({
             />
 
             <div className="min-h-screen overflow-x-hidden bg-white text-neutral-900">
-                <Navbar />
 
                 {/* ── 1. Deferred Hero Slider ────────────────────────────── */}
                 <Deferred
@@ -707,21 +701,29 @@ export default function Welcome({
                 </Deferred>
 
                 {/* ── 6. Value Promises Strip ────────────────────────────── */}
-                <section className="border-t border-neutral-100 bg-neutral-50/50 py-12">
+                <section className="border-t border-neutral-200/70 bg-gradient-to-b from-neutral-50/80 to-white py-14">
                     <div className="mx-auto max-w-screen-xl px-4 sm:px-6 lg:px-8">
-                        <div className="grid grid-cols-2 gap-8 sm:grid-cols-4">
+                        <div className="grid grid-cols-1 gap-6 sm:grid-cols-2 lg:grid-cols-4">
                             {[promise1, promise2, promise3, promise4].map((item) => (
                                 <div
                                     key={item.title}
-                                    className="flex flex-col items-center gap-2 text-center"
+                                    className="group relative flex flex-col items-center gap-3 rounded-lg border border-neutral-200/60 bg-white/90 p-6 text-center shadow-xs transition-all duration-300 hover:-translate-y-0.5 hover:border-neutral-300 hover:shadow-sm"
                                 >
-                                    <span className="text-3xl">{item.icon}</span>
-                                    <p className="text-sm font-semibold tracking-tight text-neutral-900">
-                                        {item.title}
-                                    </p>
-                                    <p className="text-xs leading-relaxed text-neutral-500">
-                                        {item.desc}
-                                    </p>
+                                    <div className="flex h-14 w-14 items-center justify-center rounded-full border border-neutral-200/80 bg-neutral-50 text-neutral-800 transition-all duration-300 group-hover:border-neutral-900 group-hover:bg-neutral-900 group-hover:text-white">
+                                        <LucideIcon
+                                            name={item.icon}
+                                            className="h-6 w-6 transition-transform duration-300 group-hover:scale-110"
+                                            strokeWidth={1.5}
+                                        />
+                                    </div>
+                                    <div className="space-y-1">
+                                        <p className="text-xs font-semibold tracking-[0.15em] text-neutral-900 uppercase">
+                                            {item.title}
+                                        </p>
+                                        <p className="text-xs leading-relaxed text-neutral-500">
+                                            {item.desc}
+                                        </p>
+                                    </div>
                                 </div>
                             ))}
                         </div>
@@ -764,171 +766,6 @@ export default function Welcome({
                         </form>
                     </div>
                 </section>
-
-                {/* ── 8. Comprehensive Storefront Footer ─────────────────── */}
-                <footer className="border-t border-neutral-800 bg-neutral-950 py-16 text-white">
-                    <div className="mx-auto max-w-screen-xl px-4 sm:px-6 lg:px-8">
-                        <div className="grid grid-cols-1 gap-12 sm:grid-cols-2 lg:grid-cols-4">
-                            {/* Brand Column */}
-                            <div className="space-y-4">
-                                <p className="text-xl font-semibold tracking-tight">{storeName}</p>
-                                <p className="text-sm leading-relaxed text-neutral-400">
-                                    {footerAbout}
-                                </p>
-                                {/* Social links from settings */}
-                                {settings?.social && (
-                                    <div className="flex flex-wrap gap-4 pt-2 text-xs font-medium text-neutral-400">
-                                        {settings.social.instagram && (
-                                            <a
-                                                href={settings.social.instagram}
-                                                target="_blank"
-                                                rel="noopener noreferrer"
-                                                className="transition-colors hover:text-white"
-                                            >
-                                                Instagram
-                                            </a>
-                                        )}
-                                        {settings.social.facebook && (
-                                            <a
-                                                href={settings.social.facebook}
-                                                target="_blank"
-                                                rel="noopener noreferrer"
-                                                className="transition-colors hover:text-white"
-                                            >
-                                                Facebook
-                                            </a>
-                                        )}
-                                        {settings.social.tiktok && (
-                                            <a
-                                                href={settings.social.tiktok}
-                                                target="_blank"
-                                                rel="noopener noreferrer"
-                                                className="transition-colors hover:text-white"
-                                            >
-                                                TikTok
-                                            </a>
-                                        )}
-                                        {settings.social.youtube && (
-                                            <a
-                                                href={settings.social.youtube}
-                                                target="_blank"
-                                                rel="noopener noreferrer"
-                                                className="transition-colors hover:text-white"
-                                            >
-                                                YouTube
-                                            </a>
-                                        )}
-                                    </div>
-                                )}
-                            </div>
-
-                            {/* Collections Column */}
-                            <div>
-                                <p className="mb-4 text-xs font-semibold tracking-widest text-neutral-400 uppercase">
-                                    Collections
-                                </p>
-                                <ul className="space-y-2.5 text-sm text-neutral-400">
-                                    <li>
-                                        <Link href="/collections" className="transition-colors hover:text-white">
-                                            All Collections
-                                        </Link>
-                                    </li>
-                                    {collections.slice(0, 5).map((c) => (
-                                        <li key={c.id}>
-                                            <Link
-                                                href={`/collections/${c.slug}`}
-                                                className="transition-colors hover:text-white"
-                                            >
-                                                {c.name}
-                                            </Link>
-                                        </li>
-                                    ))}
-                                </ul>
-                            </div>
-
-                            {/* Client Services & Account */}
-                            <div>
-                                <p className="mb-4 text-xs font-semibold tracking-widest text-neutral-400 uppercase">
-                                    Client Services
-                                </p>
-                                <ul className="space-y-2.5 text-sm text-neutral-400">
-                                    <li>
-                                        <Link href="/login" className="transition-colors hover:text-white">
-                                            Sign In
-                                        </Link>
-                                    </li>
-                                    <li>
-                                        <Link href="/register" className="transition-colors hover:text-white">
-                                            Create Account
-                                        </Link>
-                                    </li>
-                                    <li>
-                                        <Link href="/customer/orders" className="transition-colors hover:text-white">
-                                            Track Order
-                                        </Link>
-                                    </li>
-                                    <li>
-                                        <Link href="/cart" className="transition-colors hover:text-white">
-                                            Shopping Bag
-                                        </Link>
-                                    </li>
-                                </ul>
-                            </div>
-
-                            {/* Contact Details */}
-                            <div>
-                                <p className="mb-4 text-xs font-semibold tracking-widest text-neutral-400 uppercase">
-                                    Atelier & Contact
-                                </p>
-                                <ul className="space-y-2.5 text-sm text-neutral-400">
-                                    {settings?.contact?.email && (
-                                        <li>
-                                            <a
-                                                href={`mailto:${settings.contact.email}`}
-                                                className="transition-colors hover:text-white"
-                                            >
-                                                {settings.contact.email}
-                                            </a>
-                                        </li>
-                                    )}
-                                    {settings?.contact?.phone && (
-                                        <li>
-                                            <a
-                                                href={`tel:${settings.contact.phone}`}
-                                                className="transition-colors hover:text-white"
-                                            >
-                                                {settings.contact.phone}
-                                            </a>
-                                        </li>
-                                    )}
-                                    {settings?.contact?.whatsapp_number && (
-                                        <li>
-                                            <a
-                                                href={`https://wa.me/${settings.contact.whatsapp_number.replace(/[^0-9]/g, '')}`}
-                                                target="_blank"
-                                                rel="noopener noreferrer"
-                                                className="transition-colors hover:text-white"
-                                            >
-                                                WhatsApp: {settings.contact.whatsapp_number}
-                                            </a>
-                                        </li>
-                                    )}
-                                    {settings?.contact?.address && (
-                                        <li className="leading-relaxed text-neutral-400 pt-1">
-                                            {settings.contact.address}
-                                            {settings.contact.city ? `, ${settings.contact.city}` : ''}
-                                        </li>
-                                    )}
-                                </ul>
-                            </div>
-                        </div>
-
-                        {/* Bottom Copyright */}
-                        <div className="mt-14 border-t border-neutral-900 pt-8 text-center text-xs text-neutral-500">
-                            {footerCopyright}
-                        </div>
-                    </div>
-                </footer>
             </div>
         </>
     );

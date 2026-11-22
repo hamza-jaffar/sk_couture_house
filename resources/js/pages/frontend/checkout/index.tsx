@@ -1,4 +1,3 @@
-import Navbar from '@/components/frontend/navbar';
 import SeoHead from '@/components/frontend/seo-head';
 import type { PlatformSettings } from '@/types';
 import type { CartItem } from '@/types/orders';
@@ -131,7 +130,6 @@ export default function CheckoutIndex({
     return (
         <div className="min-h-screen bg-neutral-50/50 text-neutral-900">
             <SeoHead title={seoTitle} description={seoDescription} robots="noindex, follow" />
-            <Navbar />
 
             <main className="mx-auto max-w-7xl px-4 py-8 sm:px-6 lg:px-8">
                 {/* Breadcrumbs */}

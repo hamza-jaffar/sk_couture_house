@@ -1,4 +1,3 @@
-import Navbar from '@/components/frontend/navbar';
 import ProductReviews, { type ProductReviewsData } from '@/components/frontend/product-reviews';
 import SeoHead from '@/components/frontend/seo-head';
 import { Deferred, Link, router } from '@inertiajs/react';
@@ -325,7 +324,6 @@ export default function ProductShow({
                 jsonLd={productSchema}
             />
             <div className="min-h-screen overflow-x-hidden bg-white text-neutral-900">
-                <Navbar />
 
                 <main className="mx-auto max-w-[1360px] px-4 pt-4 pb-16 sm:px-6 lg:px-10">
                     {/* ─── Breadcrumb ────────────────────────────────────────────── */}

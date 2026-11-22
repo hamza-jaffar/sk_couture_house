@@ -1,6 +1,7 @@
 import { createInertiaApp, router } from "@inertiajs/react";
 import { Toaster } from "@/components/ui/sonner";
 import AppLayout from "@/layouts/app-layout";
+import FrontendLayout from "@/layouts/frontend-layout";
 import { TooltipProvider } from "@/components/ui/tooltip";
 import { initializeTheme } from "./hooks/use-appearance";
 import SettingsLayout from "@/layouts/settings/layout";
@@ -18,6 +19,8 @@ void createInertiaApp({
                 return AppLayout;
             case name.startsWith("settings/"):
                 return [AppLayout, SettingsLayout];
+            case name.startsWith("frontend/"):
+                return FrontendLayout;
             default:
                 return null;
         }

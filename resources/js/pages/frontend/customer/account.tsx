@@ -1,4 +1,3 @@
-import Navbar from '@/components/frontend/navbar';
 import { Head, Link, router } from '@inertiajs/react';
 import { useState } from 'react';
 
@@ -124,7 +123,6 @@ export default function CustomerAccount({ customer, stats, recent_orders, errors
     return (
         <div className="min-h-screen bg-white text-neutral-900">
             <Head title="My Account" />
-            <Navbar />
 
             <main className="mx-auto max-w-7xl px-4 py-10 sm:px-6 lg:px-8">
                 {/* Breadcrumbs */}

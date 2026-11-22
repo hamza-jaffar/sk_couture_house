@@ -1,4 +1,3 @@
-import Navbar from '@/components/frontend/navbar';
 import SeoHead from '@/components/frontend/seo-head';
 import { Deferred, InfiniteScroll, Link, router } from '@inertiajs/react';
 import { ChevronDown, Minus, Plus } from 'lucide-react';
@@ -539,7 +538,6 @@ export default function CollectionsShow({ collection, products, filters }: Props
             `}</style>
 
             <div className="min-h-screen overflow-x-hidden bg-white">
-                <Navbar />
 
                 {/* Hero Banner — banner_url first, falls back to image_url */}
                 {bannerSrc && (

@@ -1,4 +1,3 @@
-import Navbar from '@/components/frontend/navbar';
 import SeoHead from '@/components/frontend/seo-head';
 import type { PlatformSettings } from '@/types';
 import type { CartItem } from '@/types/orders';
@@ -141,7 +140,6 @@ export default function CartIndex({
                 description={description}
                 robots="noindex, follow"
             />
-            <Navbar />
 
             <main className="mx-auto max-w-7xl px-4 py-8 sm:px-6 lg:px-8">
                 {/* Breadcrumbs */}

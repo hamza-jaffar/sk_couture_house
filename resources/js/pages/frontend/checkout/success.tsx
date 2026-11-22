@@ -1,4 +1,3 @@
-import Navbar from '@/components/frontend/navbar';
 import type { Order } from '@/types/orders';
 import { Head, Link } from '@inertiajs/react';
 import { ArrowRight, Check, Package, ShoppingBag, Truck } from 'lucide-react';
@@ -18,7 +17,6 @@ export default function CheckoutSuccess({ order }: Props) {
     return (
         <div className="min-h-screen bg-neutral-50/50 text-neutral-900">
             <Head title={`Order Confirmed - #${order.order_number}`} />
-            <Navbar />
 
             <main className="mx-auto max-w-3xl px-4 py-12 sm:px-6 lg:px-8">
                 {/* Confirmation Header */}

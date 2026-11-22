@@ -1,4 +1,3 @@
-import Navbar from '@/components/frontend/navbar';
 import { Head, Link } from '@inertiajs/react';
 import {
     ArrowLeft,
@@ -98,7 +97,6 @@ export default function CustomerOrderShow({ order }: Props) {
     return (
         <div className="min-h-screen bg-white text-neutral-900">
             <Head title={`Order ${order.order_number} — SK Couture House`} />
-            <Navbar />
 
             <main className="mx-auto max-w-7xl px-4 py-8 sm:px-6 lg:px-8">
                 {/* Breadcrumbs */}

@@ -8,6 +8,7 @@ import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import InputError from '@/components/ui/input-error';
 import { Label } from '@/components/ui/label';
+import LucideIcon from '@/components/ui/lucide-icon';
 import {
     Select,
     SelectContent,
@@ -161,6 +162,73 @@ function TextareaField({
                 aria-describedby={error ? `${id}-error` : undefined}
                 className="w-full rounded-lg border border-input bg-transparent px-3 py-2 text-sm transition-colors outline-none placeholder:text-muted-foreground focus-visible:border-ring focus-visible:ring-3 focus-visible:ring-ring/50 disabled:cursor-not-allowed disabled:opacity-50 dark:bg-input/30"
             />
+            {error ? <InputError id={`${id}-error`} message={error} /> : null}
+        </div>
+    );
+}
+
+type LucideIconFieldProps = {
+    id: string;
+    name: string;
+    label: string;
+    value?: string;
+    error?: string;
+};
+
+function LucideIconField({ id, name, label, value, error }: LucideIconFieldProps) {
+    const [iconName, setIconName] = useState(value ?? '');
+
+    const quickIcons = [
+        'Truck',
+        'ShieldCheck',
+        'RotateCcw',
+        'Scissors',
+        'MessageCircle',
+        'Sparkles',
+        'Package',
+        'Award',
+    ];
+
+    return (
+        <div className="grid gap-2">
+            <Label htmlFor={id}>{label}</Label>
+            <div className="flex items-center gap-2">
+                <div className="flex h-10 w-10 shrink-0 items-center justify-center overflow-hidden rounded-md border bg-muted/60 transition-colors">
+                    <LucideIcon
+                        name={iconName}
+                        className="h-5 w-5 text-foreground transition-all"
+                        strokeWidth={1.5}
+                    />
+                </div>
+                <Input
+                    id={id}
+                    name={name}
+                    value={iconName}
+                    onChange={(e) => setIconName(e.target.value)}
+                    placeholder="e.g. Truck, ShieldCheck, RotateCcw"
+                    aria-invalid={Boolean(error)}
+                    aria-describedby={error ? `${id}-error` : undefined}
+                    className="font-mono text-sm"
+                />
+            </div>
+            <div className="flex flex-wrap items-center gap-1.5 pt-0.5">
+                <span className="text-[11px] text-muted-foreground">Quick pick:</span>
+                {quickIcons.map((qi) => (
+                    <button
+                        key={qi}
+                        type="button"
+                        onClick={() => setIconName(qi)}
+                        className={`inline-flex items-center gap-1 rounded-sm border px-1.5 py-0.5 text-[11px] transition-colors ${
+                            iconName.toLowerCase() === qi.toLowerCase()
+                                ? 'border-primary bg-primary/10 font-medium text-primary'
+                                : 'border-neutral-200 bg-background text-neutral-600 hover:border-neutral-400 hover:text-foreground dark:border-neutral-800 dark:text-neutral-400'
+                        }`}
+                    >
+                        <LucideIcon name={qi} className="h-3 w-3" strokeWidth={1.75} />
+                        {qi}
+                    </button>
+                ))}
+            </div>
             {error ? <InputError id={`${id}-error`} message={error} /> : null}
         </div>
     );
@@ -633,11 +701,11 @@ export default function Settings({ settings, selectedTab }: Props) {
                                             Value Promises / Badges
                                         </h3>
                                         <div className="grid gap-4 sm:grid-cols-3">
-                                            <TextField
+                                            <LucideIconField
                                                 id="sf-p1-icon"
                                                 name="promise_1_icon"
                                                 label="Promise 1 Icon"
-                                                value={settings.storefront?.promise_1_icon ?? '🚚'}
+                                                value={settings.storefront?.promise_1_icon ?? 'Truck'}
                                                 error={errors.promise_1_icon}
                                             />
                                             <TextField
@@ -655,11 +723,11 @@ export default function Settings({ settings, selectedTab }: Props) {
                                                 error={errors.promise_1_desc}
                                             />
 
-                                            <TextField
+                                            <LucideIconField
                                                 id="sf-p2-icon"
                                                 name="promise_2_icon"
                                                 label="Promise 2 Icon"
-                                                value={settings.storefront?.promise_2_icon ?? '✂️'}
+                                                value={settings.storefront?.promise_2_icon ?? 'Scissors'}
                                                 error={errors.promise_2_icon}
                                             />
                                             <TextField
@@ -677,11 +745,11 @@ export default function Settings({ settings, selectedTab }: Props) {
                                                 error={errors.promise_2_desc}
                                             />
 
-                                            <TextField
+                                            <LucideIconField
                                                 id="sf-p3-icon"
                                                 name="promise_3_icon"
                                                 label="Promise 3 Icon"
-                                                value={settings.storefront?.promise_3_icon ?? '🔄'}
+                                                value={settings.storefront?.promise_3_icon ?? 'RotateCcw'}
                                                 error={errors.promise_3_icon}
                                             />
                                             <TextField
@@ -699,11 +767,11 @@ export default function Settings({ settings, selectedTab }: Props) {
                                                 error={errors.promise_3_desc}
                                             />
 
-                                            <TextField
+                                            <LucideIconField
                                                 id="sf-p4-icon"
                                                 name="promise_4_icon"
                                                 label="Promise 4 Icon"
-                                                value={settings.storefront?.promise_4_icon ?? '💬'}
+                                                value={settings.storefront?.promise_4_icon ?? 'MessageCircle'}
                                                 error={errors.promise_4_icon}
                                             />
                                             <TextField
